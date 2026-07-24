@@ -21,14 +21,14 @@ health page.
 
 ## Phase 1 — commerce domain
 
-- [ ] Define typed schemas for jobs, requirements, policies, providers, offers,
+- [x] Define typed schemas for jobs, requirements, policies, providers, offers,
       quotes, decisions, challenges, payments, deliveries, receipts, and events.
-- [ ] Represent fiat amounts as integer minor units and HBAR as exact strings or
+- [x] Represent fiat amounts as integer minor units and HBAR as exact strings or
       tinybars.
-- [ ] Define stable lifecycle states and failure reason codes.
-- [ ] Implement deterministic policy eligibility and ranking independent of the
+- [x] Define stable lifecycle states and failure reason codes.
+- [x] Implement deterministic policy eligibility and ranking independent of the
       model.
-- [ ] Test budget, privacy, capability, expiry, and tie-breaking rules.
+- [x] Test budget, privacy, capability, expiry, and tie-breaking rules.
 
 Exit criterion: changing provider data or policy changes a schema-valid routing
 decision without changing application code.

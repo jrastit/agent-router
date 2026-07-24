@@ -8,8 +8,9 @@ of every decision.
 Rather than focusing only on how an agent pays, AgentRouter focuses on how an
 agent decides to spend.
 
-> Project status: the application scaffold is implemented. Commerce-domain
-> behavior and external integrations remain planned until linked to a commit
+> Project status: the application scaffold and deterministic commerce-domain
+> routing contracts are implemented. Durable storage, live provider discovery,
+> execution, and external integrations remain planned until linked to a commit
 > and marked complete in [TODO.md](TODO.md).
 
 ## Problem
@@ -73,6 +74,20 @@ flowchart TD
 The final implementation must persist the considered providers, exclusion
 reasons, selected provider, policy snapshot, and price—not only a prose
 explanation.
+
+The implemented policy engine currently:
+
+- validates typed jobs, requirements, policies, providers, offers, quotes,
+  decisions, challenges, payments, deliveries, receipts, and events;
+- stores fiat prices as integer minor units and HBAR values as exact decimal
+  strings;
+- rejects candidates that violate budget, privacy, capability, currency, or
+  quote-expiry constraints; and
+- ranks eligible candidates deterministically by price, expected latency,
+  provider ID, and offer ID.
+
+Provider discovery remains fixture/test input until Phase 3. Persistence and
+model-derived requirements remain planned for Phases 2 and 4 respectively.
 
 ## Target architecture
 

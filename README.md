@@ -124,6 +124,13 @@ See [ETHGlobal Lisbon 2026 prize strategy](docs/PRIZE_STRATEGY.md) for the
 selected tracks, qualification gates, required evidence, and final submission
 checklist.
 
+## Attribution
+
+AgentRouter was initialized as a fresh repository and did not use a third-party
+application starter. The repository baseline, validation-lab boundary,
+third-party packages, and ongoing disclosure rule are recorded in
+[Attribution and project baseline](docs/ATTRIBUTION.md).
+
 ## Demo target
 
 1. The user submits a task, budget, and privacy policy.

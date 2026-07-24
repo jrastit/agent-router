@@ -14,7 +14,7 @@ or documentation exist.
       validation command.
 - [x] Add `.env.example`, secret validation, and documented server/client
       boundaries.
-- [ ] Record third-party starter attribution and hackathon start scope.
+- [x] Record third-party starter attribution and hackathon start scope.
 
 Exit criterion: a clean clone installs, validates, builds, and renders a basic
 health page.

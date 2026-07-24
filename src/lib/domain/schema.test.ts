@@ -5,6 +5,8 @@ import {
   decisionSchema,
   deliverySchema,
   eventSchema,
+  fiatMoneySchema,
+  hbarAmountSchema,
   jobSchema,
   offerSchema,
   paymentSchema,
@@ -157,5 +159,26 @@ describe("commerce domain schemas", () => {
         unreviewed: true,
       }),
     ).toThrow();
+  });
+
+  it("uses exact fiat and HBAR representations", () => {
+    expect(
+      fiatMoneySchema.parse({ currency: "EUR", amountMinor: 125 }),
+    ).toEqual({ currency: "EUR", amountMinor: 125 });
+    expect(hbarAmountSchema.parse("1.25000000")).toBe("1.25000000");
+    expect(hbarAmountSchema.parse("0")).toBe("0");
+
+    expect(() =>
+      fiatMoneySchema.parse({ currency: "EUR", amountMinor: 1.25 }),
+    ).toThrow();
+    expect(() =>
+      fiatMoneySchema.parse({
+        currency: "EUR",
+        amountMinor: Number.MAX_SAFE_INTEGER + 1,
+      }),
+    ).toThrow();
+    expect(() => hbarAmountSchema.parse("0.000000001")).toThrow();
+    expect(() => hbarAmountSchema.parse("01.25")).toThrow();
+    expect(() => hbarAmountSchema.parse(1.25)).toThrow();
   });
 });

@@ -2,10 +2,14 @@ import { z } from "zod";
 
 const id = z.string().min(1);
 const timestamp = z.string().datetime({ offset: true });
-const money = z.strictObject({
-  currency: z.string().length(3),
-  amountMinor: z.number().nonnegative(),
+export const fiatMoneySchema = z.strictObject({
+  currency: z.string().regex(/^[A-Z]{3}$/),
+  amountMinor: z.number().int().safe().nonnegative(),
 });
+
+export const hbarAmountSchema = z
+  .string()
+  .regex(/^(0|[1-9]\d*)(\.\d{1,8})?$/, "must be an exact HBAR decimal");
 
 export const requirementSchema = z.strictObject({
   id,
@@ -18,8 +22,8 @@ export const requirementSchema = z.strictObject({
 export const policySchema = z.strictObject({
   id,
   version: z.number().int().positive(),
-  budget: money,
-  maxTransaction: money,
+  budget: fiatMoneySchema,
+  maxTransaction: fiatMoneySchema,
   allowedPrivacyClasses: z.array(z.enum(["public", "confidential"])).min(1),
   requiredCapabilities: z.array(z.string().min(1)),
 });
@@ -38,7 +42,7 @@ export const offerSchema = z.strictObject({
   capability: z.string().min(1),
   inputType: z.string().min(1),
   outputType: z.string().min(1),
-  price: money,
+  price: fiatMoneySchema,
   expectedLatencyMs: z.number().int().nonnegative(),
 });
 
@@ -46,7 +50,7 @@ export const quoteSchema = z.strictObject({
   id,
   jobId: id,
   offerId: id,
-  price: money,
+  price: fiatMoneySchema,
   expiresAt: timestamp,
 });
 
@@ -77,7 +81,7 @@ export const challengeSchema = z.strictObject({
   recipientAccount: z.string().min(1),
   network: z.string().min(1),
   asset: z.string().min(1),
-  amount: z.string().min(1),
+  amount: hbarAmountSchema,
   memo: z.string().min(1),
   expiresAt: timestamp,
 });
@@ -87,7 +91,7 @@ export const paymentSchema = z.strictObject({
   challengeId: id,
   transactionId: z.string().min(1),
   status: z.string().min(1),
-  amount: z.string().min(1),
+  amount: hbarAmountSchema,
   createdAt: timestamp,
 });
 
@@ -106,7 +110,7 @@ export const receiptSchema = z.strictObject({
   decisionId: id,
   paymentId: id,
   deliveryId: id,
-  total: money,
+  total: fiatMoneySchema,
   createdAt: timestamp,
 });
 
@@ -130,6 +134,8 @@ export const jobSchema = z.strictObject({
 });
 
 export type Requirement = z.infer<typeof requirementSchema>;
+export type FiatMoney = z.infer<typeof fiatMoneySchema>;
+export type HbarAmount = z.infer<typeof hbarAmountSchema>;
 export type Policy = z.infer<typeof policySchema>;
 export type Provider = z.infer<typeof providerSchema>;
 export type Offer = z.infer<typeof offerSchema>;

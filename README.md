@@ -156,6 +156,18 @@ npm run validate
 The gate checks formatting, lint rules, TypeScript, tests, and the production
 build.
 
+Copy the safe environment template for local development:
+
+```sh
+cp .env.example .env.local
+```
+
+Only variables beginning with `NEXT_PUBLIC_` may be read by browser code.
+Operator keys, model keys, Supabase secret keys, and all future payment
+credentials are server-only. The typed contracts in `src/lib/env` reject
+unknown or malformed configuration. Empty optional credentials keep the
+scaffold usable before those integrations are implemented.
+
 Implementation progress and acceptance criteria live in [TODO.md](TODO.md).
 
 ## Vision

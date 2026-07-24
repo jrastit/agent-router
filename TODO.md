@@ -12,7 +12,7 @@ or documentation exist.
 - [x] Initialize the Next.js, TypeScript, and Tailwind CSS scaffold.
 - [x] Add formatting, linting, type checking, tests, and one canonical
       validation command.
-- [ ] Add `.env.example`, secret validation, and documented server/client
+- [x] Add `.env.example`, secret validation, and documented server/client
       boundaries.
 - [ ] Record third-party starter attribution and hackathon start scope.
 

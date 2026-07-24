@@ -142,7 +142,12 @@ state without duplicate payment or secret exposure.
 - [ ] Capture decision, payment, mirror, execution, and completion timestamps.
 - [ ] Add setup, architecture, payment-flow, and sponsor-integration
   documentation.
-- [ ] Recheck current event and sponsor requirements before submission.
+- [x] Record the selected tracks and qualification requirements in
+  `docs/PRIZE_STRATEGY.md`.
+- [ ] Complete every applicable gate in the prize strategy's final go/no-go
+  checklist.
+- [ ] Recheck current event rules and all three official sponsor requirements
+  immediately before submission.
 - [ ] Verify public repository access and third-party attribution.
 - [ ] Test screen recording, microphone, readable font size, and backup capture.
 - [ ] Record a demo within the event time limit.

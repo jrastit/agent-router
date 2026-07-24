@@ -120,6 +120,10 @@ the application.
 Sponsor integrations remain planned until their corresponding TODO items and
 tests are complete.
 
+See [ETHGlobal Lisbon 2026 prize strategy](docs/PRIZE_STRATEGY.md) for the
+selected tracks, qualification gates, required evidence, and final submission
+checklist.
+
 ## Demo target
 
 1. The user submits a task, budget, and privacy policy.

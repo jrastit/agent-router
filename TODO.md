@@ -35,14 +35,14 @@ decision without changing application code.
 
 ## Phase 2 — Supabase durability
 
-- [ ] Create version-controlled domain migrations.
-- [ ] Add ownership-aware row-level security.
-- [ ] Add unique constraints for idempotency keys and transaction proofs.
-- [ ] Make quote acceptance, decision persistence, and budget reservation
+- [x] Create version-controlled domain migrations.
+- [x] Add ownership-aware row-level security.
+- [x] Add unique constraints for idempotency keys and transaction proofs.
+- [x] Make quote acceptance, decision persistence, and budget reservation
       atomic.
-- [ ] Make proof consumption and receipt creation atomic.
-- [ ] Persist events before broadcasting them.
-- [ ] Add database linting and migration verification.
+- [x] Make proof consumption and receipt creation atomic.
+- [x] Persist events before broadcasting them.
+- [x] Add database linting and migration verification.
 
 Exit criterion: a job can resume after process restart without losing state or
 double-spending its reservation.

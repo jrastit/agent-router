@@ -192,6 +192,20 @@ scaffold usable before those integrations are implemented.
 
 Implementation progress and acceptance criteria live in [TODO.md](TODO.md).
 
+### Supabase migrations
+
+The durable commerce schema, ownership-aware row-level security, uniqueness
+guards, and atomic workflow functions live in `supabase/migrations`. Validate
+the configured database without applying changes with:
+
+```sh
+npm run validate:supabase
+```
+
+Apply reviewed migrations with `supabase db push --db-url "$SUPABASE_DB_URL"`.
+The atomic functions require an authenticated Supabase user; privileged
+credentials remain server-only.
+
 ## Vision
 
 AgentRouter is infrastructure for agents that must discover, negotiate,

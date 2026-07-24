@@ -90,6 +90,12 @@ transitions, and trust assumptions.
 
 ## Sponsor integrations
 
+Official ETHGlobal Lisbon 2026 prize pages:
+
+- [0G prizes](https://ethglobal.com/events/lisbon2026/prizes/0g)
+- [Hedera prizes](https://ethglobal.com/events/lisbon2026/prizes/hedera)
+- [The Graph prizes](https://ethglobal.com/events/lisbon2026/prizes/the-graph)
+
 ### Hedera
 
 Hedera is the settlement and public-audit layer:

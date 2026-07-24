@@ -35,6 +35,7 @@ export const deliveryStates = [
 export const failureReasonCodes = [
   "BUDGET_EXCEEDED",
   "CAPABILITY_REQUIRED",
+  "PRICE_CURRENCY_MISMATCH",
   "PRIVACY_CLASS_NOT_ALLOWED",
   "PRIVATE_COMPUTE_REQUIRED",
   "QUOTE_EXPIRED",

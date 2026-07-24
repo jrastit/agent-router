@@ -1,5 +1,11 @@
 # AgentRouter Architecture
 
+This document is the current AgentRouter design. The inherited technical
+evidence is summarized in [Validation Baseline](VALIDATION_BASELINE.md), and the
+recommended build sequence is in
+[Implementation Handoff](IMPLEMENTATION_HANDOFF.md). Those documents adapt the
+validation lab without replacing AgentRouter's newer The Graph and 0G design.
+
 ## Product boundary
 
 AgentRouter is a commerce orchestration layer. It owns provider discovery,
@@ -155,3 +161,14 @@ The Next.js application and server routes are intended for Vercel. Supabase,
 Hedera, The Graph, and 0G remain external systems. All privileged credentials
 stay in server-only environment variables and must not be referenced by client
 components.
+
+## Validation boundary
+
+Hedera settlement, mirror verification, HCS, structured model output, Supabase
+server-side CRUD, browser SSE, and core failure behavior were proven separately
+in the validation lab. AgentRouter must still implement and test those contracts
+inside its own durable architecture.
+
+The Graph discovery and 0G private execution are AgentRouter additions and have
+not been validated by the lab. They remain planned until their live adapters,
+failure handling, and acceptance tests are complete.

@@ -8,12 +8,12 @@ or documentation exist.
 
 - [x] Define incremental commit and safety rules in `AGENTS.md`.
 - [x] Record the product vision, target architecture, sponsor roles, and demo
-  target.
+      target.
 - [x] Initialize the Next.js, TypeScript, and Tailwind CSS scaffold.
-- [ ] Add formatting, linting, type checking, tests, and one canonical
-  validation command.
+- [x] Add formatting, linting, type checking, tests, and one canonical
+      validation command.
 - [ ] Add `.env.example`, secret validation, and documented server/client
-  boundaries.
+      boundaries.
 - [ ] Record third-party starter attribution and hackathon start scope.
 
 Exit criterion: a clean clone installs, validates, builds, and renders a basic
@@ -22,12 +22,12 @@ health page.
 ## Phase 1 — commerce domain
 
 - [ ] Define typed schemas for jobs, requirements, policies, providers, offers,
-  quotes, decisions, challenges, payments, deliveries, receipts, and events.
+      quotes, decisions, challenges, payments, deliveries, receipts, and events.
 - [ ] Represent fiat amounts as integer minor units and HBAR as exact strings or
-  tinybars.
+      tinybars.
 - [ ] Define stable lifecycle states and failure reason codes.
 - [ ] Implement deterministic policy eligibility and ranking independent of the
-  model.
+      model.
 - [ ] Test budget, privacy, capability, expiry, and tie-breaking rules.
 
 Exit criterion: changing provider data or policy changes a schema-valid routing
@@ -39,7 +39,7 @@ decision without changing application code.
 - [ ] Add ownership-aware row-level security.
 - [ ] Add unique constraints for idempotency keys and transaction proofs.
 - [ ] Make quote acceptance, decision persistence, and budget reservation
-  atomic.
+      atomic.
 - [ ] Make proof consumption and receipt creation atomic.
 - [ ] Persist events before broadcasting them.
 - [ ] Add database linting and migration verification.
@@ -79,7 +79,7 @@ engine independently validates.
 - [ ] Implement the 0G execution adapter.
 - [ ] Route confidential requirements only to eligible private execution.
 - [ ] Prevent confidential inputs and artifacts from entering logs or public
-  audit payloads.
+      audit payloads.
 - [ ] Validate typed delivery output and failure behavior.
 
 Exit criterion: changing a task from public to confidential changes provider
@@ -89,12 +89,12 @@ eligibility and routes execution through the verified 0G path.
 
 - [ ] Implement the versioned `402` payment-challenge contract.
 - [ ] Validate network, asset, amount, recipient, memo, quote, and expiry before
-  payment.
+      payment.
 - [ ] Reserve budget before submitting a transfer.
 - [ ] Submit one HBAR payment on Hedera testnet.
 - [ ] Expose separate submitted, consensus-confirmed, and mirror-verified states.
 - [ ] Verify payer, recipient, amount, memo, timestamp, type, and success through
-  the mirror node.
+      the mirror node.
 - [ ] Reject expired, mismatched, and duplicate proofs.
 - [ ] Reconcile ambiguous outcomes without automatically paying twice.
 - [ ] Publish compact non-sensitive decision and receipt anchors to HCS.
@@ -141,13 +141,13 @@ state without duplicate payment or secret exposure.
 - [ ] Seed deterministic backup providers and a completed receipt.
 - [ ] Capture decision, payment, mirror, execution, and completion timestamps.
 - [ ] Add setup, architecture, payment-flow, and sponsor-integration
-  documentation.
+      documentation.
 - [x] Record the selected tracks and qualification requirements in
-  `docs/PRIZE_STRATEGY.md`.
+      `docs/PRIZE_STRATEGY.md`.
 - [ ] Complete every applicable gate in the prize strategy's final go/no-go
-  checklist.
+      checklist.
 - [ ] Recheck current event rules and all three official sponsor requirements
-  immediately before submission.
+      immediately before submission.
 - [ ] Verify public repository access and third-party attribution.
 - [ ] Test screen recording, microphone, readable font size, and backup capture.
 - [ ] Record a demo within the event time limit.

@@ -15,17 +15,17 @@ unrestricted provider marketplace in the hackathon MVP.
 
 ## System responsibilities
 
-| Component | Owns | Must not own |
-|---|---|---|
-| Browser | User intent, policy input, progress, receipts | Payment keys or server secrets |
-| Planner | Typed requirements and proposed routing decision | Direct authority to bypass policy |
-| Policy engine | Eligibility, budget checks, deterministic ranking | Free-form model reasoning |
-| Discovery adapter | Provider and offer retrieval | Provider selection |
-| Execution adapter | Typed workload invocation and delivery | Payment authorization |
-| Payment service | Challenge validation, HBAR settlement, reconciliation | Product workflow state |
-| Postgres | Durable operational state and idempotency | Settlement truth |
-| Hedera | Settlement truth and public audit anchors | Full application state |
-| SSE endpoint | Projection of persisted workflow events | Authoritative in-memory state |
+| Component         | Owns                                                  | Must not own                      |
+| ----------------- | ----------------------------------------------------- | --------------------------------- |
+| Browser           | User intent, policy input, progress, receipts         | Payment keys or server secrets    |
+| Planner           | Typed requirements and proposed routing decision      | Direct authority to bypass policy |
+| Policy engine     | Eligibility, budget checks, deterministic ranking     | Free-form model reasoning         |
+| Discovery adapter | Provider and offer retrieval                          | Provider selection                |
+| Execution adapter | Typed workload invocation and delivery                | Payment authorization             |
+| Payment service   | Challenge validation, HBAR settlement, reconciliation | Product workflow state            |
+| Postgres          | Durable operational state and idempotency             | Settlement truth                  |
+| Hedera            | Settlement truth and public audit anchors             | Full application state            |
+| SSE endpoint      | Projection of persisted workflow events               | Authoritative in-memory state     |
 
 ## Durable lifecycle
 

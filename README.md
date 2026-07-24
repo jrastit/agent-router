@@ -76,14 +76,14 @@ explanation.
 
 ## Target architecture
 
-| Layer | Planned technology | Responsibility |
-|---|---|---|
-| Frontend | Next.js, TypeScript, Tailwind CSS | Task input, policy, progress, result, receipts |
-| Planner | Vercel AI SDK | Requirement extraction and structured routing decision |
-| Application database | Supabase/Postgres | Durable jobs, policies, quotes, decisions, and receipts |
-| Provider discovery | The Graph | Indexed provider and capability discovery |
-| Private execution | 0G Compute / Private Compute | Confidential workload execution |
-| Settlement and audit | Hedera | HBAR payment, HCS audit events, HashScan evidence |
+| Layer                | Planned technology                | Responsibility                                          |
+| -------------------- | --------------------------------- | ------------------------------------------------------- |
+| Frontend             | Next.js, TypeScript, Tailwind CSS | Task input, policy, progress, result, receipts          |
+| Planner              | Vercel AI SDK                     | Requirement extraction and structured routing decision  |
+| Application database | Supabase/Postgres                 | Durable jobs, policies, quotes, decisions, and receipts |
+| Provider discovery   | The Graph                         | Indexed provider and capability discovery               |
+| Private execution    | 0G Compute / Private Compute      | Confidential workload execution                         |
+| Settlement and audit | Hedera                            | HBAR payment, HCS audit events, HashScan evidence       |
 
 See [Architecture](docs/ARCHITECTURE.md) for system boundaries, state
 transitions, and trust assumptions.
@@ -145,6 +145,16 @@ branch.
 This repository intentionally uses small, chronological commits. Read
 [AGENTS.md](AGENTS.md) before making changes. Every independently verifiable
 milestone receives its own commit after relevant checks pass.
+
+Install dependencies and run the canonical validation gate:
+
+```sh
+npm install
+npm run validate
+```
+
+The gate checks formatting, lint rules, TypeScript, tests, and the production
+build.
 
 Implementation progress and acceptance criteria live in [TODO.md](TODO.md).
 

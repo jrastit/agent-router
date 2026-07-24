@@ -103,14 +103,14 @@ Required constraints:
 
 Commit names and safe defaults in `.env.example`; keep values outside Git.
 
-| Class | Examples | Deployment rule |
-|---|---|---|
-| Hedera runtime | Operator ID/key, recipient, topic, transfer amount | Server-only encrypted variables |
-| Model runtime | API key, base URL, model, timeout | Server-only encrypted variables |
-| Supabase runtime | Project URL and secret key | Server-only; browser uses scoped public access only |
-| The Graph runtime | Gateway/subgraph identifiers and access token | Token server-only when required |
-| 0G runtime | Endpoint, network, signer, or provider credentials | Server-only; exact names follow verified SDK/API |
-| Administration | Vercel token and direct database URL | Local/CI administration only; never app runtime |
+| Class             | Examples                                           | Deployment rule                                     |
+| ----------------- | -------------------------------------------------- | --------------------------------------------------- |
+| Hedera runtime    | Operator ID/key, recipient, topic, transfer amount | Server-only encrypted variables                     |
+| Model runtime     | API key, base URL, model, timeout                  | Server-only encrypted variables                     |
+| Supabase runtime  | Project URL and secret key                         | Server-only; browser uses scoped public access only |
+| The Graph runtime | Gateway/subgraph identifiers and access token      | Token server-only when required                     |
+| 0G runtime        | Endpoint, network, signer, or provider credentials | Server-only; exact names follow verified SDK/API    |
+| Administration    | Vercel token and direct database URL               | Local/CI administration only; never app runtime     |
 
 Do not invent final The Graph or 0G variable names before selecting and testing
 their actual integration surfaces.
@@ -162,8 +162,7 @@ integration.
 Before submission:
 
 - a clean clone installs, validates, and builds;
-- the deployed flow completes `discover → compare → select → execute → pay →
-  verify → record`;
+- the deployed flow completes the full documented commerce loop;
 - refresh and SSE reconnect restore durable state;
 - insufficient funds, expiry, mismatch, replay, discovery outage, model
   timeout, mirror delay, and provider timeout fail safely;

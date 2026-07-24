@@ -1,4 +1,12 @@
-const loop = ["Discover", "Compare", "Select", "Pay", "Verify", "Deliver", "Record"];
+const loop = [
+  "Discover",
+  "Compare",
+  "Select",
+  "Pay",
+  "Verify",
+  "Deliver",
+  "Record",
+];
 
 export default function Home() {
   return (
@@ -13,7 +21,10 @@ export default function Home() {
         AgentRouter discovers providers, enforces policy, routes execution, and
         preserves verifiable evidence of every decision and payment.
       </p>
-      <ol className="mt-12 flex flex-wrap gap-3" aria-label="Agent commerce loop">
+      <ol
+        className="mt-12 flex flex-wrap gap-3"
+        aria-label="Agent commerce loop"
+      >
         {loop.map((step, index) => (
           <li
             className="rounded-full border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-200"

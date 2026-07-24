@@ -12,27 +12,27 @@ items complete.
 
 Validated on 24 July 2026 with Node.js 24.18.0:
 
-| Capability | Evidence |
-|---|---|
-| Local HTTP 402 | Challenge, proof retry, and protected-resource unlock passed |
-| Real Hedera HTTP 402 | A testnet HBAR proof was verified through the mirror node and replay was rejected |
-| Hedera transfer | Small testnet HBAR transfers reached consensus |
-| HCS | Topic creation, message submission, and mirror-node read-back passed |
-| Structured decision | GLM-5.2 returned a schema-valid, policy-compliant provider choice |
-| Supabase | A server-side create/read/update/delete round trip passed |
-| Browser progress | Native `EventSource` delivered ordered lifecycle updates |
-| Failure handling | Insufficient balance, expiry, replay, and provider timeout failed closed |
+| Capability               | Evidence                                                                                            |
+| ------------------------ | --------------------------------------------------------------------------------------------------- |
+| Local HTTP 402           | Challenge, proof retry, and protected-resource unlock passed                                        |
+| Real Hedera HTTP 402     | A testnet HBAR proof was verified through the mirror node and replay was rejected                   |
+| Hedera transfer          | Small testnet HBAR transfers reached consensus                                                      |
+| HCS                      | Topic creation, message submission, and mirror-node read-back passed                                |
+| Structured decision      | GLM-5.2 returned a schema-valid, policy-compliant provider choice                                   |
+| Supabase                 | A server-side create/read/update/delete round trip passed                                           |
+| Browser progress         | Native `EventSource` delivered ordered lifecycle updates                                            |
+| Failure handling         | Insufficient balance, expiry, replay, and provider timeout failed closed                            |
 | Deployment configuration | Fourteen encrypted Hedera, model, and Supabase runtime variables were accepted by Vercel Production |
 
 ## Observed timing
 
 Ten Hedera testnet transfers produced these submission-to-receipt measurements:
 
-| Metric | Result |
-|---|---:|
-| Minimum | 944 ms |
-| Median | 1134 ms |
-| Mean | 1354 ms |
+| Metric                 |  Result |
+| ---------------------- | ------: |
+| Minimum                |  944 ms |
+| Median                 | 1134 ms |
+| Mean                   | 1354 ms |
 | Maximum / observed p95 | 2366 ms |
 
 In a separate transfer, the public mirror-node record became available 2575 ms
@@ -70,13 +70,13 @@ service and enforce proof uniqueness in durable storage.
 
 The lab confirmed these required outcomes:
 
-| Condition | Required behavior |
-|---|---|
-| Insufficient balance | Reject before transaction submission |
-| Expired challenge | Reject without execution |
-| Duplicate proof | Reject the second consumption |
-| Provider timeout | Abort execution without retrying payment |
-| Mirror indexing delay | Enter reconciliation/pending state |
+| Condition             | Required behavior                        |
+| --------------------- | ---------------------------------------- |
+| Insufficient balance  | Reject before transaction submission     |
+| Expired challenge     | Reject without execution                 |
+| Duplicate proof       | Reject the second consumption            |
+| Provider timeout      | Abort execution without retrying payment |
+| Mirror indexing delay | Enter reconciliation/pending state       |
 
 The final application still needs integration and persistence tests for these
 paths. Lab success does not prove that AgentRouter's implementation is safe.
@@ -116,16 +116,16 @@ commit with its own acceptance evidence.
 
 These files live in the separate validation-lab repository:
 
-| Lab file | Reusable lesson |
-|---|---|
-| `src/run-local.mjs` | Local HTTP 402, SSE, and failure-mode assertions |
-| `src/run-external.mjs` | Mirror-node, HBAR, HCS, model, and Supabase probes |
-| `src/run-hedera-402.mjs` | Real challenge, payment, proof verification, and replay rejection |
-| `src/run-hedera-latency.mjs` | Ten-transfer receipt-latency benchmark |
-| `src/run-mirror-lag.mjs` | Receipt-to-mirror measurement and UI state split |
-| `src/llm-provider-decision.mjs` | Structured provider-decision contract |
-| `src/run-supabase.mjs` | Temporary server-side CRUD validation |
-| `src/run-browser-sse.mjs` | Native browser `EventSource` lifecycle |
+| Lab file                        | Reusable lesson                                                   |
+| ------------------------------- | ----------------------------------------------------------------- |
+| `src/run-local.mjs`             | Local HTTP 402, SSE, and failure-mode assertions                  |
+| `src/run-external.mjs`          | Mirror-node, HBAR, HCS, model, and Supabase probes                |
+| `src/run-hedera-402.mjs`        | Real challenge, payment, proof verification, and replay rejection |
+| `src/run-hedera-latency.mjs`    | Ten-transfer receipt-latency benchmark                            |
+| `src/run-mirror-lag.mjs`        | Receipt-to-mirror measurement and UI state split                  |
+| `src/llm-provider-decision.mjs` | Structured provider-decision contract                             |
+| `src/run-supabase.mjs`          | Temporary server-side CRUD validation                             |
+| `src/run-browser-sse.mjs`       | Native browser `EventSource` lifecycle                            |
 
 Port contracts deliberately. Do not copy lab credentials, environment files,
 Git history, or unrelated validation scaffolding.

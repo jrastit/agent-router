@@ -123,8 +123,14 @@ sponsor integrations until the core loop works end to end.
 
 ## Validation
 
-Once the scaffold defines its toolchain, document one canonical full validation
-command here and in the README. Until then:
+The canonical full validation command is:
+
+```sh
+npm run validate
+```
+
+It runs formatting checks, static analysis, type checking, tests, and the
+production build. In addition:
 
 - run the formatter and static analysis for every code change;
 - run targeted tests for the changed behavior;

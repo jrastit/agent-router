@@ -8,7 +8,9 @@ export const metadata: Metadata = {
   description: "Policy-driven commerce routing for autonomous AI agents.",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
       <body>{children}</body>

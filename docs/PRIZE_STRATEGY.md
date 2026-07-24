@@ -7,11 +7,11 @@ submission because sponsors may update their requirements.
 
 ## Selected tracks
 
-| Sponsor | Target track | Why AgentRouter fits |
-|---|---|---|
-| [0G](https://ethglobal.com/events/lisbon2026/prizes/0g) | Best AI Product on 0G | The user-facing product routes confidential inference through 0G Compute / Private Computer |
-| [Hedera](https://ethglobal.com/events/lisbon2026/prizes/hedera) | AI & Agentic Payments on Hedera | An agent discovers services, selects an offer under policy, and pays for it in HBAR |
-| [The Graph](https://ethglobal.com/events/lisbon2026/prizes/the-graph) | Best AI Use Case of The Graph | The agent uses live indexed blockchain data as a load-bearing input to provider selection |
+| Sponsor                                                               | Target track                    | Why AgentRouter fits                                                                        |
+| --------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------- |
+| [0G](https://ethglobal.com/events/lisbon2026/prizes/0g)               | Best AI Product on 0G           | The user-facing product routes confidential inference through 0G Compute / Private Computer |
+| [Hedera](https://ethglobal.com/events/lisbon2026/prizes/hedera)       | AI & Agentic Payments on Hedera | An agent discovers services, selects an offer under policy, and pays for it in HBAR         |
+| [The Graph](https://ethglobal.com/events/lisbon2026/prizes/the-graph) | Best AI Use Case of The Graph   | The agent uses live indexed blockchain data as a load-bearing input to provider selection   |
 
 Do not submit AgentRouter to 0G's Infrastructure track unless the shipped
 artifact becomes reusable developer tooling rather than an end-user product.
@@ -234,7 +234,7 @@ AgentRouter is ready to submit for all three selected prizes only when every
 item below is true:
 
 - [ ] The public repository installs, validates, builds, and runs from its
-  documented instructions.
+      documented instructions.
 - [ ] The deployed application completes the entire live commerce loop.
 - [ ] Live Graph data is load-bearing and its provenance is visible.
 - [ ] Real inference runs through 0G Compute / Private Computer with proof.
@@ -245,6 +245,6 @@ item below is true:
 - [ ] The README identifies every sponsor technology and deployed identifier.
 - [ ] The video satisfies the two-to-three-minute common duration.
 - [ ] The submission contains all required URLs, evidence, team contacts, and
-  pre-existing-work disclosures.
+      pre-existing-work disclosures.
 - [ ] The team rechecks the official prize pages and event rules immediately
-  before submitting.
+      before submitting.

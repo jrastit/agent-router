@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+import {
+  deliveryStateSchema,
+  eventTypeSchema,
+  failureReasonCodeSchema,
+  jobStateSchema,
+  paymentStateSchema,
+} from "./lifecycle";
+
 const id = z.string().min(1);
 const timestamp = z.string().datetime({ offset: true });
 export const fiatMoneySchema = z.strictObject({
@@ -90,7 +98,7 @@ export const paymentSchema = z.strictObject({
   id,
   challengeId: id,
   transactionId: z.string().min(1),
-  status: z.string().min(1),
+  status: paymentStateSchema,
   amount: hbarAmountSchema,
   createdAt: timestamp,
 });
@@ -99,7 +107,7 @@ export const deliverySchema = z.strictObject({
   id,
   jobId: id,
   providerId: id,
-  status: z.string().min(1),
+  status: deliveryStateSchema,
   artifactReference: z.string().min(1).optional(),
   completedAt: timestamp.optional(),
 });
@@ -118,7 +126,7 @@ export const eventSchema = z.strictObject({
   id,
   jobId: id,
   sequence: z.number().int().nonnegative(),
-  type: z.string().min(1),
+  type: eventTypeSchema,
   occurredAt: timestamp,
   payload: z.record(z.string(), z.unknown()),
 });
@@ -127,8 +135,8 @@ export const jobSchema = z.strictObject({
   id,
   requirementId: id,
   policyId: id,
-  status: z.string().min(1),
-  failureReason: z.string().min(1).optional(),
+  status: jobStateSchema,
+  failureReason: failureReasonCodeSchema.optional(),
   createdAt: timestamp,
   updatedAt: timestamp,
 });

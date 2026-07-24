@@ -8,9 +8,9 @@ of every decision.
 Rather than focusing only on how an agent pays, AgentRouter focuses on how an
 agent decides to spend.
 
-> Project status: product definition and implementation plan. The application
-> scaffold and integrations described below are planned until linked to a
-> commit and marked complete in [TODO.md](TODO.md).
+> Project status: the application scaffold is implemented. Commerce-domain
+> behavior and external integrations remain planned until linked to a commit
+> and marked complete in [TODO.md](TODO.md).
 
 ## Problem
 

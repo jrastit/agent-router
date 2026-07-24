@@ -9,7 +9,7 @@ or documentation exist.
 - [x] Define incremental commit and safety rules in `AGENTS.md`.
 - [x] Record the product vision, target architecture, sponsor roles, and demo
   target.
-- [ ] Initialize the Next.js, TypeScript, and Tailwind CSS scaffold.
+- [x] Initialize the Next.js, TypeScript, and Tailwind CSS scaffold.
 - [ ] Add formatting, linting, type checking, tests, and one canonical
   validation command.
 - [ ] Add `.env.example`, secret validation, and documented server/client

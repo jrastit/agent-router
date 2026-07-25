@@ -19,6 +19,16 @@ export const serverEnvSchema = z
     HEDERA_NETWORK: z.enum(["testnet"]).default("testnet"),
     HEDERA_OPERATOR_ID: optionalSecret,
     HEDERA_OPERATOR_KEY: optionalSecret,
+    DISCOVERY_SOURCE: z.enum(["fixture", "the-graph"]).default("fixture"),
+    GRAPH_ENDPOINT: z.string().url().optional(),
+    GRAPH_DEPLOYMENT_ID: z.string().min(1).optional(),
+    GRAPH_NETWORK: z.string().min(1).optional(),
+    GRAPH_MAX_STALENESS_MS: z.coerce
+      .number()
+      .int()
+      .nonnegative()
+      .default(300_000),
+    GRAPH_ACCESS_TOKEN: optionalSecret,
     OPENAI_API_KEY: optionalSecret,
     SUPABASE_SERVICE_ROLE_KEY: optionalSecret,
   })
@@ -29,6 +39,12 @@ export const serverOnlyEnvKeys = [
   "HEDERA_NETWORK",
   "HEDERA_OPERATOR_ID",
   "HEDERA_OPERATOR_KEY",
+  "DISCOVERY_SOURCE",
+  "GRAPH_ENDPOINT",
+  "GRAPH_DEPLOYMENT_ID",
+  "GRAPH_NETWORK",
+  "GRAPH_MAX_STALENESS_MS",
+  "GRAPH_ACCESS_TOKEN",
   "OPENAI_API_KEY",
   "SUPABASE_SERVICE_ROLE_KEY",
 ] as const;

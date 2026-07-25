@@ -8,10 +8,11 @@ of every decision.
 Rather than focusing only on how an agent pays, AgentRouter focuses on how an
 agent decides to spend.
 
-> Project status: the application scaffold and deterministic commerce-domain
-> routing contracts are implemented. Durable storage, live provider discovery,
-> execution, and external integrations remain planned until linked to a commit
-> and marked complete in [TODO.md](TODO.md).
+> Project status: the application scaffold, deterministic commerce-domain
+> routing, durable storage, and fixture/live provider-discovery adapters are
+> implemented. A live Graph deployment, execution, and payment integrations
+> remain planned until linked to a commit and marked complete in
+> [TODO.md](TODO.md).
 
 ## Problem
 
@@ -86,8 +87,10 @@ The implemented policy engine currently:
 - ranks eligible candidates deterministically by price, expected latency,
   provider ID, and offer ID.
 
-Provider discovery remains fixture/test input until Phase 3. Persistence and
-model-derived requirements remain planned for Phases 2 and 4 respectively.
+Provider discovery uses one normalized contract for deterministic fixtures and
+live indexed records. The selected source is explicit, and live results retain
+deployment, network, endpoint, block, and query-time provenance. Model-derived
+requirements remain planned for Phase 4.
 
 ## Target architecture
 
@@ -128,12 +131,22 @@ requirement remain eligible.
 
 ### The Graph
 
-The Graph is the planned discovery layer. The planner should query an indexed
-provider registry instead of relying exclusively on providers hardcoded into
-the application.
+The discovery adapter posts `DiscoverProviders` to a configured Graph endpoint,
+normalizes active offers into the same provider/offer/quote contract used by
+fixtures, and rejects empty, stale, malformed, or unavailable results without
+silently falling back. The indexed entity contract is
+[`graph/schema.graphql`](graph/schema.graphql).
 
-Sponsor integrations remain planned until their corresponding TODO items and
-tests are complete.
+Use `DISCOVERY_SOURCE=fixture` for the deterministic local path. For live
+discovery, set `DISCOVERY_SOURCE=the-graph`, `GRAPH_ENDPOINT`,
+`GRAPH_DEPLOYMENT_ID`, and `GRAPH_NETWORK`; optionally set a server-only
+`GRAPH_ACCESS_TOKEN`. `GRAPH_MAX_STALENESS_MS` defaults to five minutes.
+Fixture results are labeled `fixture`, while live results are labeled
+`the-graph`.
+
+The schema and query adapter are implemented, but a live registry deployment
+identifier is intentionally not claimed until a registry contract is indexed
+and its deployment evidence is recorded.
 
 See [ETHGlobal Lisbon 2026 prize strategy](docs/PRIZE_STRATEGY.md) for the
 selected tracks, qualification gates, required evidence, and final submission

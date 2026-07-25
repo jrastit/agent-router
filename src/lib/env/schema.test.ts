@@ -10,6 +10,24 @@ describe("environment contract", () => {
     expect(serverEnvSchema.parse({})).toMatchObject({
       APP_ENV: "development",
       HEDERA_NETWORK: "testnet",
+      DISCOVERY_SOURCE: "fixture",
+      GRAPH_MAX_STALENESS_MS: 300_000,
+    });
+  });
+
+  it("parses server-only Graph discovery configuration", () => {
+    expect(
+      serverEnvSchema.parse({
+        DISCOVERY_SOURCE: "the-graph",
+        GRAPH_ENDPOINT: "https://gateway.thegraph.com/api/subgraphs/id/example",
+        GRAPH_DEPLOYMENT_ID: "QmExample",
+        GRAPH_NETWORK: "hedera-testnet",
+        GRAPH_MAX_STALENESS_MS: "60000",
+        GRAPH_ACCESS_TOKEN: "secret",
+      }),
+    ).toMatchObject({
+      DISCOVERY_SOURCE: "the-graph",
+      GRAPH_MAX_STALENESS_MS: 60_000,
     });
   });
 

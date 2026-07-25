@@ -1,0 +1,34 @@
+"""
+An execution provider indexed from the provider registry.
+IDs are stable registry identifiers, not display names.
+"""
+type Provider @entity(immutable: false) {
+  id: Bytes!
+  name: String!
+  capabilities: [String!]!
+  privacyClasses: [String!]!
+  settlementAccount: String!
+  active: Boolean!
+  offers: [ProviderOffer!]! @derivedFrom(field: "provider")
+  updatedAt: BigInt!
+  updatedAtBlock: BigInt!
+}
+
+"""
+A versioned, queryable offer. Integer strings preserve exact minor-unit values.
+The application creates a short-lived quote from the indexed TTL at query time.
+"""
+type ProviderOffer @entity(immutable: false) {
+  id: Bytes!
+  provider: Provider!
+  capability: String!
+  inputType: String!
+  outputType: String!
+  currency: String!
+  amountMinor: BigInt!
+  expectedLatencyMs: BigInt!
+  quoteTtlSeconds: BigInt!
+  active: Boolean!
+  updatedAt: BigInt!
+  updatedAtBlock: BigInt!
+}

@@ -51,7 +51,7 @@ double-spending its reservation.
 
 - [x] Define the discovery-adapter interface and normalized provider model.
 - [x] Add deterministic fixtures for at least two providers.
-- [ ] Define the provider registry/subgraph schema.
+- [x] Define the provider registry/subgraph schema.
 - [ ] Implement and deploy the subgraph or agreed indexed data source.
 - [x] Query The Graph through the discovery adapter.
 - [x] Handle empty, stale, malformed, and unavailable discovery results.

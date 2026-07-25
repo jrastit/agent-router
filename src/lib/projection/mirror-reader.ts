@@ -82,11 +82,17 @@ export async function readVerifiedHederaEvents(input: {
   handle: (event: VerifiedHederaEvent) => Promise<void>;
   fetcher?: typeof fetch;
   pageLimit?: number;
+  maxPages?: number;
 }): Promise<{ handled: number; cursor: string | null }> {
   const fetcher = input.fetcher ?? fetch;
   const baseUrl = input.mirrorNodeUrl.replace(/\/$/, "");
   const streamId = `${input.source.type}:${input.source.id}`;
   let cursor = await input.cursorStore.load(streamId);
+  const initialCursor = cursor;
+  const maxPages = input.maxPages ?? 1_000;
+  if (!Number.isSafeInteger(maxPages) || maxPages < 1) {
+    throw new Error("invalid Mirror page limit");
+  }
   const resource =
     input.source.type === "contract_log"
       ? `/api/v1/contracts/${encodeURIComponent(input.source.id)}/results/logs`
@@ -98,8 +104,19 @@ export async function readVerifiedHederaEvents(input: {
   if (cursor) params.set("timestamp", `gt:${cursor}`);
   let url: string | null = `${baseUrl}${resource}?${params}`;
   let handled = 0;
+  let pageCount = 0;
+  const visitedUrls = new Set<string>();
+  const verified = new Map<`0x${string}`, VerifiedHederaEvent>();
 
   while (url) {
+    pageCount += 1;
+    if (pageCount > maxPages) {
+      throw new Error("Mirror pagination exceeded the configured bound");
+    }
+    if (visitedUrls.has(url)) {
+      throw new Error("Mirror pagination repeated a page");
+    }
+    visitedUrls.add(url);
     const response = await fetcher(url, {
       headers: { accept: "application/json" },
       cache: "no-store",
@@ -155,18 +172,75 @@ export async function readVerifiedHederaEvents(input: {
     }
 
     for (const anchor of events) {
-      if (cursor && anchor.consensusTimestamp <= cursor) continue;
-      await input.handle({
+      if (
+        initialCursor &&
+        compareConsensusTimestamps(anchor.consensusTimestamp, initialCursor) <=
+          0
+      ) {
+        continue;
+      }
+      const event = {
         sourceEventId: createHederaSourceEventId(anchor),
         anchor,
         mirrorVerified: true,
-      });
-      await input.cursorStore.save(streamId, anchor.consensusTimestamp);
-      cursor = anchor.consensusTimestamp;
-      handled += 1;
+      } satisfies VerifiedHederaEvent;
+      const duplicate = verified.get(event.sourceEventId);
+      if (duplicate) {
+        if (JSON.stringify(duplicate.anchor) !== JSON.stringify(event.anchor)) {
+          throw new Error("Mirror response changed a duplicate source event");
+        }
+        continue;
+      }
+      verified.set(event.sourceEventId, event);
     }
     url = next;
   }
 
+  const ordered = [...verified.values()].sort((left, right) => {
+    const timestampOrder = compareConsensusTimestamps(
+      left.anchor.consensusTimestamp,
+      right.anchor.consensusTimestamp,
+    );
+    if (timestampOrder !== 0) return timestampOrder;
+    if (left.anchor.sourceIndex !== right.anchor.sourceIndex) {
+      return left.anchor.sourceIndex - right.anchor.sourceIndex;
+    }
+    return left.sourceEventId.localeCompare(right.sourceEventId);
+  });
+
+  for (let index = 0; index < ordered.length;) {
+    const timestamp = ordered[index].anchor.consensusTimestamp;
+    const group: VerifiedHederaEvent[] = [];
+    while (
+      index < ordered.length &&
+      compareConsensusTimestamps(
+        ordered[index].anchor.consensusTimestamp,
+        timestamp,
+      ) === 0
+    ) {
+      group.push(ordered[index]);
+      index += 1;
+    }
+    for (const event of group) {
+      await input.handle(event);
+      handled += 1;
+    }
+    await input.cursorStore.save(streamId, timestamp);
+    cursor = timestamp;
+  }
+
   return { handled, cursor };
+}
+
+function compareConsensusTimestamps(left: string, right: string): number {
+  const parts = (value: string): [bigint, bigint] => {
+    const match = /^(\d+)\.(\d{1,9})$/.exec(value);
+    if (!match) throw new Error("invalid consensus timestamp");
+    return [BigInt(match[1]), BigInt(match[2].padEnd(9, "0"))];
+  };
+  const [leftSeconds, leftNanos] = parts(left);
+  const [rightSeconds, rightNanos] = parts(right);
+  if (leftSeconds !== rightSeconds) return leftSeconds < rightSeconds ? -1 : 1;
+  if (leftNanos === rightNanos) return 0;
+  return leftNanos < rightNanos ? -1 : 1;
 }

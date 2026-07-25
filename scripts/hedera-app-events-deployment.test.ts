@@ -12,6 +12,22 @@ describe("Hedera app-event deployment guards", () => {
     expect(script).not.toContain("console.log(privateKey");
   });
 
+  it("supports guarded deployment with the native Hedera operator", () => {
+    const script = readFileSync(
+      "scripts/deploy-hedera-app-events-sdk.mjs",
+      "utf8",
+    );
+
+    expect(script).toContain("new ContractCreateFlow()");
+    expect(script).toContain("operatorId.toSolidityAddress()");
+    expect(script).toContain("chainId !== 296n");
+    expect(script).toContain('rpc("eth_getCode"');
+    expect(script).toContain(
+      "JSON-RPC indexing timed out; reconcile before deploying the Subgraph",
+    );
+    expect(script).not.toContain("console.log(operatorKey");
+  });
+
   it("requires precomputed digests for public event submission", () => {
     const script = readFileSync("scripts/emit-hedera-app-event.mjs", "utf8");
 

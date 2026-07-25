@@ -8,9 +8,9 @@ dataSources:
     name: HederaAppEventJournal
     network: hedera-testnet
     source:
-      address: "0x0000000000000000000000000000000000000000"
       abi: HederaAppEventJournal
-      startBlock: 0
+      address: "0x000000000000000000000000000000000094aab0"
+      startBlock: 38431807
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -24,6 +24,7 @@ dataSources:
       eventHandlers:
         - event: AppEventRecorded(indexed bytes32,indexed bytes32,string,bytes32,uint16)
           handler: handleAppEventRecorded
-        - event: EconomicEventRecorded(indexed bytes32,indexed bytes32,indexed uint8,int64,bytes32,bytes32,uint16)
+        - event: EconomicEventRecorded(indexed bytes32,indexed bytes32,indexed
+            uint8,int64,bytes32,bytes32,uint16)
           handler: handleEconomicEventRecorded
       file: ./src/mapping.ts

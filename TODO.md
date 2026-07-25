@@ -262,7 +262,7 @@ application credit.
 - [x] Add an idempotent projection and Graph-ingestion worker that correlates the
       durable, credited Hedera deposit with its destination anchor and indexed
       entity.
-- [ ] Add projection reconciliation for credited Hedera events missing
+- [x] Add projection reconciliation for credited Hedera events missing
       destination anchors, destination anchors missing durable relay records,
       and Subgraph entities lagging their finalized destination transactions.
 - [ ] Keep application credit and provider execution gated only by authoritative

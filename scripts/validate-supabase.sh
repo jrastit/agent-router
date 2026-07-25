@@ -30,7 +30,9 @@ node --env-file=.env -e '
     url.toString(), "-X", "-v", "ON_ERROR_STOP=1", "-c", "begin",
     "-f", "supabase/migrations/20260725000100_create_commerce_domain.sql",
     "-f", "supabase/migrations/20260725000200_add_atomic_workflows.sql",
-    "-f", "supabase/tests/phase2.sql", "-c", "rollback",
+    "-f", "supabase/migrations/20260725000400_persist_planner_decision.sql",
+    "-f", "supabase/tests/phase2.sql",
+    "-f", "supabase/tests/phase4.sql", "-c", "rollback",
   ];
   const result = spawnSync(psql, args, { stdio: "inherit" });
   process.exit(result.status ?? 1);

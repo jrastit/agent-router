@@ -36,6 +36,7 @@ export const serverEnvSchema = z
       .default("https://api.scaleway.ai/v1"),
     SCALEWAY_GENAI_MODEL: z.string().min(1).default("qwen3.5-27b"),
     PLANNER_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
+    SUPABASE_URL: z.string().url().optional(),
     SUPABASE_SERVICE_ROLE_KEY: optionalSecret,
   })
   .strict();
@@ -55,5 +56,6 @@ export const serverOnlyEnvKeys = [
   "SCALEWAY_GENAI_BASE_URL",
   "SCALEWAY_GENAI_MODEL",
   "PLANNER_TIMEOUT_MS",
+  "SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
 ] as const;

@@ -52,7 +52,8 @@
     "solc": "^0.8.36",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
-    "vitest": "4.1.10"
+    "vitest": "4.1.10",
+    "yaml": "^2.9.0"
   },
   "overrides": {
     "brace-expansion": "5.0.8",

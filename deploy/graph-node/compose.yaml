@@ -1,0 +1,84 @@
+name: agent-router-graph
+
+services:
+  postgres:
+    image: postgres:17.5-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: graph-node
+      POSTGRES_PASSWORD: ${GRAPH_POSTGRES_PASSWORD:?set GRAPH_POSTGRES_PASSWORD}
+      POSTGRES_DB: graph-node
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C
+    volumes:
+      - graph-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U graph-node -d graph-node"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    logging: &default-logging
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
+
+  ipfs:
+    image: ipfs/kubo:v0.42.0
+    restart: unless-stopped
+    environment:
+      IPFS_PROFILE: server
+    volumes:
+      - graph-ipfs-data:/data/ipfs
+    healthcheck:
+      test: ["CMD", "ipfs", "id"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+  graph-node:
+    image: graphprotocol/graph-node:v0.44.0
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ipfs:
+        condition: service_healthy
+    environment:
+      postgres_host: postgres
+      postgres_user: graph-node
+      postgres_pass: ${GRAPH_POSTGRES_PASSWORD:?set GRAPH_POSTGRES_PASSWORD}
+      postgres_db: graph-node
+      ipfs: ipfs:5001
+      ethereum: hedera-testnet:${HEDERA_EVM_RPC_URL:?set HEDERA_EVM_RPC_URL}
+      GRAPH_LOG: ${GRAPH_LOG:-info}
+      GRAPH_ALLOW_NON_DETERMINISTIC_FULLTEXT_SEARCH: "false"
+    ports:
+      - "127.0.0.1:${GRAPH_QUERY_PORT:-8000}:8000"
+      - "127.0.0.1:${GRAPH_WS_PORT:-8001}:8001"
+      - "127.0.0.1:${GRAPH_ADMIN_PORT:-8020}:8020"
+      - "127.0.0.1:${GRAPH_STATUS_PORT:-8030}:8030"
+      - "127.0.0.1:${GRAPH_METRICS_PORT:-8040}:8040"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'curl --fail --silent --show-error http://127.0.0.1:8030/graphql -H ''content-type: application/json'' --data ''{"query":"{ indexingStatuses { subgraph } }"}'' >/dev/null',
+        ]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+    security_opt:
+      - no-new-privileges:true
+    logging: *default-logging
+
+volumes:
+  graph-postgres-data:
+  graph-ipfs-data:

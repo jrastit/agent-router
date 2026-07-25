@@ -24,8 +24,8 @@ describe("mid-hackathon demo", () => {
     expect(html).toContain("Run timeline");
     expect(html).toContain("Latest Graph activity");
     expect(html).toContain("Prepaid application credit");
-    expect(html).toContain("Deposit HBAR with your wallet");
-    expect(html).toContain("AgentRouter never receives");
+    expect(html).toContain("Add funds");
+    expect(html).toContain("You stay in control");
     expect(html).toContain("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID");
     expect(html).toContain("Credited");
     expect(html).toContain("Reserved");

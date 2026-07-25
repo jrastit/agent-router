@@ -16,6 +16,38 @@ npm run pm2:start
 npm run pm2:save
 ```
 
+Apply database migrations only after the transactional SQL suite and guarded
+dry run both pass:
+
+```sh
+npm run validate:supabase
+npm run deploy:supabase
+npm run deploy:supabase -- --confirm-production-migrations
+```
+
+The first deployment command is non-mutating and prints the pending migration
+list. The confirmation form uses Supabase's tracked `db push`, then probes the
+latest migration, deposit and projection tables, and atomic credit function.
+
+### Recorded schema deployment
+
+On 2026-07-25, the transactional SQL suite and deployment dry run passed before
+eight migrations were applied to the self-hosted AgentRouter Supabase
+database. The post-deployment probe returned:
+
+```json
+{
+  "latestMigration": "20260725001000",
+  "depositTable": true,
+  "projectionTable": true,
+  "creditFunction": true
+}
+```
+
+The restored `20260724000000_create_validation_health.sql` baseline matches the
+already-applied production migration and keeps local and remote migration
+histories aligned.
+
 For an existing process after a new build:
 
 ```sh

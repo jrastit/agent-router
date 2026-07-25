@@ -13,6 +13,7 @@
 # production
 /build
 /graph/app-events/build
+/supabase/.temp/
 
 # misc
 .DS_Store

@@ -175,7 +175,7 @@ milestone.
 - [ ] Prove one live flow in which a user-signed testnet HBAR deposit is
       Mirror-verified, credits exactly once, and funds one policy-approved 0G
       operation from treasury inventory while projection proceeds independently.
-  - [ ] Deploy the reviewed commerce, prepaid-credit, and projection migrations
+  - [x] Deploy the reviewed commerce, prepaid-credit, and projection migrations
         to the production Supabase database with tracked versions and a
         post-deployment schema probe.
   - [ ] Expose authenticated server endpoints for creating a bound deposit

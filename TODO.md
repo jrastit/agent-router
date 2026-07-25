@@ -127,45 +127,45 @@ milestone.
 
 ## Phase 6A — prepaid HBAR deposits and authoritative application credit
 
-- [ ] Define a versioned user-deposit intent binding the application user,
+- [x] Define a versioned user-deposit intent binding the application user,
       Hedera payer, treasury recipient, network, exact tinybar amount, memo,
       expiry, and idempotency key.
-- [ ] Change the customer-payment path from an app-operator-funded transfer to
+- [x] Change the customer-payment path from an app-operator-funded transfer to
       a user-signed HBAR deposit into the application treasury; keep the
       existing operator-funded transfer only as an explicitly labeled provider
       settlement or guarded demo path.
-- [ ] Add durable deposit states for intent created, submitted, consensus
+- [x] Add durable deposit states for intent created, submitted, consensus
       confirmed, mirror pending, mirror verified, credited, reconciliation
       required, and rejected. Track projection and Graph-indexing states
       separately so monitoring lag cannot change the authoritative balance.
-- [ ] Verify each native HBAR deposit through Hedera Mirror Node before it can
+- [x] Verify each native HBAR deposit through Hedera Mirror Node before it can
       increase spendable application balance; validate payer, recipient,
       network, exact tinybars, memo, transaction type, success, timestamp, and
       intent binding.
-- [ ] Consume each Hedera transaction proof exactly once and atomically credit
+- [x] Consume each Hedera transaction proof exactly once and atomically credit
       the user's integer-tinybar ledger balance with an immutable journal entry.
-- [ ] Define a minimal `DepositObserved` monitoring payload containing only the
+- [x] Define a minimal `DepositObserved` monitoring payload containing only the
       deposit ID, user pseudonymous identifier or hash, Hedera transaction hash,
       exact tinybars, verification timestamp, and version; never publish
       personal data, credentials, or raw application requests.
 - [x] Select Base Sepolia as the Graph-compatible destination for the
       relayer-mediated monitoring projection described in Phase 6B. This
       destination is not payment truth and is not yet deployed.
-- [ ] Enqueue the monitoring projection only after the deposit is independently
+- [x] Enqueue the monitoring projection only after the deposit is independently
       Mirror-verified and atomically credited; projection failure or Graph lag
       must not reverse, duplicate, or delay authoritative application credit.
-- [ ] Add a reconciliation path for Mirror-verified deposits that cannot be
+- [x] Add a reconciliation path for Mirror-verified deposits that cannot be
       credited, and separately reconcile credited deposits whose projection or
       indexed monitoring entity is missing, stale, or mismatched.
-- [ ] Reserve user credit atomically before 0G execution, debit the actual
+- [x] Reserve user credit atomically before 0G execution, debit the actual
       charge once, and release any unused reservation without submitting a
       second HBAR transfer.
-- [ ] Fund 0G Compute from the application's separately pre-funded 0G Payment
+- [x] Fund 0G Compute from the application's separately pre-funded 0G Payment
       Layer balance and record the exchange-rate snapshot and treasury liability
       used for the HBAR-denominated user charge.
-- [ ] Keep HBAR-to-0G treasury rebalancing outside the request transaction;
+- [x] Keep HBAR-to-0G treasury rebalancing outside the request transaction;
       document that no native or automatic HBAR-to-0G conversion is claimed.
-- [ ] Expose user-visible pending, credited, reserved, spent, refunded, and
+- [x] Expose user-visible pending, credited, reserved, spent, refunded, and
       reconciliation balances, with separate Hedera, projection, and Graph
       monitoring evidence.
 - [ ] Test duplicate deposits, Mirror lag, mismatched proofs, atomic-credit

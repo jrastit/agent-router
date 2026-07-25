@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { formatTinybarsAsHbar } from "../lib/deposit/balance";
 import type { UserSigningRequest } from "../lib/deposit/workflow";
 import {
   createDepositWalletReview,
@@ -14,6 +15,7 @@ type IntentResponse = {
   intent: { id: string };
   signingRequest: UserSigningRequest;
 };
+type BalanceResponse = { balanceTinybars: string };
 
 const walletProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 
@@ -21,6 +23,7 @@ export default function DepositWalletPanel() {
   const [accessToken, setAccessToken] = useState("");
   const [amountTinybars, setAmountTinybars] = useState("100000");
   const [wallet, setWallet] = useState<WalletConnection>();
+  const [balanceTinybars, setBalanceTinybars] = useState<string>();
   const [review, setReview] = useState<DepositWalletReview>();
   const [depositId, setDepositId] = useState("");
   const [transactionId, setTransactionId] = useState("");
@@ -37,6 +40,15 @@ export default function DepositWalletPanel() {
         await import("../lib/deposit/wallet-client");
       const connection = await connectHederaWallet(walletProjectId);
       setWallet(connection);
+      setBalanceTinybars(undefined);
+      const balanceResponse = await fetch(
+        `/api/hedera/accounts/${encodeURIComponent(connection.accountId)}/balance`,
+        { cache: "no-store" },
+      );
+      if (balanceResponse.ok) {
+        const balance = (await balanceResponse.json()) as BalanceResponse;
+        setBalanceTinybars(balance.balanceTinybars);
+      }
       setMessage(`Connected to ${connection.accountId} on Hedera Testnet.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Wallet failed");
@@ -132,14 +144,18 @@ export default function DepositWalletPanel() {
 
       <div className="wallet-controls">
         <label>
-          Application session token
+          Signed-in user access token
           <input
             type="password"
             autoComplete="off"
             value={accessToken}
             onChange={(event) => setAccessToken(event.target.value)}
-            placeholder="Authenticated Supabase bearer token"
+            placeholder="Short-lived session token (not a Supabase API key)"
           />
+          <small>
+            Identifies who receives the deposit credit. Never enter a Supabase
+            service-role or project key.
+          </small>
         </label>
         <label>
           Deposit amount (tinybars)
@@ -149,6 +165,11 @@ export default function DepositWalletPanel() {
             value={amountTinybars}
             onChange={(event) => setAmountTinybars(event.target.value)}
           />
+          <small>
+            {wallet && balanceTinybars !== undefined
+              ? `Available: ${formatTinybarsAsHbar(balanceTinybars)} HBAR (${balanceTinybars} tinybars). Leave enough for the network fee.`
+              : "Connect a wallet to see its testnet HBAR balance."}
+          </small>
         </label>
         <button
           type="button"

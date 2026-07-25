@@ -678,6 +678,14 @@ h4 {
   margin: 0;
 }
 
+.wallet-controls small {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
 .wallet-controls input {
   display: block;
   margin-top: 9px;

@@ -35,6 +35,7 @@ node --env-file=.env -e '
     "-f", "supabase/migrations/20260725000700_store_hedera_audit_evidence.sql",
     "-f", "supabase/migrations/20260725000800_add_prepaid_hbar_credit.sql",
     "-f", "supabase/migrations/20260725000900_persist_hedera_projection.sql",
+    "-f", "supabase/migrations/20260725001000_harden_hedera_projection_recovery.sql",
     "-f", "supabase/tests/phase2.sql",
     "-f", "supabase/tests/phase4.sql",
     "-f", "supabase/tests/phase6.sql",

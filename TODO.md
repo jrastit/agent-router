@@ -272,7 +272,7 @@ application credit.
 - [ ] Show separate Hedera source, EVM projection, and Graph indexing states in
       the UI, with links to both chain explorers and an explicit relayer-trust
       label.
-- [ ] Test duplicate Mirror responses, cursor restart, event reordering,
+- [x] Test duplicate Mirror responses, cursor restart, event reordering,
       relayer crash recovery, destination replay, nonce races, EVM reorg,
       Subgraph lag, malformed payloads, and mismatched Hedera source identity.
 - [ ] Prove one live testnet flow from Hedera event through Mirror verification,

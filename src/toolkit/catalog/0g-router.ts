@@ -24,7 +24,9 @@ const providerListSchema = z.object({
       z.object({
         address: z.string().regex(/^0x[0-9a-fA-F]{40}$/),
         latency: z.number().int().nonnegative().optional(),
-        verifiability: z.string().min(1),
+        verifiability: z.string().min(1).optional(),
+        trust_mode: z.string().min(1).optional(),
+        tee_attested: z.boolean().optional(),
       }),
     )
     .default([]),
@@ -77,30 +79,39 @@ export class ZgRouterCatalogAdapter implements ModelCatalogAdapter {
         return providers
           .filter(
             (provider) =>
-              query.privacy === "public" || provider.verifiability === "TeeML",
+              query.privacy === "public" ||
+              (provider.verifiability === "TeeML" &&
+                provider.trust_mode === "private" &&
+                provider.tee_attested === true),
           )
-          .map((provider) => ({
-            id: `0g:${model.id}:${provider.address.toLowerCase()}`,
-            providerAddress: provider.address,
-            model: model.id,
-            capability: "chat",
-            privacy:
-              provider.verifiability === "TeeML"
+          .map((provider) => {
+            const confidential =
+              provider.verifiability === "TeeML" &&
+              provider.trust_mode === "private" &&
+              provider.tee_attested === true;
+            return {
+              id: `0g:${model.id}:${provider.address.toLowerCase()}`,
+              providerAddress: provider.address,
+              model: model.id,
+              capability: "chat",
+              privacy: confidential
                 ? ("confidential" as const)
                 : ("public" as const),
-            expectedLatencyMs: provider.latency ?? 0,
-            price: {
-              currency: "0G",
-              inputAmount: model.pricing.prompt,
-              outputAmount: model.pricing.completion,
-              unit: "neuron-per-token",
-            },
-            provenance: {
-              network: "0g-mainnet",
-              endpoint: this.baseUrl,
-              verification: provider.verifiability,
-            },
-          }));
+              expectedLatencyMs: provider.latency ?? 0,
+              price: {
+                currency: "0G",
+                inputAmount: model.pricing.prompt,
+                outputAmount: model.pricing.completion,
+                unit: "neuron-per-token",
+              },
+              provenance: {
+                network: "0g-mainnet",
+                endpoint: this.baseUrl,
+                verification:
+                  provider.verifiability ?? provider.trust_mode ?? "standard",
+              },
+            };
+          });
       }),
     );
 

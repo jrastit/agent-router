@@ -29,13 +29,15 @@ describe("ZgRouterCatalogAdapter", () => {
                 address: address("1"),
                 latency: 1200,
                 verifiability: "TeeML",
+                trust_mode: "private",
+                tee_attested: true,
               },
             ]
           : [
               {
                 address: address("2"),
                 latency: 800,
-                verifiability: "TeeTLS",
+                trust_mode: "standard",
               },
             ],
       });

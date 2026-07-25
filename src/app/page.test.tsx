@@ -15,6 +15,11 @@ describe("mid-hackathon demo", () => {
     expect(html).toContain("hashscan.io/testnet/transaction");
     expect(html).toContain("Discover");
     expect(html).toContain("Record");
+    expect(html).toContain("Restored persisted timeline");
+    expect(html).toContain("Delivered result");
+    expect(html).toContain("Total spend");
+    expect(html).toContain("Remaining budget");
+    expect(html).toContain("Open receipt");
     expect(html).toContain("Prepaid application credit");
     expect(html).toContain("Credited");
     expect(html).toContain("Reserved");

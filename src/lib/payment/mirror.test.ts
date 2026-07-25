@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Challenge } from "../domain/schema";
 import {
   assertUnusedProof,
+  fetchAndVerifyMirrorProof,
   normalizeTransactionId,
   verifyMirrorResponse,
 } from "./mirror";
@@ -76,5 +77,44 @@ describe("Mirror Node proof verification", () => {
     expect(() =>
       assertUnusedProof(transactionId, new Set([transactionId])),
     ).toThrow(/already used/);
+  });
+
+  it("keeps indexing delay recoverable and reports outages stably", async () => {
+    await expect(
+      fetchAndVerifyMirrorProof(
+        "https://mirror.example",
+        transactionId,
+        challenge,
+        async () => new Response(null, { status: 404 }),
+      ),
+    ).rejects.toMatchObject({ code: "MIRROR_PENDING" });
+    await expect(
+      fetchAndVerifyMirrorProof(
+        "https://mirror.example",
+        transactionId,
+        challenge,
+        async () => new Response(null, { status: 504 }),
+      ),
+    ).rejects.toMatchObject({ code: "MIRROR_UNAVAILABLE" });
+  });
+
+  it("turns a mirror timeout into a stable recoverable error", async () => {
+    await expect(
+      fetchAndVerifyMirrorProof(
+        "https://mirror.example",
+        transactionId,
+        challenge,
+        (_url, init) =>
+          new Promise((_resolve, reject) => {
+            init?.signal?.addEventListener("abort", () =>
+              reject(new DOMException("aborted", "AbortError")),
+            );
+          }),
+        1,
+      ),
+    ).rejects.toMatchObject({
+      code: "MIRROR_UNAVAILABLE",
+      message: "mirror node verification timed out",
+    });
   });
 });

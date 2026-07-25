@@ -164,6 +164,19 @@ describe("commerce domain schemas", () => {
     ).toThrow();
   });
 
+  it("rejects an invalid completed delivery", () => {
+    expect(() =>
+      deliverySchema.parse({
+        id: "del_invalid",
+        jobId: "job_1",
+        providerId: "prv_1",
+        status: "completed",
+        artifactReference: "",
+        completedAt: "not-a-timestamp",
+      }),
+    ).toThrow();
+  });
+
   it("uses exact fiat and HBAR representations", () => {
     expect(
       fiatMoneySchema.parse({ currency: "EUR", amountMinor: 125 }),

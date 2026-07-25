@@ -21,6 +21,7 @@
     "graph:build": "graph build graph/app-events/subgraph.yaml",
     "graph:projection:codegen": "graph codegen -o graph/hedera-projection/generated graph/hedera-projection/subgraph.yaml",
     "graph:projection:build": "graph build graph/hedera-projection/subgraph.yaml",
+    "verify:client-secrets": "node --env-file-if-exists=.env scripts/verify-client-bundle-secrets.mjs",
     "validate:supabase": "bash scripts/validate-supabase.sh",
     "validate:hedera-subgraph": "node --env-file=.env scripts/validate-hedera-subgraph.mjs",
     "deploy:hedera-app-events": "node --env-file=.env scripts/deploy-hedera-app-events.mjs --confirm-live-testnet",
@@ -36,7 +37,7 @@
     "deploy:0g-provenance": "node --env-file=.env scripts/deploy-0g-provenance.mjs --confirm-live-testnet",
     "deploy:0g-provenance:mainnet": "node --env-file=.env scripts/deploy-0g-provenance.mjs --confirm-live-mainnet",
     "verify:0g-provenance": "node --env-file=.env scripts/verify-0g-provenance.mjs",
-    "validate": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run graph:build && npm run graph:projection:build && npm run build"
+    "validate": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run graph:build && npm run graph:projection:build && npm run build && npm run verify:client-secrets"
   },
   "dependencies": {
     "@0gfoundation/0g-storage-ts-sdk": "^1.2.10",

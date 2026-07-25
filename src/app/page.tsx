@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { evaluateProjectionAuthority } from "../lib/projection/status";
+import WorkflowTimeline from "./workflow-timeline";
 
 const providers = [
   {
@@ -19,15 +20,6 @@ const providers = [
     privacy: "confidential",
     account: "0.0.6101002",
   },
-] as const;
-
-const timeline = [
-  ["Discover", "2 fixture-backed offers normalized"],
-  ["Compare", "Budget and privacy policy enforced"],
-  ["Select", "Lowest eligible exact quote selected"],
-  ["Pay", "0.001 HBAR reached testnet consensus"],
-  ["Verify", "Mirror Node matched the bound transfer"],
-  ["Record", "Decision and receipt anchored to HCS"],
 ] as const;
 
 const transactionUrl =
@@ -334,40 +326,7 @@ export default function Home() {
               Inspect HCS topic on HashScan ↗
             </a>
           </div>
-          <ol className="timeline">
-            {timeline.map(([title, detail], index) => (
-              <li key={title}>
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <div>
-                  <strong>{title}</strong>
-                  <p>{detail}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
-          <div className="receipt">
-            <div>
-              <span>Settlement receipt</span>
-              <strong>Mirror verified</strong>
-            </div>
-            <dl>
-              <div>
-                <dt>Network</dt>
-                <dd>Hedera Testnet</dd>
-              </div>
-              <div>
-                <dt>Amount</dt>
-                <dd>100,000 tinybars</dd>
-              </div>
-              <div>
-                <dt>HCS topic</dt>
-                <dd>0.0.9676520 · sequences 2–3</dd>
-              </div>
-            </dl>
-            <a href={transactionUrl} target="_blank" rel="noreferrer">
-              Open receipt ↗
-            </a>
-          </div>
+          <WorkflowTimeline />
         </div>
       </section>
     </main>

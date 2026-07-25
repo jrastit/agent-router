@@ -445,7 +445,8 @@ h4 {
 }
 .timeline {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px 0;
   margin: 55px 0;
   padding: 0;
   list-style: none;
@@ -487,6 +488,81 @@ h4 {
   color: #667870;
   line-height: 1.45;
 }
+.timeline time {
+  display: block;
+  margin-top: 8px;
+  color: #81928d;
+  font-size: 9px;
+}
+.stream-state,
+.delivery {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 15px 18px;
+  border: 1px solid #b6c9c0;
+  border-radius: 10px;
+  background: #f3f7f4;
+  color: #38554a;
+  font-size: 12px;
+  font-weight: 700;
+}
+.stream-state::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: #238260;
+}
+.stream-state span {
+  margin-right: auto;
+}
+.stream-state button {
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #238260;
+  color: #fff;
+  cursor: pointer;
+}
+.stream-state.terminal {
+  border-color: #d49b88;
+  color: #8d3826;
+}
+.empty-state {
+  margin: 30px 0;
+  padding: 30px;
+  border: 1px dashed #9caea6;
+  border-radius: 12px;
+  color: #52655e;
+  text-align: center;
+}
+.delivery {
+  align-items: flex-start;
+  margin: 0 0 18px;
+  padding: 22px;
+  background: #dce9e2;
+}
+.delivery span,
+.delivery strong {
+  display: block;
+  min-width: 170px;
+}
+.delivery span {
+  margin-bottom: 7px;
+  color: #52655e;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+.delivery p {
+  max-width: 670px;
+  margin: 0;
+  color: #38554a;
+  font-size: 13px;
+  line-height: 1.55;
+}
 .receipt {
   gap: 30px;
   padding: 27px 30px;
@@ -498,6 +574,12 @@ h4 {
   display: block;
   margin-top: 8px;
   color: #5ce6ad;
+}
+.receipt small {
+  display: block;
+  margin-top: 6px;
+  color: #82938d;
+  font-size: 9px;
 }
 .receipt dl {
   display: flex;
@@ -537,7 +619,8 @@ h4 {
     border-bottom: 1px solid #263a35;
   }
   .section-heading,
-  .receipt {
+  .receipt,
+  .delivery {
     align-items: flex-start;
     flex-direction: column;
     gap: 18px;

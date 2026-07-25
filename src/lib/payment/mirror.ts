@@ -39,6 +39,7 @@ export class MirrorVerificationError extends Error {
   constructor(
     readonly code:
       | "MIRROR_PENDING"
+      | "MIRROR_UNAVAILABLE"
       | "PAYMENT_CHALLENGE_MISMATCH"
       | "PAYMENT_PROOF_REPLAYED",
     message: string,
@@ -111,13 +112,32 @@ export async function fetchAndVerifyMirrorProof(
   transactionId: string,
   challenge: Challenge,
   fetcher: typeof fetch = fetch,
+  timeoutMs = 10_000,
 ): Promise<VerifiedMirrorProof> {
-  const response = await fetcher(
-    `${mirrorNodeUrl.replace(/\/$/, "")}/api/v1/transactions/${encodeURIComponent(
-      transactionId,
-    )}`,
-    { headers: { accept: "application/json" }, cache: "no-store" },
-  );
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let response: Response;
+  try {
+    response = await fetcher(
+      `${mirrorNodeUrl.replace(/\/$/, "")}/api/v1/transactions/${encodeURIComponent(
+        transactionId,
+      )}`,
+      {
+        headers: { accept: "application/json" },
+        cache: "no-store",
+        signal: controller.signal,
+      },
+    );
+  } catch {
+    throw new MirrorVerificationError(
+      "MIRROR_UNAVAILABLE",
+      controller.signal.aborted
+        ? "mirror node verification timed out"
+        : "mirror node verification request failed",
+    );
+  } finally {
+    clearTimeout(timer);
+  }
   if (response.status === 404) {
     throw new MirrorVerificationError(
       "MIRROR_PENDING",
@@ -125,7 +145,10 @@ export async function fetchAndVerifyMirrorProof(
     );
   }
   if (!response.ok) {
-    throw new Error(`mirror node returned HTTP ${response.status}`);
+    throw new MirrorVerificationError(
+      "MIRROR_UNAVAILABLE",
+      `mirror node returned HTTP ${response.status}`,
+    );
   }
   return verifyMirrorResponse(await response.json(), challenge, transactionId);
 }

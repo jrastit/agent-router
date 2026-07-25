@@ -36,9 +36,11 @@ describe("production Graph Node Compose configuration", () => {
     expect(compose.volumes).toHaveProperty("graph-ipfs-data");
   });
 
-  it("keeps databases private and all Graph Node ports on loopback", () => {
+  it("keeps databases private and all operator ports on loopback", () => {
     expect(compose.services.postgres.ports).toBeUndefined();
-    expect(compose.services.ipfs.ports).toBeUndefined();
+    expect(compose.services.ipfs.ports).toEqual([
+      "127.0.0.1:${GRAPH_IPFS_API_PORT:-5001}:5001",
+    ]);
     expect(compose.services["graph-node"].ports).toHaveLength(5);
     expect(
       compose.services["graph-node"].ports?.every((port) =>

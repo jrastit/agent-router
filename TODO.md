@@ -241,7 +241,7 @@ application credit.
 - [x] Require independent Mirror Node verification before enqueueing an event
       for projection; never infer payment validity from the destination EVM
       event or Subgraph entity.
-- [ ] Persist the verified source event, projection attempt, destination
+- [x] Persist the verified source event, projection attempt, destination
       transaction, retry state, and terminal failure before broadcasting
       progress.
 - [x] Implement a minimal destination EVM contract that rejects duplicate

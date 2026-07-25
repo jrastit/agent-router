@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ -f .env ]]; then
+if [[ -f .env && -z "${SUPABASE_DB_URL:-}" ]]; then
   set -a
   # shellcheck disable=SC1091
   source .env
@@ -34,10 +34,12 @@ node --env-file=.env -e '
     "-f", "supabase/migrations/20260725000600_verify_hedera_payments.sql",
     "-f", "supabase/migrations/20260725000700_store_hedera_audit_evidence.sql",
     "-f", "supabase/migrations/20260725000800_add_prepaid_hbar_credit.sql",
+    "-f", "supabase/migrations/20260725000900_persist_hedera_projection.sql",
     "-f", "supabase/tests/phase2.sql",
     "-f", "supabase/tests/phase4.sql",
     "-f", "supabase/tests/phase6.sql",
-    "-f", "supabase/tests/phase6a.sql", "-c", "rollback",
+    "-f", "supabase/tests/phase6a.sql",
+    "-f", "supabase/tests/phase6b.sql", "-c", "rollback",
   ];
   const result = spawnSync(psql, args, { stdio: "inherit" });
   process.exit(result.status ?? 1);

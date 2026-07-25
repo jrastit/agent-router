@@ -1,22 +1,17 @@
 import "server-only";
 
-import {
-  AccountId,
-  Client,
-  Hbar,
-  PrivateKey,
-  TransferTransaction,
-} from "@hashgraph/sdk";
+import { AccountId, Client, Hbar, TransferTransaction } from "@hashgraph/sdk";
 
 import { serverEnv } from "../env/server";
 import type { HederaTransferTransport } from "./hedera";
+import { parseHederaPrivateKey } from "./private-key";
 
 export function createHederaTransferTransport(): HederaTransferTransport {
   if (!serverEnv.HEDERA_OPERATOR_ID || !serverEnv.HEDERA_OPERATOR_KEY) {
     throw new Error("Hedera operator credentials are not configured");
   }
   const operatorId = AccountId.fromString(serverEnv.HEDERA_OPERATOR_ID);
-  const operatorKey = PrivateKey.fromString(serverEnv.HEDERA_OPERATOR_KEY);
+  const operatorKey = parseHederaPrivateKey(serverEnv.HEDERA_OPERATOR_KEY);
   const client = Client.forTestnet().setOperator(operatorId, operatorKey);
 
   return {

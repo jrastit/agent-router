@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "validate:supabase": "bash scripts/validate-supabase.sh",
+    "demo:hedera": "node --env-file=.env scripts/run-hedera-phase6.mjs --confirm-live-testnet",
     "validate": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {

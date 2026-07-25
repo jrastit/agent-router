@@ -3,13 +3,13 @@ import "server-only";
 import {
   AccountId,
   Client,
-  PrivateKey,
   TopicId,
   TopicMessageSubmitTransaction,
 } from "@hashgraph/sdk";
 
 import { serverEnv } from "../env/server";
 import { encodeAuditAnchor, type AuditAnchor } from "./audit";
+import { parseHederaPrivateKey } from "./private-key";
 
 export type PublishedAuditAnchor = {
   transactionId: string;
@@ -29,7 +29,7 @@ export async function publishAuditAnchor(
   }
   const client = Client.forTestnet().setOperator(
     AccountId.fromString(serverEnv.HEDERA_OPERATOR_ID),
-    PrivateKey.fromString(serverEnv.HEDERA_OPERATOR_KEY),
+    parseHederaPrivateKey(serverEnv.HEDERA_OPERATOR_KEY),
   );
   try {
     const response = await new TopicMessageSubmitTransaction()

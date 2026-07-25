@@ -91,6 +91,21 @@ export interface StorageEvidenceAdapter {
   persist(request: StorageEvidenceRequest): Promise<StorageEvidenceReference>;
 }
 
+export type ProvenanceAnchorRequest = Readonly<{
+  receiptHash: string;
+  network: string;
+  idempotencyKey: string;
+}>;
+
+export type ProvenanceAnchorResult = Readonly<{
+  transactionHash: string;
+  blockNumber: string;
+}>;
+
+export interface ProvenanceAnchor {
+  anchor(request: ProvenanceAnchorRequest): Promise<ProvenanceAnchorResult>;
+}
+
 export type ProvenanceVerificationRequest = Readonly<{
   receiptHash: string;
   network: string;

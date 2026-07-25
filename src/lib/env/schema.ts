@@ -58,6 +58,11 @@ export const serverEnvSchema = z
       .default("https://indexer-storage-testnet-turbo.0g.ai"),
     ZG_STORAGE_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),
     ZG_STORAGE_PRIVATE_KEY: optionalSecret,
+    ZG_CHAIN_RPC_URL: z.string().url().default("https://evmrpc-testnet.0g.ai"),
+    ZG_CHAIN_NETWORK: z.string().min(1).default("0g-galileo-testnet"),
+    ZG_CHAIN_CONTRACT_ADDRESS: optionalSecret,
+    ZG_CHAIN_TIMEOUT_MS: z.coerce.number().int().positive().default(60_000),
+    ZG_CHAIN_PRIVATE_KEY: optionalSecret,
     SUPABASE_URL: z.string().url().optional(),
     SUPABASE_SERVICE_ROLE_KEY: optionalSecret,
   })
@@ -91,6 +96,11 @@ export const serverOnlyEnvKeys = [
   "ZG_STORAGE_INDEXER_URL",
   "ZG_STORAGE_TIMEOUT_MS",
   "ZG_STORAGE_PRIVATE_KEY",
+  "ZG_CHAIN_RPC_URL",
+  "ZG_CHAIN_NETWORK",
+  "ZG_CHAIN_CONTRACT_ADDRESS",
+  "ZG_CHAIN_TIMEOUT_MS",
+  "ZG_CHAIN_PRIVATE_KEY",
   "SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
 ] as const;

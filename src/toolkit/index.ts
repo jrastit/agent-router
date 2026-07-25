@@ -8,6 +8,9 @@ export type {
   ModelCatalogQuery,
   ModelRoute,
   ModelRouter,
+  ProvenanceAnchor,
+  ProvenanceAnchorRequest,
+  ProvenanceAnchorResult,
   ProvenanceVerificationRequest,
   ProvenanceVerificationResult,
   ProvenanceVerifier,
@@ -31,3 +34,17 @@ export {
   type ZgStorageFailureCode,
   type ZgStorageUploader,
 } from "./storage/0g";
+export {
+  canonicalizeRoutingReceipt,
+  createRoutingReceipt,
+  hashRoutingReceipt,
+  type RoutingReceipt,
+  type RoutingReceiptInput,
+} from "./receipt";
+export {
+  ZgChainProvenanceAdapter,
+  ZgProvenanceError,
+  zgProvenanceFailureCodes,
+  type ZgChainClient,
+  type ZgProvenanceFailureCode,
+} from "./provenance/0g-chain";

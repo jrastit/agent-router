@@ -107,7 +107,7 @@ engine independently validates.
 - [x] Define a versioned canonical routing receipt binding request and policy
       hashes, candidates, selected model, quote, execution evidence, storage
       reference, optional caller/Agentic ID, network, and timestamp.
-- [ ] Deploy a minimal 0G Chain provenance contract and record its network,
+- [x] Deploy a minimal 0G Chain provenance contract and record its network,
       address, deployment transaction, verified source, and deployment command.
 - [ ] Anchor the receipt hash on 0G Chain and independently verify it.
 - [x] Prevent prompts, confidential artifacts, secrets, and raw outputs from

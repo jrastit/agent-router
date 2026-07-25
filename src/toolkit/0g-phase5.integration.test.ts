@@ -61,5 +61,15 @@ describe.skipIf(!liveEnabled)("live 0G Phase 5 path", () => {
 
     expect(result.verification.verified).toBe(true);
     expect(result.receipt.storage.rootHash).toMatch(/^0x[0-9a-f]{64}$/);
+    process.stdout.write(
+      `0G_PHASE5_EVIDENCE=${JSON.stringify({
+        storageRootHash: result.receipt.storage.rootHash,
+        storageTransactionHash: result.receipt.storage.transactionHash,
+        receiptHash: result.receiptHash,
+        anchorTransactionHash: result.anchor.transactionHash,
+        anchorBlockNumber: result.anchor.blockNumber,
+        verified: result.verification.verified,
+      })}\n`,
+    );
   }, 240_000);
 });

@@ -74,7 +74,24 @@ chain ID, address, deployment transaction, block, compiler, and EVM target.
 Record that JSON below after deployment and add the contract address to
 `ZG_CHAIN_CONTRACT_ADDRESS`.
 
-Deployment evidence: **not yet recorded.**
+Deployment evidence:
+
+- network: `0g-aristotle-mainnet` (chain ID `16661`);
+- contract: `0xdAc715Cbfa81F60B0e05C0D9E8c96eC21948Cd93`;
+- deployment transaction:
+  `0x7c6652ec7906b00a470082955eac2bf7055a7adc06cd75a396c33941a8c10caf`;
+- deployment block: `39766437`;
+- gas used: `160907`;
+- fee: `0.000643628001126349 0G`; and
+- committed source: [`contracts/ZgRoutingProvenance.sol`](../contracts/ZgRoutingProvenance.sol).
+
+Run `npm run verify:0g-provenance` to compile the committed source with the
+recorded compiler settings and compare its runtime bytecode with the deployed
+contract. Verified on 2026-07-25 with Solidity
+`0.8.36+commit.8a079791`, source SHA-256
+`c8525f6b32c2339f596d0294d2780ad85942da0f1ff624b7daf59871b8940510`,
+and matching runtime bytecode Keccak-256
+`0x3519076428bbcef0bb0bc799f1c49a8c11f41ef608739b4da7817bf9086fc086`.
 
 ### Aristotle mainnet
 

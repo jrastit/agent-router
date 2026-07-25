@@ -21,6 +21,7 @@
     "demo:hedera": "node --env-file=.env scripts/run-hedera-phase6.mjs --confirm-live-testnet",
     "deploy:0g-provenance": "node --env-file=.env scripts/deploy-0g-provenance.mjs --confirm-live-testnet",
     "deploy:0g-provenance:mainnet": "node --env-file=.env scripts/deploy-0g-provenance.mjs --confirm-live-mainnet",
+    "verify:0g-provenance": "node --env-file=.env scripts/verify-0g-provenance.mjs",
     "validate": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build"
   },
   "dependencies": {

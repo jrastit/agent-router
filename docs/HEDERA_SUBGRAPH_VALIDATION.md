@@ -16,8 +16,11 @@ network. The deployed Subgraph must expose this entity/query contract:
 type AppEvent @entity(immutable: true) {
   id: Bytes!
   kind: String!
-  subject: String!
+  subject: Bytes!
   payloadDigest: Bytes!
+  version: Int!
+  publisher: Bytes!
+  contractAddress: Bytes!
   transactionHash: Bytes!
   blockNumber: BigInt!
   blockTimestamp: BigInt!

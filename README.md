@@ -305,6 +305,10 @@ Use it only with disposable testnet accounts and a deliberately trivial
 `HEDERA_TRANSFER_HBAR`. The verified Phase 6 run and public HashScan evidence
 are recorded in [Hedera testnet evidence](docs/HEDERA_TESTNET_EVIDENCE.md).
 
+The optional self-hosted app-event history path is documented in the
+[Hedera Subgraph production runbook](docs/HEDERA_SUBGRAPH_PRODUCTION.md). It is
+a monitoring projection and never replaces Mirror Node payment verification.
+
 ## Vision
 
 AgentRouter is infrastructure for agents that must discover, negotiate,

@@ -39,7 +39,7 @@ function compile(): CompiledContract {
 }
 
 describe("HederaEventAnchor", () => {
-  it("compiles for Base Sepolia", () => {
+  it("compiles for the local EVM destination", () => {
     expect(compile().evm.bytecode.object).not.toBe("");
   });
 

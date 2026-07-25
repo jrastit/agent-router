@@ -224,10 +224,10 @@ The direct Hedera Graph Node experiment is not a production dependency. The
 configured Hedera JSON-RPC Relay can advertise transactions in a block while
 returning `null` for their receipts, so Graph Node correctly refuses to build a
 partial canonical block. Do not patch Graph Node to skip those transactions.
-Project only independently Mirror-verified Hedera events onto Base Sepolia
-instead. The projection is asynchronous monitoring evidence: Mirror verification
-and atomic Postgres proof consumption remain the only path to application
-credit.
+Project only independently Mirror-verified Hedera events onto the local Ganache
+EVM instead. The projection is asynchronous monitoring evidence: Mirror
+verification and atomic Postgres proof consumption remain the only path to
+application credit.
 
 - [x] Define a versioned `HederaEventAnchor` payload binding the Hedera network,
       source contract or HCS topic, transaction hash, consensus timestamp,
@@ -253,7 +253,7 @@ credit.
 - [ ] Submit destination transactions with bounded retries, fee limits, and one
       idempotent state machine; a timeout or ambiguous receipt must reconcile
       the original transaction rather than submit a new logical anchor.
-- [ ] Deploy the projection contract to Base Sepolia and record its chain ID,
+- [ ] Deploy the projection contract to local Ganache and record its chain ID,
       address, deployment transaction, start block, source verification, and
       relayer address.
 - [ ] Implement and deploy a Subgraph for `HederaEventAnchored`, retaining the
@@ -282,10 +282,10 @@ credit.
       funding, cursor backup, contract pause/rotation, and recovery procedures.
 
 Exit criterion: one independently Mirror-verified and durably credited Hedera
-event is projected exactly once to Base Sepolia and indexed by The Graph, while
-the receipt and UI clearly preserve Hedera and Postgres as the authoritative
-payment and balance records and identify the destination event as a
-relayer-mediated monitoring projection.
+event is projected exactly once to local Ganache and indexed by the local Graph
+Node, while the receipt and UI clearly preserve Hedera and Postgres as the
+authoritative payment and balance records and identify the destination event as
+a relayer-mediated monitoring projection.
 
 ## Phase 7 — product experience
 

@@ -317,7 +317,8 @@ legend {
 }
 
 textarea,
-.wallet-controls input {
+.wallet-controls input,
+.supabase-auth input {
   width: 100%;
   color: var(--text);
   border: 1px solid var(--line);
@@ -335,7 +336,8 @@ textarea {
 }
 
 textarea:focus,
-.wallet-controls input:focus {
+.wallet-controls input:focus,
+.supabase-auth input:focus {
   border-color: var(--cyan);
 }
 
@@ -668,10 +670,28 @@ h4 {
 
 .wallet-controls {
   display: grid;
-  grid-template-columns: 1.5fr 1fr auto auto;
+  grid-template-columns: 1fr auto auto;
   gap: 12px;
   align-items: end;
   margin-top: 24px;
+}
+
+.supabase-auth {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: 12px;
+  align-items: end;
+  margin-top: 24px;
+}
+
+.supabase-auth label {
+  margin: 0;
+}
+
+.supabase-auth input {
+  display: block;
+  margin-top: 9px;
+  padding: 11px 12px;
 }
 
 .wallet-controls label {
@@ -693,6 +713,7 @@ h4 {
 }
 
 .wallet-controls button,
+.supabase-auth button,
 .wallet-review button {
   min-height: 41px;
   padding: 10px 14px;
@@ -705,6 +726,7 @@ h4 {
 }
 
 .wallet-controls button:disabled,
+.supabase-auth button:disabled,
 .wallet-review button:disabled {
   cursor: not-allowed;
   opacity: 0.42;
@@ -988,6 +1010,7 @@ h4 {
   }
 
   .evidence-planes,
+  .supabase-auth,
   .wallet-controls,
   .wallet-review dl {
     grid-template-columns: 1fr;

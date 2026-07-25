@@ -9,6 +9,8 @@ export const publicEnvSchema = z
   .object({
     NEXT_PUBLIC_APP_NAME: z.string().min(1).default("AgentRouter"),
     NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: optionalSecret,
+    NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: optionalSecret,
   })
   .strict();
 

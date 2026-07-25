@@ -36,6 +36,12 @@ export const serverEnvSchema = z
       .default(
         "https://graph.router.fexhu.com/subgraphs/name/agent-router/hedera-projection",
       ),
+    HEDERA_ECONOMIC_PUBLIC_QUERY_URL: z
+      .string()
+      .url()
+      .default(
+        "https://graph.router.fexhu.com/subgraphs/name/agent-router/app-events",
+      ),
     DISCOVERY_SOURCE: z.enum(["fixture", "the-graph"]).default("fixture"),
     GRAPH_ENDPOINT: z.string().url().optional(),
     GRAPH_DEPLOYMENT_ID: z.string().min(1).optional(),
@@ -91,6 +97,7 @@ export const serverOnlyEnvKeys = [
   "HEDERA_MIRROR_NODE_URL",
   "DEPOSIT_PSEUDONYM_SALT",
   "HEDERA_PROJECTION_PUBLIC_QUERY_URL",
+  "HEDERA_ECONOMIC_PUBLIC_QUERY_URL",
   "DISCOVERY_SOURCE",
   "GRAPH_ENDPOINT",
   "GRAPH_DEPLOYMENT_ID",

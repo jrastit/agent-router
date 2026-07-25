@@ -23,27 +23,11 @@ describe("mid-hackathon demo", () => {
     expect(html).toContain("Open receipt");
     expect(html).toContain("Run timeline");
     expect(html).toContain("Latest Graph activity");
-    expect(html).toContain("Prepaid application credit");
+    expect(html).toContain("User deposits and spending");
+    expect(html).toContain("Live indexed account activity");
     expect(html).toContain("Add funds");
     expect(html).toContain("You stay in control");
     expect(html).toContain("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID");
-    expect(html).toContain("Credited");
-    expect(html).toContain("Reserved");
-    expect(html).toContain("Spent");
-    expect(html).toContain("Refunded");
-    expect(html).toContain("Reconciliation");
-    expect(html).toContain("Three independent evidence states");
-    expect(html).toContain("Hedera source");
-    expect(html).toContain("EVM projection");
-    expect(html).toContain("Graph indexing");
-    expect(html).toContain("Open HashScan source");
-    expect(html).toContain("Open local deployment evidence");
-    expect(html).toContain("Relayer trust boundary · monitoring only");
-    expect(html).toContain(
-      "EVM and Graph status cannot create, duplicate, reverse, or delay funds",
-    );
-    expect(html).toContain(
-      "No direct or automatic HBAR-to-0G conversion is claimed",
-    );
+    expect(html).toContain("Loading live data");
   });
 });

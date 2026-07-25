@@ -1,0 +1,46 @@
+<VirtualHost *:80>
+    ServerName graph.router.fexhu.com
+
+    RewriteEngine On
+    RewriteRule ^ https://graph.router.fexhu.com%{REQUEST_URI} [R=308,L]
+</VirtualHost>
+
+<IfModule mod_ssl.c>
+    <VirtualHost *:443>
+        ServerName graph.router.fexhu.com
+
+        SSLEngine on
+        SSLCertificateFile /etc/letsencrypt/live/graph.router.fexhu.com/fullchain.pem
+        SSLCertificateKeyFile /etc/letsencrypt/live/graph.router.fexhu.com/privkey.pem
+        SSLProtocol -all +TLSv1.2 +TLSv1.3
+
+        ProxyRequests Off
+        ProxyPreserveHost On
+        ProxyTimeout 30
+        LimitRequestBody 65536
+        RequestReadTimeout header=10-20,MinRate=500 body=10,MinRate=500
+
+        RewriteEngine On
+        RewriteCond %{REQUEST_URI} !^/subgraphs/name/agent-router/app-events$
+        RewriteRule ^ - [R=404,L]
+
+        ProxyPassMatch "^/subgraphs/name/agent-router/app-events$" \
+            "http://127.0.0.1:8000/subgraphs/name/agent-router/app-events"
+
+        <LocationMatch "^/subgraphs/name/agent-router/app-events$">
+            <Limit POST>
+                Require all granted
+            </Limit>
+            <LimitExcept POST>
+                Require all denied
+            </LimitExcept>
+        </LocationMatch>
+
+        Header always set Strict-Transport-Security "max-age=31536000"
+        Header always set X-Content-Type-Options "nosniff"
+        Header always set Referrer-Policy "no-referrer"
+
+        ErrorLog ${APACHE_LOG_DIR}/graph-router-error.log
+        CustomLog ${APACHE_LOG_DIR}/graph-router-access.log combined
+    </VirtualHost>
+</IfModule>

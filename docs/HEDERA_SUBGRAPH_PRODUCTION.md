@@ -24,8 +24,10 @@ bind to server loopback only.
 
 Only the exact app-event GraphQL route should be published through an
 authenticated or rate-limited TLS reverse proxy. The supplied
-`nginx-app-events.conf.example` is a starting point; replace its hostname and
-certificate paths.
+`nginx-app-events.conf.example` is a generic starting point. An Apache
+alternative preconfigured for `graph.router.fexhu.com` is available at
+`apache-app-events.conf.example`. Confirm the hostname and certificate paths
+before installing either template.
 
 ## Linux prerequisites
 
@@ -99,6 +101,19 @@ certificate, and expose only:
 ```text
 POST https://graph.example.com/subgraphs/name/agent-router/app-events
 ```
+
+For Apache, enable `headers`, `proxy`, `proxy_http`, `reqtimeout`, `rewrite`,
+and `ssl`, install `apache-app-events.conf.example` as a site, issue the
+certificate named in the template, and expose only:
+
+```text
+POST https://graph.router.fexhu.com/subgraphs/name/agent-router/app-events
+```
+
+The template redirects HTTP to HTTPS, rejects non-POST methods and unrelated
+paths, limits request bodies, and proxies only to the loopback query port.
+Use an upstream firewall or a request-aware Apache security module when public
+traffic requires per-client request-rate limiting.
 
 ## 3. Deploy the Hedera event journal
 

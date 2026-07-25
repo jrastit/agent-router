@@ -10,6 +10,7 @@ describe("mid-hackathon demo", () => {
     expect(html).toContain("Route a summarization task");
     expect(html).toContain("Scaleway Generative APIs");
     expect(html).toContain("Private Compute Provider");
+    expect(html).toContain("LLM instances");
     expect(html).toContain("no new payment is submitted");
     expect(html).toContain("Mirror verified");
     expect(html).toContain("hashscan.io/testnet/transaction");

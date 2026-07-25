@@ -104,14 +104,17 @@ POST https://graph.example.com/subgraphs/name/agent-router/app-events
 
 For Apache, enable `headers`, `proxy`, `proxy_http`, `reqtimeout`, `rewrite`,
 and `ssl`, install `apache-app-events.conf.example` as a site, issue the
-certificate named in the template, and expose only:
+certificate named in the template, and expose only these POST query routes:
 
 ```text
 POST https://graph.router.fexhu.com/subgraphs/name/agent-router/app-events
+POST https://graph.router.fexhu.com/subgraphs/name/agent-router/hedera-projection
 ```
 
 The template redirects HTTP to HTTPS, rejects non-POST methods and unrelated
-paths, limits request bodies, and proxies only to the loopback query port.
+paths, limits request bodies, and uses exact proxy mappings to the loopback
+query port. Graph administration, indexing status, metrics, IPFS, and WebSocket
+ports remain private.
 Use an upstream firewall or a request-aware Apache security module when public
 traffic requires per-client request-rate limiting.
 

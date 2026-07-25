@@ -22,12 +22,20 @@
 
         RewriteEngine On
         RewriteCond %{REQUEST_URI} !^/subgraphs/name/agent-router/app-events$
+        RewriteCond %{REQUEST_URI} !^/subgraphs/name/agent-router/hedera-projection$
         RewriteRule ^ - [R=404,L]
 
-        ProxyPassMatch "^/subgraphs/name/agent-router/app-events$" \
+        ProxyPass "/subgraphs/name/agent-router/app-events" \
+            "http://127.0.0.1:8000/subgraphs/name/agent-router/app-events"
+        ProxyPassReverse "/subgraphs/name/agent-router/app-events" \
             "http://127.0.0.1:8000/subgraphs/name/agent-router/app-events"
 
-        <LocationMatch "^/subgraphs/name/agent-router/app-events$">
+        ProxyPass "/subgraphs/name/agent-router/hedera-projection" \
+            "http://127.0.0.1:8000/subgraphs/name/agent-router/hedera-projection"
+        ProxyPassReverse "/subgraphs/name/agent-router/hedera-projection" \
+            "http://127.0.0.1:8000/subgraphs/name/agent-router/hedera-projection"
+
+        <LocationMatch "^/subgraphs/name/agent-router/(app-events|hedera-projection)$">
             <Limit POST>
                 Require all granted
             </Limit>

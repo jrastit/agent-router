@@ -18,13 +18,26 @@ describe("public Graph Node Apache template", () => {
     );
   });
 
-  it("exposes only the app-events POST query over a loopback upstream", () => {
+  it("exposes only the project POST queries over a loopback upstream", () => {
     expect(config).toContain(
-      'ProxyPassMatch "^/subgraphs/name/agent-router/app-events$"',
+      'ProxyPass "/subgraphs/name/agent-router/app-events"',
     );
     expect(config).toContain(
       '"http://127.0.0.1:8000/subgraphs/name/agent-router/app-events"',
     );
+    expect(config).toContain(
+      'ProxyPassReverse "/subgraphs/name/agent-router/app-events"',
+    );
+    expect(config).toContain(
+      'ProxyPass "/subgraphs/name/agent-router/hedera-projection"',
+    );
+    expect(config).toContain(
+      '"http://127.0.0.1:8000/subgraphs/name/agent-router/hedera-projection"',
+    );
+    expect(config).toContain(
+      'ProxyPassReverse "/subgraphs/name/agent-router/hedera-projection"',
+    );
+    expect(config).not.toContain("ProxyPassMatch");
     expect(config).toContain("<Limit POST>");
     expect(config).toContain("<LimitExcept POST>");
     expect(config).toContain("Require all denied");

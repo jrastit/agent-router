@@ -77,6 +77,28 @@ describe("HederaAppEventJournal", () => {
     ]);
   });
 
+  it("exposes exact economic lifecycle events in integer tinybars", () => {
+    const event = compile().abi.find(
+      ({ type, name }) => type === "event" && name === "EconomicEventRecorded",
+    );
+
+    expect(
+      event?.inputs?.map(({ name, type, indexed }) => ({
+        name,
+        type,
+        indexed,
+      })),
+    ).toEqual([
+      { indexed: true, name: "eventId", type: "bytes32" },
+      { indexed: true, name: "subject", type: "bytes32" },
+      { indexed: true, name: "eventType", type: "uint8" },
+      { indexed: false, name: "amountTinybars", type: "int64" },
+      { indexed: false, name: "referenceId", type: "bytes32" },
+      { indexed: false, name: "payloadDigest", type: "bytes32" },
+      { indexed: false, name: "version", type: "uint16" },
+    ]);
+  });
+
   it("commits replay, publisher, and public-data guards in source", () => {
     const source = readFileSync(
       resolve("contracts", "HederaAppEventJournal.sol"),
@@ -86,6 +108,8 @@ describe("HederaAppEventJournal", () => {
     expect(source).toContain("msg.sender != publisher");
     expect(source).toContain("recorded[eventId]");
     expect(source).toContain("bytes(kind).length > 64");
+    expect(source).toContain("eventType > RECONCILIATION_OPENED");
+    expect(source).toContain("amountTinybars == 0");
     expect(source).not.toMatch(/privateKey|prompt|result|credential/i);
   });
 });

@@ -44,6 +44,48 @@ export class AppEventRecorded__Params {
   }
 }
 
+export class EconomicEventRecorded extends ethereum.Event {
+  get params(): EconomicEventRecorded__Params {
+    return new EconomicEventRecorded__Params(this);
+  }
+}
+
+export class EconomicEventRecorded__Params {
+  _event: EconomicEventRecorded;
+
+  constructor(event: EconomicEventRecorded) {
+    this._event = event;
+  }
+
+  get eventId(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+
+  get subject(): Bytes {
+    return this._event.parameters[1].value.toBytes();
+  }
+
+  get eventType(): i32 {
+    return this._event.parameters[2].value.toI32();
+  }
+
+  get amountTinybars(): BigInt {
+    return this._event.parameters[3].value.toBigInt();
+  }
+
+  get referenceId(): Bytes {
+    return this._event.parameters[4].value.toBytes();
+  }
+
+  get payloadDigest(): Bytes {
+    return this._event.parameters[5].value.toBytes();
+  }
+
+  get version(): i32 {
+    return this._event.parameters[6].value.toI32();
+  }
+}
+
 export class HederaAppEventJournal extends ethereum.SmartContract {
   static bind(address: Address): HederaAppEventJournal {
     return new HederaAppEventJournal("HederaAppEventJournal", address);

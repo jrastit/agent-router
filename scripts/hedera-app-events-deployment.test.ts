@@ -20,6 +20,20 @@ describe("Hedera app-event deployment guards", () => {
     expect(script).not.toMatch(/HEDERA_APP_EVENT_(PROMPT|RESULT|CREDENTIAL)/);
   });
 
+  it("keeps economic lifecycle amounts exact and bounded", () => {
+    const script = readFileSync(
+      "scripts/emit-hedera-economic-event.mjs",
+      "utf8",
+    );
+
+    expect(script).toContain("BigInt(config.amountTinybars)");
+    expect(script).toContain("amountTinybars < -(2n ** 63n)");
+    expect(script).toContain(
+      "eventType: process.env.HEDERA_ECONOMIC_EVENT_TYPE",
+    );
+    expect(script).not.toMatch(/parseFloat|Number\(config\.amountTinybars\)/);
+  });
+
   it("restricts Graph administration and IPFS uploads to loopback", () => {
     const script = readFileSync("scripts/deploy-hedera-subgraph.mjs", "utf8");
 

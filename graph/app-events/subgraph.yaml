@@ -17,10 +17,13 @@ dataSources:
       language: wasm/assemblyscript
       entities:
         - AppEvent
+        - EconomicEvent
       abis:
         - name: HederaAppEventJournal
           file: ./abis/HederaAppEventJournal.json
       eventHandlers:
         - event: AppEventRecorded(indexed bytes32,indexed bytes32,string,bytes32,uint16)
           handler: handleAppEventRecorded
+        - event: EconomicEventRecorded(indexed bytes32,indexed bytes32,indexed uint8,int64,bytes32,bytes32,uint16)
+          handler: handleEconomicEventRecorded
       file: ./src/mapping.ts

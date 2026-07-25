@@ -217,6 +217,55 @@ query RecentAppEvents {
 Use cursor-based filters rather than increasing `first` without bounds in an
 operator UI.
 
+### Economic lifecycle history
+
+The same contract and Subgraph expose exact integer-tinybar economic events:
+
+| Type | Meaning               |
+| ---- | --------------------- |
+| `1`  | Deposit observed      |
+| `2`  | Balance credited      |
+| `3`  | Balance debited       |
+| `4`  | Credit reserved       |
+| `5`  | 0G execution charged  |
+| `6`  | Balance refunded      |
+| `7`  | Reconciliation opened |
+
+Set `HEDERA_ECONOMIC_EVENT_TYPE`, an exact signed
+`HEDERA_ECONOMIC_AMOUNT_TINYBARS`, and a hashed
+`HEDERA_ECONOMIC_REFERENCE_ID`, then run:
+
+```sh
+npm run emit:hedera-economic-event
+```
+
+`referenceId` binds the monitoring event to the relevant payment, reservation,
+execution, refund, or reconciliation record without publishing that private
+record. Event types 1–6 require a nonzero amount; reconciliation may use zero
+when no balance delta is known.
+
+Query history by pseudonymous subject:
+
+```graphql
+query EconomicHistory($subject: Bytes!) {
+  economicEvents(
+    first: 100
+    where: { subject: $subject }
+    orderBy: blockTimestamp
+    orderDirection: asc
+  ) {
+    id
+    eventType
+    amountTinybars
+    referenceId
+    payloadDigest
+    transactionHash
+    blockNumber
+    blockTimestamp
+  }
+}
+```
+
 ## Operations
 
 ### Backups

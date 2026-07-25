@@ -32,6 +32,11 @@ The manifest should use an event handler for the application event contract.
 Deploy it to the self-hosted Graph Node with Graph CLI, then submit one known
 event on Hedera Testnet and retain its EVM transaction hash.
 
+The production schema also exposes immutable `EconomicEvent` history for
+deposit observation, credit, debit, reservation, execution charge, refund, and
+reconciliation events. Amounts are signed `BigInt` tinybar values; identifiers
+and references are public digests.
+
 ## Run the proof
 
 Set the following server-only values in `.env`:

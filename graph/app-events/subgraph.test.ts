@@ -16,20 +16,18 @@ describe("Hedera app-event Subgraph", () => {
         }),
       ),
     );
-    const compiledEvent = output.contracts[file].HederaAppEventJournal.abi.find(
-      ({ type, name }: { type: string; name?: string }) =>
-        type === "event" && name === "AppEventRecorded",
+    const compiledEvents = output.contracts[
+      file
+    ].HederaAppEventJournal.abi.filter(
+      ({ type }: { type: string }) => type === "event",
     );
     const committedAbi = JSON.parse(
       readFileSync("graph/app-events/abis/HederaAppEventJournal.json", "utf8"),
     );
 
     expect(
-      committedAbi.find(
-        ({ type, name }: { type: string; name?: string }) =>
-          type === "event" && name === "AppEventRecorded",
-      ),
-    ).toEqual(compiledEvent);
+      committedAbi.filter(({ type }: { type: string }) => type === "event"),
+    ).toEqual(compiledEvents);
   });
 
   it("derives receipt-correlation fields from chain context", () => {
@@ -41,6 +39,10 @@ describe("Hedera app-event Subgraph", () => {
     expect(mapping).toContain("event.transaction.hash");
     expect(mapping).toContain("event.block.number");
     expect(mapping).toContain("event.logIndex");
+    expect(mapping).toContain(
+      "const entity = new EconomicEvent(event.params.eventId)",
+    );
+    expect(mapping).toContain("event.params.amountTinybars");
   });
 
   it("ships deployment placeholders instead of claiming live evidence", () => {

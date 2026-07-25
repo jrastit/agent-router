@@ -15,3 +15,23 @@ type AppEvent @entity(immutable: true) {
   blockTimestamp: BigInt!
   logIndex: BigInt!
 }
+
+"""
+An exact integer-tinybar lifecycle event for deposits, credits, debits,
+reservations, execution charges, refunds, and reconciliation.
+"""
+type EconomicEvent @entity(immutable: true) {
+  id: Bytes!
+  subject: Bytes!
+  eventType: Int!
+  amountTinybars: BigInt!
+  referenceId: Bytes!
+  payloadDigest: Bytes!
+  version: Int!
+  publisher: Bytes!
+  contractAddress: Bytes!
+  transactionHash: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  logIndex: BigInt!
+}

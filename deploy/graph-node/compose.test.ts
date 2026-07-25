@@ -26,6 +26,10 @@ const compose = parse(
 const projection = parse(
   readFileSync("deploy/graph-node/compose.projection.yaml", "utf8"),
 ) as ComposeFile;
+const combinedConfig = readFileSync(
+  "deploy/graph-node/graph-node.combined.toml",
+  "utf8",
+);
 
 describe("production Graph Node Compose configuration", () => {
   it("pins every container image and persists state", () => {
@@ -64,6 +68,12 @@ describe("production Graph Node Compose configuration", () => {
       "hedera-testnet:${HEDERA_EVM_RPC_URL:?",
     );
     expect(
+      compose.services["graph-node"].environment?.GRAPH_POSTGRES_PASSWORD,
+    ).toContain("GRAPH_POSTGRES_PASSWORD:?");
+    expect(
+      compose.services["graph-node"].environment?.HEDERA_EVM_RPC_URL,
+    ).toContain("HEDERA_EVM_RPC_URL:?");
+    expect(
       Object.values(compose.services).every(
         ({ healthcheck }) => healthcheck !== undefined,
       ),
@@ -98,10 +108,18 @@ describe("local projection Graph Node override", () => {
     );
   });
 
-  it("uses Compose service discovery for the exact Graph network name", () => {
-    expect(projection.services["graph-node"].environment?.ethereum).toBe(
-      "ganache-local:http://ganache:8545",
+  it("registers both projection and Hedera networks through a mounted config", () => {
+    expect(
+      projection.services["graph-node"].environment?.GRAPH_NODE_CONFIG,
+    ).toBe("/etc/graph-node/graph-node.toml");
+    expect(projection.services["graph-node"].volumes).toContain(
+      "./graph-node.combined.toml:/etc/graph-node/graph-node.toml:ro",
     );
+    expect(combinedConfig).toContain("[chains.ganache-local]");
+    expect(combinedConfig).toContain('url = "http://ganache:8545"');
+    expect(combinedConfig).toContain("[chains.hedera-testnet]");
+    expect(combinedConfig).toContain('url = "${HEDERA_EVM_RPC_URL}"');
+    expect(combinedConfig).toContain('features = ["no_eip1898"]');
     expect(
       projection.services["graph-node"].depends_on?.ganache.condition,
     ).toBe("service_started");

@@ -30,4 +30,6 @@ services:
       ipfs:
         condition: service_healthy
     environment:
-      ethereum: ganache-local:http://ganache:8545
+      GRAPH_NODE_CONFIG: /etc/graph-node/graph-node.toml
+    volumes:
+      - ./graph-node.combined.toml:/etc/graph-node/graph-node.toml:ro

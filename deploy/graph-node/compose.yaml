@@ -59,6 +59,8 @@ services:
       postgres_db: graph-node
       ipfs: ipfs:5001
       ethereum: hedera-testnet:${HEDERA_EVM_RPC_URL:?set HEDERA_EVM_RPC_URL}
+      GRAPH_POSTGRES_PASSWORD: ${GRAPH_POSTGRES_PASSWORD:?set GRAPH_POSTGRES_PASSWORD}
+      HEDERA_EVM_RPC_URL: ${HEDERA_EVM_RPC_URL:?set HEDERA_EVM_RPC_URL}
       GRAPH_LOG: ${GRAPH_LOG:-info}
       GRAPH_ALLOW_NON_DETERMINISTIC_FULLTEXT_SEARCH: "false"
     ports:

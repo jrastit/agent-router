@@ -1,0 +1,25 @@
+[store]
+
+[store.primary]
+connection = "postgresql://graph-node:${GRAPH_POSTGRES_PASSWORD}@postgres:5432/graph-node"
+pool_size = 10
+
+[deployment]
+
+[[deployment.rule]]
+indexers = ["default"]
+
+[chains]
+ingestor = "default"
+
+[chains.ganache-local]
+shard = "primary"
+provider = [
+  { label = "ganache-local", url = "http://ganache:8545", features = [] },
+]
+
+[chains.hedera-testnet]
+shard = "primary"
+provider = [
+  { label = "hedera-testnet", url = "${HEDERA_EVM_RPC_URL}", features = ["no_eip1898"] },
+]

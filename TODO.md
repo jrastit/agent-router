@@ -105,21 +105,25 @@ eligibility and routes execution through the verified 0G path.
 
 ## Phase 6 — Hedera payment and audit
 
-- [ ] Implement the versioned `402` payment-challenge contract.
-- [ ] Validate network, asset, amount, recipient, memo, quote, and expiry before
+- [x] Implement the versioned `402` payment-challenge contract.
+- [x] Validate network, asset, amount, recipient, memo, quote, and expiry before
       payment.
-- [ ] Reserve budget before submitting a transfer.
-- [ ] Submit one HBAR payment on Hedera testnet.
-- [ ] Expose separate submitted, consensus-confirmed, and mirror-verified states.
-- [ ] Verify payer, recipient, amount, memo, timestamp, type, and success through
+- [x] Reserve budget before submitting a transfer.
+- [x] Submit one HBAR payment on Hedera testnet.
+- [x] Expose separate submitted, consensus-confirmed, and mirror-verified states.
+- [x] Verify payer, recipient, amount, memo, timestamp, type, and success through
       the mirror node.
-- [ ] Reject expired, mismatched, and duplicate proofs.
-- [ ] Reconcile ambiguous outcomes without automatically paying twice.
-- [ ] Publish compact non-sensitive decision and receipt anchors to HCS.
-- [ ] Store HashScan transaction and topic links.
+- [x] Reject expired, mismatched, and duplicate proofs.
+- [x] Reconcile ambiguous outcomes without automatically paying twice.
+- [x] Publish compact non-sensitive decision and receipt anchors to HCS.
+- [x] Store HashScan transaction and topic links.
 
 Exit criterion: one live paid execution produces a durable receipt, public
 transaction evidence, an HCS audit anchor, and no replay path.
+
+Phase 6 settlement/audit is verified. Phase 5 was skipped by request, so the
+live proof uses the settlement smoke flow rather than a paid provider execution;
+the combined exit criterion remains dependent on Phase 5.
 
 ## Phase 7 — product experience
 

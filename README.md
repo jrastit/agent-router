@@ -9,10 +9,10 @@ Rather than focusing only on how an agent pays, AgentRouter focuses on how an
 agent decides to spend.
 
 > Project status: the application scaffold, deterministic commerce-domain
-> routing, durable storage, fixture/live provider-discovery adapters, and the
-> Scaleway-backed typed planner are implemented. A live Graph deployment,
-> execution, and payment integrations remain planned until linked to a commit
-> and marked complete in [TODO.md](TODO.md).
+> routing, durable storage, fixture/live provider-discovery adapters, the
+> Scaleway-backed typed planner, and Hedera testnet settlement/audit are
+> implemented. A live Graph deployment and execution integration remain
+> planned until linked to a commit and marked complete in [TODO.md](TODO.md).
 
 ## Problem
 
@@ -250,6 +250,24 @@ npm run validate:supabase
 Apply reviewed migrations with `supabase db push --db-url "$SUPABASE_DB_URL"`.
 The atomic functions require an authenticated Supabase user; privileged
 credentials remain server-only.
+
+### Hedera settlement and audit
+
+Phase 6 implements a versioned `402` challenge, exact tinybar validation,
+budget-before-transfer ordering, one-shot testnet settlement, separate
+submitted/consensus/mirror states, strict Mirror Node proof checks, replay
+rejection, and compact HCS decision/receipt anchors. Ambiguous outcomes enter
+reconciliation and never trigger another transfer automatically.
+
+The guarded live command creates a new testnet payment on every invocation:
+
+```sh
+npm run demo:hedera
+```
+
+Use it only with disposable testnet accounts and a deliberately trivial
+`HEDERA_TRANSFER_HBAR`. The verified Phase 6 run and public HashScan evidence
+are recorded in [Hedera testnet evidence](docs/HEDERA_TESTNET_EVIDENCE.md).
 
 ## Vision
 

@@ -47,36 +47,18 @@ decision without changing application code.
 Exit criterion: a job can resume after process restart without losing state or
 double-spending its reservation.
 
-## Phase 3 — provider discovery with The Graph
+## Phase 3 — provider discovery adapters
 
 - [x] Define the discovery-adapter interface and normalized provider model.
 - [x] Add deterministic fixtures for at least two providers.
 - [x] Define the provider registry/subgraph schema.
-- [ ] Implement a minimal provider-registry contract on a Graph-supported EVM
-      testnet, initially Base Sepolia.
-- [ ] Emit provider registration and update events containing capability,
-      execution network, Hedera settlement account, exact price, privacy, and
-      active status.
-- [ ] Deploy the registry and record its chain ID, contract address, deployment
-      transaction, and verified source.
-- [ ] Register three demo offers: 0G Private, 0G Standard, and Mock Public
-      Provider.
-- [ ] Implement and deploy a Subgraph that indexes only the supported-chain
-      provider-registry events.
-- [ ] Record the Subgraph deployment ID, endpoint, indexed network, start block,
-      and reproducible deployment commands.
 - [x] Query The Graph through the discovery adapter.
 - [x] Handle empty, stale, malformed, and unavailable discovery results.
 - [x] Show discovery provenance in discovery results for decision evidence.
-- [ ] Prove that a live registry price or active-status update changes planner
-      eligibility, ranking, or selection.
-- [ ] Label Hedera Mirror Node verification and 0G execution as independent
-      integrations; never claim that the Subgraph indexes either system.
 
-Exit criterion: the same planner flow works with fixtures and live indexed
-providers from the supported-chain registry; the demo clearly identifies which
-source is active and keeps discovery, execution, and settlement provenance
-separate.
+Exit criterion: the planner works with deterministic fixtures and the
+implemented Graph discovery adapter. Live Graph work is limited to Hedera
+monitoring in Phase 6A.
 
 ## Phase 4 — planner and decision evidence
 

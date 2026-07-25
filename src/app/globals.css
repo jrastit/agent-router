@@ -668,6 +668,26 @@ h4 {
   font-size: 12px;
 }
 
+.wallet-confirmation {
+  display: grid;
+  gap: 5px;
+  margin-top: 18px;
+  padding: 13px 15px;
+  color: #bcf8d1;
+  border: 1px solid #287e4b;
+  border-radius: 6px;
+  background: #142b20;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.wallet-confirmation strong {
+  color: #66e6a0;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .wallet-controls {
   display: grid;
   grid-template-columns: 1fr auto auto;

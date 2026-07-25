@@ -39,6 +39,7 @@ export default function DepositWalletPanel() {
   const [reviewed, setReviewed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [intentConfirmation, setIntentConfirmation] = useState("");
 
   async function authenticate(mode: SupabaseAuthMode) {
     if (!supabaseUrl || !supabasePublishableKey) return;
@@ -103,6 +104,7 @@ export default function DepositWalletPanel() {
     if (!wallet) return;
     setBusy(true);
     setMessage("Binding a deposit intent to the connected payer…");
+    setIntentConfirmation("");
     try {
       const response = await fetch("/api/deposits/intents", {
         method: "POST",
@@ -124,6 +126,9 @@ export default function DepositWalletPanel() {
       setReview(createDepositWalletReview(payload.signingRequest));
       setReviewed(false);
       setTransactionId("");
+      setIntentConfirmation(
+        `Deposit intent created successfully. Reference: ${payload.intent.id}.`,
+      );
       setMessage("Review every bound field before wallet approval.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Intent failed");
@@ -273,6 +278,16 @@ export default function DepositWalletPanel() {
           Create bound intent
         </button>
       </div>
+
+      {intentConfirmation && (
+        <div className="wallet-confirmation" role="status" aria-live="polite">
+          <strong>Intent confirmed</strong>
+          <span>{intentConfirmation}</span>
+          <span>
+            Review the bound fields below before approving the wallet.
+          </span>
+        </div>
+      )}
 
       {review && (
         <div className="wallet-review">

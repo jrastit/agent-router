@@ -36,7 +36,7 @@ describe("ZgRouterCatalogAdapter", () => {
           : [
               {
                 address: address("2"),
-                latency: 800,
+                latency: null,
                 trust_mode: "standard",
               },
             ],

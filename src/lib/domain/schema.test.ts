@@ -82,6 +82,8 @@ describe("commerce domain schemas", () => {
           offerId: offer.id,
           eligible: true,
           reasonCodes: [],
+          modelScore: 90,
+          rationale: "Strong fit",
           rank: 1,
         },
       ],

@@ -67,6 +67,8 @@ export const consideredProviderSchema = z.strictObject({
   offerId: id,
   eligible: z.boolean(),
   reasonCodes: z.array(z.string().min(1)),
+  modelScore: z.number().int().min(0).max(100),
+  rationale: z.string().min(1),
   rank: z.number().int().positive().optional(),
 });
 

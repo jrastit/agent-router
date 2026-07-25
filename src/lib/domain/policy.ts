@@ -21,7 +21,14 @@ export interface RoutingDecisionInput {
   requirement: Requirement;
   policy: Policy;
   candidates: readonly RoutingCandidate[];
+  assessments?: ReadonlyMap<string, CandidateAssessment>;
   evaluatedAt: string;
+}
+
+export interface CandidateAssessment {
+  offerId: string;
+  score: number;
+  rationale: string;
 }
 
 interface EvaluatedCandidate extends RoutingCandidate {
@@ -133,6 +140,10 @@ export function makeRoutingDecision(input: RoutingDecisionInput): Decision {
       offerId: candidate.offer.id,
       eligible: candidate.reasonCodes.length === 0,
       reasonCodes: candidate.reasonCodes,
+      modelScore: input.assessments?.get(candidate.offer.id)?.score ?? 0,
+      rationale:
+        input.assessments?.get(candidate.offer.id)?.rationale ??
+        "No model assessment was available; deterministic policy rules applied.",
       rank: ranks.get(candidate.offer.id),
     })),
     createdAt: input.evaluatedAt,

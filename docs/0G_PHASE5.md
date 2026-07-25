@@ -2,16 +2,27 @@
 
 ## Implemented stack
 
-| Layer                         | Exact integration                                                                                                     | Network and endpoint                                                                                                 | Evidence / guarantee                                                                                                                                                              |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Compute catalog and inference | Direct OpenAI-compatible 0G Compute Router HTTP API; no Compute SDK                                                   | 0G mainnet, `https://router-api.0g.ai/v1`                                                                            | Model, provider address, Router execution ID, catalog `TeeML` mode, and private trust-mode enforcement. This is Router evidence, not an independently downloaded TEE attestation. |
-| Storage                       | `@0gfoundation/0g-storage-ts-sdk` 1.2.10 and ethers 6.13.1; in-memory SDK `Blob`, `Indexer.upload`, finality required | Galileo testnet, EVM RPC `https://evmrpc-testnet.0g.ai`, Turbo indexer `https://indexer-storage-testnet-turbo.0g.ai` | SDK-returned Merkle root and upload transaction hash. Only explicitly classified `public-non-secret` evidence is accepted.                                                        |
-| Provenance                    | Solidity 0.8.36 contract, ethers 6.13.1, `evmVersion: cancun`                                                         | Galileo testnet EVM RPC `https://evmrpc-testnet.0g.ai`                                                               | Canonical receipt Keccak-256, finalized `ReceiptAnchored` event, matching configured contract address, and independent `anchoredAt` state read.                                   |
+| Layer                         | Exact integration                                                                                                     | Network and endpoint                                          | Evidence / guarantee                                                                                                                                                              |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Compute catalog and inference | Direct OpenAI-compatible 0G Compute Router HTTP API; no Compute SDK                                                   | 0G mainnet, `https://router-api.0g.ai/v1`                     | Model, provider address, Router execution ID, catalog `TeeML` mode, and private trust-mode enforcement. This is Router evidence, not an independently downloaded TEE attestation. |
+| Storage                       | `@0gfoundation/0g-storage-ts-sdk` 1.2.10 and ethers 6.13.1; in-memory SDK `Blob`, `Indexer.upload`, finality required | Galileo testnet or Aristotle mainnet; see network table below | SDK-returned Merkle root and upload transaction hash. Only explicitly classified `public-non-secret` evidence is accepted.                                                        |
+| Provenance                    | Solidity 0.8.36 contract, ethers 6.13.1, `evmVersion: cancun`                                                         | Galileo testnet or Aristotle mainnet                          | Canonical receipt Keccak-256, finalized `ReceiptAnchored` event, matching configured contract address, and independent `anchoredAt` state read.                                   |
 
 Official references:
 
 - [0G Storage TypeScript SDK](https://github.com/0glabs/0g-ts-sdk)
 - [0G documentation](https://docs.0g.ai/)
+
+| Storage network   | Chain ID | EVM RPC                        | Turbo indexer                                 |
+| ----------------- | -------: | ------------------------------ | --------------------------------------------- |
+| Galileo testnet   |  `16602` | `https://evmrpc-testnet.0g.ai` | `https://indexer-storage-testnet-turbo.0g.ai` |
+| Aristotle mainnet |  `16661` | `https://evmrpc.0g.ai`         | `https://indexer-storage-turbo.0g.ai`         |
+
+The Aristotle indexer was live-probed on 2026-07-25 through the official SDK's
+`getShardedNodes()` method and returned two shard groups. The upstream SDK
+README currently demonstrates only Galileo, so this repository records that
+runtime verification explicitly. The adapter checks the EVM chain ID before
+calling `Indexer.upload`.
 
 ## Canonical public receipt
 
@@ -76,11 +87,13 @@ npm run deploy:0g-provenance:mainnet
 ```
 
 The script refuses to sign unless the RPC reports Aristotle chain ID `16661`.
-This spends real 0G. Mainnet Chain support does not imply mainnet Storage
-support: the live end-to-end test must remain disabled until an authoritative
-mainnet Storage indexer is configured and documented.
+This spends real 0G. For an all-mainnet run, also configure
+`ZG_STORAGE_NETWORK=0g-aristotle-mainnet`,
+`ZG_STORAGE_EVM_RPC_URL=https://evmrpc.0g.ai`, and
+`ZG_STORAGE_INDEXER_URL=https://indexer-storage-turbo.0g.ai`.
 
-The live integration is deliberately guarded because it spends testnet funds:
+The live integration is deliberately guarded because it spends funds on the
+configured network:
 
 ```sh
 ZG_LIVE_TEST=true npm test -- --run src/toolkit/0g-phase5.integration.test.ts

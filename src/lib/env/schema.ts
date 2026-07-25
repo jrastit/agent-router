@@ -52,6 +52,7 @@ export const serverEnvSchema = z
       .url()
       .default("https://api.scaleway.ai/v1"),
     SCALEWAY_GENAI_MODEL: z.string().min(1).default("qwen3.5-27b"),
+    LLM_INSTANCE_ADMIN_TOKEN: optionalSecret,
     PLANNER_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
     G_API_KEY_PRIVATE: optionalSecret,
     G_API_KEY_MANAGEMENT: optionalSecret,
@@ -99,6 +100,7 @@ export const serverOnlyEnvKeys = [
   "SCALEWAY_GENAI_API_KEY",
   "SCALEWAY_GENAI_BASE_URL",
   "SCALEWAY_GENAI_MODEL",
+  "LLM_INSTANCE_ADMIN_TOKEN",
   "PLANNER_TIMEOUT_MS",
   "G_API_KEY_PRIVATE",
   "G_API_KEY_MANAGEMENT",

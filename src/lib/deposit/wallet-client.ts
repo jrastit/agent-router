@@ -28,6 +28,13 @@ type RestorableHederaProvider = {
   }): Promise<unknown>;
 };
 
+type ReconnectableHederaProvider = RestorableHederaProvider & {
+  disconnect(): Promise<void>;
+  getAccountAddresses(): string[];
+  once(event: "connect", listener: () => void): void;
+  removeListener(event: "connect", listener: () => void): void;
+};
+
 export async function initializeRestoredHederaProvider(
   provider: RestorableHederaProvider,
   optionalNamespaces: unknown,
@@ -35,6 +42,69 @@ export async function initializeRestoredHederaProvider(
   if (provider.session && !provider.nativeProvider) {
     await provider.connect({ optionalNamespaces, skipPairing: true });
   }
+}
+
+export async function ensureHederaProviderReady(input: {
+  provider: ReconnectableHederaProvider;
+  optionalNamespaces: unknown;
+  expectedAccountId: string;
+  openConnectView(): Promise<unknown>;
+  timeoutMs?: number;
+}): Promise<void> {
+  await initializeRestoredHederaProvider(
+    input.provider,
+    input.optionalNamespaces,
+  );
+  if (input.provider.nativeProvider) return;
+
+  if (input.provider.session) await input.provider.disconnect();
+
+  await new Promise<void>((resolve, reject) => {
+    const timeout = globalThis.setTimeout(() => {
+      input.provider.removeListener("connect", onConnect);
+      reject(
+        new Error(
+          "Reconnect your Hedera wallet to approve this deposit. No payment was submitted.",
+        ),
+      );
+    }, input.timeoutMs ?? 120_000);
+
+    const finish = (error?: unknown) => {
+      globalThis.clearTimeout(timeout);
+      input.provider.removeListener("connect", onConnect);
+      if (error) reject(error);
+      else resolve();
+    };
+    const onConnect = () => {
+      void (async () => {
+        try {
+          await initializeRestoredHederaProvider(
+            input.provider,
+            input.optionalNamespaces,
+          );
+          const accountId = input.provider
+            .getAccountAddresses()
+            .find((value) => /^\d+\.\d+\.\d+$/.test(value));
+          if (!input.provider.nativeProvider) {
+            throw new Error(
+              "The wallet connected without Hedera transaction support. Choose a Hedera-compatible wallet.",
+            );
+          }
+          if (accountId !== input.expectedAccountId) {
+            throw new Error(
+              "The reconnected wallet does not match the deposit payer.",
+            );
+          }
+          finish();
+        } catch (error) {
+          finish(error);
+        }
+      })();
+    };
+
+    input.provider.once("connect", onConnect);
+    void input.openConnectView().catch(finish);
+  });
 }
 
 async function getRuntime(projectId: string): Promise<WalletRuntime> {
@@ -103,10 +173,12 @@ function createWalletConnection(
     },
     async signAndExecute(review) {
       assertWalletCanSign(review, accountId);
-      await initializeRestoredHederaProvider(
-        runtime.provider,
-        runtime.optionalNamespaces,
-      );
+      await ensureHederaProviderReady({
+        provider: runtime.provider,
+        optionalNamespaces: runtime.optionalNamespaces,
+        expectedAccountId: accountId,
+        openConnectView: () => runtime.appKit.open({ view: "Connect" }),
+      });
       const [{ AccountId, Hbar, TransferTransaction }, sharedUtils] =
         await Promise.all([
           import("@hiero-ledger/sdk"),

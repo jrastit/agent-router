@@ -256,7 +256,7 @@ application credit.
 - [x] Deploy the projection contract to local Ganache and record its chain ID,
       address, deployment transaction, start block, source verification, and
       relayer address.
-- [ ] Implement and deploy a Subgraph for `HederaEventAnchored`, retaining the
+- [x] Implement and deploy a Subgraph for `HederaEventAnchored`, retaining the
       Hedera source identity and destination transaction provenance as
       separate fields.
 - [x] Add an idempotent projection and Graph-ingestion worker that correlates the

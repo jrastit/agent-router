@@ -5,9 +5,11 @@ import { describe, expect, it } from "vitest";
 
 interface ComposeService {
   image: string;
+  command?: string[];
   ports?: string[];
   environment?: Record<string, string>;
   volumes?: string[];
+  depends_on?: Record<string, { condition: string }>;
   healthcheck?: {
     test: string[];
   };
@@ -20,6 +22,9 @@ interface ComposeFile {
 
 const compose = parse(
   readFileSync("deploy/graph-node/compose.yaml", "utf8"),
+) as ComposeFile;
+const projection = parse(
+  readFileSync("deploy/graph-node/compose.projection.yaml", "utf8"),
 ) as ComposeFile;
 
 describe("production Graph Node Compose configuration", () => {
@@ -73,5 +78,32 @@ describe("production Graph Node Compose configuration", () => {
       "127.0.0.1",
       "8030",
     ]);
+  });
+});
+
+describe("local projection Graph Node override", () => {
+  it("pins a quiet disposable Ganache on loopback", () => {
+    expect(projection.services.ganache.image).toBe(
+      "trufflesuite/ganache:v7.9.2",
+    );
+    expect(projection.services.ganache.ports).toEqual([
+      "127.0.0.1:${LOCAL_EVM_PORT:-8545}:8545",
+    ]);
+    expect(projection.services.ganache.command).toEqual(
+      expect.arrayContaining([
+        "--chain.chainId=1337",
+        "--wallet.totalAccounts=3",
+        "--logging.quiet=true",
+      ]),
+    );
+  });
+
+  it("uses Compose service discovery for the exact Graph network name", () => {
+    expect(projection.services["graph-node"].environment?.ethereum).toBe(
+      "ganache-local:http://ganache:8545",
+    );
+    expect(
+      projection.services["graph-node"].depends_on?.ganache.condition,
+    ).toBe("service_started");
   });
 });

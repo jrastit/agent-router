@@ -6,7 +6,7 @@ import {
   createHederaSourceEventId,
   hederaEventAnchorSchema,
   type HederaEventAnchor,
-} from "./anchor";
+} from "./anchor.ts";
 
 const mirrorLinksSchema = z
   .object({ next: z.string().nullable().optional() })

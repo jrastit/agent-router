@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -9,6 +9,7 @@ const contractAddress = process.env.LOCAL_HEDERA_ANCHOR_CONTRACT_ADDRESS;
 const startBlockText = process.env.LOCAL_HEDERA_ANCHOR_START_BLOCK;
 const adminUrl = process.env.GRAPH_NODE_ADMIN_URL ?? "http://127.0.0.1:8020";
 const ipfsUrl = process.env.GRAPH_IPFS_URL ?? "http://127.0.0.1:5001";
+const queryUrl = process.env.GRAPH_NODE_QUERY_URL ?? "http://127.0.0.1:8000";
 const subgraphName =
   process.env.HEDERA_PROJECTION_SUBGRAPH_NAME ??
   "agent-router/hedera-projection";
@@ -48,6 +49,7 @@ if (!Number.isSafeInteger(startBlock)) {
 }
 const normalizedAdminUrl = requireLoopbackUrl("GRAPH_NODE_ADMIN_URL", adminUrl);
 const normalizedIpfsUrl = requireLoopbackUrl("GRAPH_IPFS_URL", ipfsUrl);
+const normalizedQueryUrl = requireLoopbackUrl("GRAPH_NODE_QUERY_URL", queryUrl);
 
 const createResponse = await fetch(normalizedAdminUrl, {
   method: "POST",
@@ -73,6 +75,8 @@ if (createError && !/already exists/i.test(createError)) {
 const temporaryDirectory = await mkdtemp(
   join(tmpdir(), "agent-router-projection-"),
 );
+const manifestPath = "graph/hedera-projection/subgraph.yaml";
+const originalManifest = await readFile(manifestPath);
 try {
   const networkFile = join(temporaryDirectory, "networks.json");
   await writeFile(
@@ -108,7 +112,7 @@ try {
       "--version-label",
       versionLabel,
       subgraphName,
-      "graph/hedera-projection/subgraph.yaml",
+      manifestPath,
     ],
     { stdio: "inherit" },
   );
@@ -116,6 +120,7 @@ try {
     throw new Error(`Graph CLI deployment exited with status ${result.status}`);
   }
 } finally {
+  await writeFile(manifestPath, originalManifest);
   await rm(temporaryDirectory, { recursive: true, force: true });
 }
 
@@ -126,7 +131,10 @@ process.stdout.write(
       network: "ganache-local",
       contractAddress,
       startBlock,
-      queryUrl: `http://127.0.0.1:8000/subgraphs/name/${subgraphName}`,
+      queryUrl: new URL(
+        `/subgraphs/name/${subgraphName}`,
+        normalizedQueryUrl,
+      ).toString(),
       versionLabel,
       authority:
         "relayer-mediated monitoring only; Hedera Mirror and Postgres remain authoritative",

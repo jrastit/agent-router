@@ -15,8 +15,8 @@ repository includes a loopback-only deployment command, durable relay
 persistence, a bounded transaction state machine, and a deployable local
 `HederaEventAnchored` Subgraph. The contract deployment path, correlating Graph
 ingestion, reconciliation, three-plane UI state, recovery semantics, and
-operations contract are implemented. A verified Graph deployment and the
-complete live replay proof remain open in `TODO.md`.
+operations contract are implemented. A verified Graph deployment is recorded
+below; the complete durably credited deposit proof remains open in `TODO.md`.
 
 ## Authority and trust boundary
 
@@ -60,11 +60,11 @@ source identity.
 
 ## Required next sequence
 
-1. Start and verify the private Linux Graph topology.
-2. Deploy the `HederaEventAnchored` Subgraph to that running Graph Node.
-3. Project one independently Mirror-verified testnet event.
-4. Retain the destination receipt, indexed entity, cursor, and replay-rejection
-   evidence described below.
+1. Bind one independently Mirror-verified source event to its credited deposit
+   and durable Postgres relay record.
+2. Exercise the same source event through the recorded local deployment path.
+3. Retain Postgres, destination, Graph, and replay-rejection evidence in one
+   correlated proof.
 
 ## Local deployment
 
@@ -223,32 +223,42 @@ npm run deploy:hedera-projection-subgraph:local
 
 ### Linux verification handoff
 
-The repository does not yet ship a verified Compose topology for the local
-projection. The attempted macOS/Colima topology reached Ganache and registered
-its chain in Graph Node, but Graph Node rejected the deployment with
-`no network ganache-local found on chain ethereum`. Do not treat a successful
-Subgraph build as deployment evidence.
+The repository ships a local override for the pinned private Graph stack. It
+places disposable Ganache and Graph Node on the same Compose network and uses
+the exact provider declaration `ganache-local:http://ganache:8545`. Ganache and
+every Graph operator port bind to host loopback only.
 
 Run the remaining verification on Linux with Docker Engine, Docker Compose v2,
 Node.js, and npm available. Keep Ganache, Graph Node, IPFS, and Postgres
 disposable and isolated from production data.
 
-1. Start Ganache and leave it running:
+1. Create a temporary Compose environment. Do not reuse a production Graph
+   database:
 
    ```sh
-   npm run evm:local
+   cp deploy/graph-node/graph-node.env.example deploy/graph-node/.env
+   chmod 600 deploy/graph-node/.env
    ```
 
-2. In another terminal, deploy a fresh anchor and retain its JSON output:
+   Set a disposable `GRAPH_POSTGRES_PASSWORD`. The required
+   `HEDERA_EVM_RPC_URL` value is ignored by the local override but must remain a
+   syntactically valid URL for the base Compose configuration.
+
+2. Start the isolated topology:
+
+   ```sh
+   docker compose \
+     -p agent-router-projection \
+     -f deploy/graph-node/compose.yaml \
+     -f deploy/graph-node/compose.projection.yaml \
+     --env-file deploy/graph-node/.env up -d
+   ```
+
+3. Deploy a fresh anchor and retain its JSON output:
 
    ```sh
    npm run deploy:hedera-anchor:local
    ```
-
-3. Start a private Graph Node configured with the exact provider argument
-   `ganache-local:http://127.0.0.1:8545`. If Graph Node runs in a container,
-   ensure that the URL resolves inside its network namespace; do not publish
-   Ganache beyond the Linux host.
 
 4. Export the fresh deployment values without committing them:
 
@@ -267,17 +277,98 @@ disposable and isolated from production data.
    ID, indexed head block, and at least one projected entity. Also retain Graph
    Node startup lines proving that `ganache-local` passed provider checks.
 
-If the registrar error repeats on Linux, capture the Graph Node version,
-provider startup logs, the `public.chains` row for `ganache-local`, and the
-exact deployment error before changing clients or versions. Hardhat is the
-next candidate local EVM, but it has not yet been implemented or verified
-here.
+   For an HCS source, configure the exact durable cursor immediately before the
+   one proof event and run the guarded correlation probe:
+
+   ```sh
+   export HEDERA_PROJECTION_TOPIC_ID=0.0...
+   export HEDERA_PROJECTION_CURSOR=1234567890.000000000
+   export HEDERA_PROJECTION_SUBGRAPH_QUERY_URL=http://127.0.0.1:8000/subgraphs/name/agent-router/hedera-projection
+   npm run demo:hedera-projection:local
+   ```
+
+   The command requires exactly one independently Mirror-verified event after
+   the cursor, submits it through the allowlisted relayer, proves destination
+   replay rejection, waits for its Graph entity, and rejects any source or
+   destination provenance mismatch.
+
+If the registrar error repeats, capture the Graph Node version, provider
+startup logs, the `public.chains` row for `ganache-local`, and the exact
+deployment error before changing clients or versions.
 
 The command validates the address and start block, rejects non-loopback admin
 or IPFS URLs, writes its generated network file with mode `0600`, removes the
 temporary directory, and reports the query URL and monitoring-only authority
 label. A successful `graph build` does not satisfy the deployment milestone;
 retain the actual deployment and indexed-entity evidence before checking it.
+
+Stop and remove the disposable topology without deleting unrelated Docker
+resources:
+
+```sh
+docker compose \
+  -p agent-router-projection \
+  -f deploy/graph-node/compose.yaml \
+  -f deploy/graph-node/compose.projection.yaml \
+  --env-file deploy/graph-node/.env down --volumes
+```
+
+If another private Graph stack already owns the default loopback ports, set
+`LOCAL_EVM_PORT`, `GRAPH_IPFS_API_PORT`, `GRAPH_QUERY_PORT`, `GRAPH_WS_PORT`,
+`GRAPH_ADMIN_PORT`, `GRAPH_STATUS_PORT`, and `GRAPH_METRICS_PORT` to unused
+values for both `up` and `down`. Point `LOCAL_EVM_RPC_URL`,
+`GRAPH_IPFS_URL`, `GRAPH_NODE_ADMIN_URL`, `GRAPH_NODE_QUERY_URL`, and
+`HEDERA_PROJECTION_SUBGRAPH_QUERY_URL` at those matching loopback ports. The
+explicit Compose project name prevents reuse of another stack's containers or
+volumes.
+
+### Recorded Linux deployment and live indexing proof
+
+The following disposable proof completed on 2026-07-25. The Compose topology
+was isolated under project `agent-router-projection`; the destination chain and
+Graph deployment are historical local evidence after teardown.
+
+| Field                  | Recorded value                                                       |
+| ---------------------- | -------------------------------------------------------------------- |
+| Docker Engine          | `29.3.0`                                                             |
+| Docker Compose         | `5.1.0`                                                              |
+| Graph Node             | `graphprotocol/graph-node:v0.44.0`                                   |
+| Ganache                | `trufflesuite/ganache:v7.9.2`                                        |
+| Destination chain ID   | `1337`                                                               |
+| Anchor contract        | `0xB477de72792C0CDB7a59D6F2B7081b600faCb0Cd`                         |
+| Deployment transaction | `0xcbc3978355f6903908e7d985e1789a671e1a31b1c6960a68cc5b80a3b7e3faf9` |
+| Deployment start block | `1`                                                                  |
+| Subgraph deployment ID | `QmPM32WC2iNUus9xZQpz2Ni6FsewYjT9gUrseE9vK5ZQ4a`                     |
+| Subgraph health        | `healthy`, `synced: true`                                            |
+
+Graph Node logged a checked provider named `ganache-local-rpc-0` at
+`http://ganache:8545`, created the `ganache-local` block ingestor, and accepted
+the Subgraph deployment through its loopback admin API.
+
+The proof runner then read HCS topic `0.0.9676520` from the public Testnet
+Mirror Node, strictly after cursor `1784941222.395471302`:
+
+| Field                            | Recorded value                                                       |
+| -------------------------------- | -------------------------------------------------------------------- |
+| HCS consensus timestamp          | `1784941222.395471303`                                               |
+| HCS sequence                     | `3`                                                                  |
+| Source-event ID                  | `0x511f1c5563ef498dcdc857ee09d596a593af48838d3de3cbc2fe11194b6c92b8` |
+| Source transaction identity hash | `0xda066189d9f053e4e02f2e77a234b0a4abffc4b9cdab771bc465c41e43c1137c` |
+| Non-secret payload digest        | `0x871f5320a013de4fbff1bb4fea90afea178cc4735276a619f1f5fa9856c46ba4` |
+| Destination transaction          | `0x80d816388fb779a4453258af0aa79ca8ee3ddeec7c3fa5e284cfcdc59f39753b` |
+| Destination block                | `2`                                                                  |
+| Destination block hash           | `0x21ac7fc10821f5b46d353a276c3fff712cb1810186f2ed673f25e342f0c98c05` |
+| Replay result                    | rejected by `SourceEventAlreadyAnchored`                             |
+
+The indexed entity returned the same source-event ID, source ID, Hedera
+identity digest, consensus timestamp, source index, payload digest, relayer,
+destination contract, destination transaction, and destination block.
+
+This proves the implemented and deployed Mirror-to-EVM-to-Graph monitoring
+path. It does not close the Phase 6B exit criterion: the proof used the existing
+HCS receipt event and an in-process proof cursor, not a new Phase 6A deposit
+atomically linked to a durable Postgres relay record. Application credit was
+neither created nor changed by this run.
 
 ### Stop and restart
 

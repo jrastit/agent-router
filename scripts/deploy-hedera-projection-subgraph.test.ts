@@ -11,6 +11,7 @@ describe("Hedera projection Subgraph deployment", () => {
   it("requires explicit local confirmation and loopback services", () => {
     expect(source).toContain("--confirm-local-graph-node");
     expect(source).toContain("must be a private loopback HTTP endpoint");
+    expect(source).toContain("GRAPH_NODE_QUERY_URL");
     expect(source).toContain("LOCAL_HEDERA_ANCHOR_CONTRACT_ADDRESS");
     expect(source).toContain("LOCAL_HEDERA_ANCHOR_START_BLOCK");
   });
@@ -19,6 +20,8 @@ describe("Hedera projection Subgraph deployment", () => {
     expect(source).toContain('"ganache-local"');
     expect(source).toContain("graph/hedera-projection/subgraph.yaml");
     expect(source).toContain("{ mode: 0o600 }");
+    expect(source).toContain("originalManifest");
+    expect(source).toContain("writeFile(manifestPath, originalManifest)");
     expect(source).toContain("await rm(temporaryDirectory");
   });
 

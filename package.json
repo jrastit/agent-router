@@ -29,6 +29,7 @@
     "emit:hedera-economic-event": "node --env-file=.env scripts/emit-hedera-economic-event.mjs --confirm-live-testnet",
     "deploy:hedera-subgraph": "node --env-file=.env scripts/deploy-hedera-subgraph.mjs --confirm-private-graph-node",
     "deploy:hedera-projection-subgraph:local": "node --env-file=.env scripts/deploy-hedera-projection-subgraph.mjs --confirm-local-graph-node",
+    "demo:hedera-projection:local": "node --no-warnings --env-file=.env scripts/run-hedera-projection-local.ts --confirm-local-projection",
     "demo:hedera": "node --env-file=.env scripts/run-hedera-phase6.mjs --confirm-live-testnet",
     "evm:local": "node scripts/run-local-ganache.mjs",
     "deploy:hedera-anchor:local": "node --env-file=.env scripts/deploy-hedera-anchor-local.mjs --confirm-local-ganache",

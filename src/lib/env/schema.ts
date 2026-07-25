@@ -8,6 +8,7 @@ const optionalSecret = z.preprocess(
 export const publicEnvSchema = z
   .object({
     NEXT_PUBLIC_APP_NAME: z.string().min(1).default("AgentRouter"),
+    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: optionalSecret,
   })
   .strict();
 

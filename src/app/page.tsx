@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { evaluateProjectionAuthority } from "../lib/projection/status";
+import DepositWalletPanel from "./deposit-wallet-panel";
 import WorkflowTimeline from "./workflow-timeline";
 
 const providers = [
@@ -313,6 +314,7 @@ export default function Home() {
             No direct or automatic HBAR-to-0G conversion is claimed.
           </p>
         </section>
+        <DepositWalletPanel />
       </section>
 
       <section className="evidence">

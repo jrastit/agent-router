@@ -104,3 +104,18 @@ The proof endpoint accepts only the finalized Hedera transaction ID. It marks
 the owner-bound deposit submitted and explicitly reports that independent
 Mirror verification is still pending. Neither endpoint accepts a private key,
 raw signed transaction bytes, or authority to submit another payment.
+
+## External wallet approval
+
+The live deposit panel uses Reown AppKit with Hedera's native WalletConnect
+adapter on Testnet. Set the browser-safe
+`NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID`, rebuild the application, connect an
+external Hedera wallet, and supply an authenticated application session token.
+
+Before opening the wallet approval, the panel displays the bound payer,
+treasury, network, exact integer tinybar amount, memo, and expiry returned by
+the server-created intent. It refuses a connected account that differs from
+the bound payer and rechecks expiry immediately before signing. The wallet
+signs and executes the native transfer; the application submits only the
+returned Hedera transaction ID to the proof endpoint. No private key or raw
+signed transaction crosses the application boundary.

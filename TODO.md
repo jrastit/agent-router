@@ -181,7 +181,7 @@ milestone.
   - [x] Expose authenticated server endpoints for creating a bound deposit
         intent and submitting a user-signed Hedera transaction proof without
         accepting or handling the user's private key.
-  - [ ] Add an external Hedera wallet signing path that displays the exact
+  - [x] Add an external Hedera wallet signing path that displays the exact
         payer, treasury, network, tinybar amount, memo, and expiry before the
         user approves the transfer.
   - [ ] Mirror-verify and atomically credit the signed deposit exactly once,

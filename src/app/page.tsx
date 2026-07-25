@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { evaluateProjectionAuthority } from "../lib/projection/status";
 import DepositWalletPanel from "./deposit-wallet-panel";
@@ -94,6 +94,15 @@ function cents(amount: number) {
 export default function Home() {
   const [budgetMinor, setBudgetMinor] = useState(10);
   const [privacy, setPrivacy] = useState<"public" | "confidential">("public");
+  const [fundingStatus, setFundingStatus] = useState<{
+    accountConnected: boolean;
+    walletAccount?: string;
+    balanceHbar?: string;
+  }>({ accountConnected: false });
+  const updateFundingStatus = useCallback(
+    (status: typeof fundingStatus) => setFundingStatus(status),
+    [],
+  );
 
   const evaluated = useMemo(
     () =>
@@ -128,9 +137,21 @@ export default function Home() {
               Agent<span>Router</span>
             </span>
           </a>
-          <span className="status">
-            <i /> Hedera testnet replay
-          </span>
+          <div className="nav-funding">
+            {fundingStatus.walletAccount && (
+              <span className="nav-balance">
+                <strong>{fundingStatus.balanceHbar ?? "—"} HBAR</strong>
+                <small>{fundingStatus.walletAccount}</small>
+              </span>
+            )}
+            <a className="nav-connect" href="#funds">
+              {fundingStatus.walletAccount
+                ? "Manage wallet"
+                : fundingStatus.accountConnected
+                  ? "Connect wallet"
+                  : "Connect"}
+            </a>
+          </div>
         </nav>
 
         <div className="hero-grid">
@@ -333,7 +354,7 @@ export default function Home() {
             No direct or automatic HBAR-to-0G conversion is claimed.
           </p>
         </section>
-        <DepositWalletPanel />
+        <DepositWalletPanel onConnectionChange={updateFundingStatus} />
       </section>
 
       <section className="evidence">

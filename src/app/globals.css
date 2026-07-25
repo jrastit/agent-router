@@ -121,6 +121,37 @@ nav {
   background: var(--amber);
 }
 
+.nav-funding {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.nav-balance {
+  display: grid;
+  text-align: right;
+}
+
+.nav-balance strong {
+  font-size: 12px;
+}
+
+.nav-balance small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 9px;
+}
+
+.nav-connect {
+  padding: 9px 13px;
+  color: var(--ink);
+  border-radius: 8px;
+  background: var(--cyan);
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
 .hero-grid {
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
@@ -657,6 +688,20 @@ h4 {
 
 .wallet-copy {
   max-width: 700px;
+  margin: 10px 0 0;
+  font-size: 14px;
+}
+
+.network-badge {
+  padding: 7px 10px;
+  color: var(--cyan) !important;
+  border: 1px solid color-mix(in srgb, var(--cyan) 35%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cyan) 8%, transparent);
+  font-size: 10px !important;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .wallet-warning {
@@ -688,68 +733,240 @@ h4 {
   text-transform: uppercase;
 }
 
-.wallet-controls {
-  display: grid;
-  grid-template-columns: 1fr repeat(3, auto);
-  gap: 12px;
-  align-items: end;
+.connection-panel,
+.deposit-form {
   margin-top: 24px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ink) 48%, transparent);
+}
+
+.deposit-form {
+  border-color: color-mix(in srgb, var(--cyan) 45%, var(--line));
+}
+
+.subsection-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.subsection-heading .eyebrow {
+  margin-bottom: 5px;
+}
+
+.subsection-heading h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.subsection-heading > span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.connection-list {
+  display: grid;
+  gap: 10px;
+}
+
+.connection-item,
+.deposit-step {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--panel-2) 65%, transparent);
+}
+
+.connection-item.complete {
+  border-color: color-mix(in srgb, var(--cyan) 28%, var(--line));
+  background: color-mix(in srgb, var(--cyan) 4%, var(--panel-2));
+}
+
+.deposit-step.active {
+  border-color: color-mix(in srgb, var(--cyan) 55%, var(--line));
+  box-shadow: 0 16px 45px rgb(0 0 0 / 14%);
+}
+
+.step-heading {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.step-number {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.connection-item.complete .step-number {
+  color: var(--ink);
+  border-color: var(--cyan);
+  background: var(--cyan);
+}
+
+.step-heading h4,
+.step-heading p {
+  margin: 0;
+}
+
+.step-heading h4 {
+  font-size: 14px;
+}
+
+.step-heading p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .supabase-auth {
   display: grid;
-  grid-template-columns: 1fr 1fr repeat(3, auto);
+  grid-template-columns: 1fr 1fr auto;
   gap: 12px;
   align-items: end;
-  margin-top: 24px;
+  margin: 18px 0 0 42px;
 }
 
 .supabase-auth label {
   margin: 0;
+  color: var(--muted);
+  font-size: 11px;
 }
 
 .supabase-auth input {
+  width: 100%;
   display: block;
   margin-top: 9px;
-  padding: 11px 12px;
+  padding: 12px 13px;
 }
 
-.wallet-controls label {
-  margin: 0;
+.auth-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
-.wallet-controls small {
+.primary-button,
+.secondary-button,
+.text-button {
+  min-height: 40px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primary-button {
+  color: var(--ink);
+  border: 1px solid var(--cyan);
+  background: var(--cyan);
+}
+
+.secondary-button {
+  color: var(--text);
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+}
+
+.text-button {
+  min-height: auto;
+  padding: 7px 9px;
+  color: var(--muted);
+  border: 0;
+  background: transparent;
+  font-size: 11px;
+}
+
+.primary-button:disabled,
+.secondary-button:disabled,
+.text-button:disabled,
+.wallet-review button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.amount-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+  margin: 18px 0 0 42px;
+}
+
+.deposit-form .deposit-step {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.amount-row > label {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.amount-input {
+  display: flex;
+  align-items: center;
+  margin-top: 9px;
+  padding-right: 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--ink);
+}
+
+.amount-input:focus-within {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgb(34 216 229 / 10%);
+}
+
+.amount-input input {
+  min-width: 0;
+  width: 100%;
+  padding: 13px 14px;
+  color: var(--text);
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.amount-input strong {
+  color: var(--cyan);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.amount-row small {
   display: block;
   margin-top: 7px;
   color: var(--muted);
   font-size: 10px;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
-.wallet-controls input {
-  display: block;
-  margin-top: 9px;
-  padding: 11px 12px;
-}
-
-.wallet-controls button,
-.supabase-auth button,
 .wallet-review button {
   min-height: 41px;
   padding: 10px 14px;
   color: var(--ink);
   border: 0;
-  border-radius: 6px;
+  border-radius: 8px;
   background: var(--cyan);
   font-weight: 800;
   cursor: pointer;
-}
-
-.wallet-controls button:disabled,
-.supabase-auth button:disabled,
-.wallet-review button:disabled {
-  cursor: not-allowed;
-  opacity: 0.42;
 }
 
 .wallet-review {
@@ -1005,7 +1222,8 @@ h4 {
   .receipt,
   .delivery,
   .projection-heading,
-  .wallet-heading {
+  .wallet-heading,
+  .subsection-heading {
     align-items: flex-start;
     flex-direction: column;
     gap: 18px;
@@ -1031,9 +1249,14 @@ h4 {
 
   .evidence-planes,
   .supabase-auth,
-  .wallet-controls,
+  .amount-row,
   .wallet-review dl {
     grid-template-columns: 1fr;
+  }
+
+  .supabase-auth,
+  .amount-row {
+    margin-left: 0;
   }
 }
 
@@ -1043,6 +1266,10 @@ h4 {
   }
 
   .status {
+    display: none;
+  }
+
+  .nav-balance {
     display: none;
   }
 
@@ -1076,5 +1303,19 @@ h4 {
   .credit-evidence,
   .wallet-deposit {
     padding: 20px;
+  }
+
+  .step-heading {
+    grid-template-columns: auto 1fr;
+  }
+
+  .step-heading > button {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .auth-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

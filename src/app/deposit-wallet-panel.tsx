@@ -38,12 +38,29 @@ async function loadBalance(accountId: string): Promise<string | undefined> {
   return balance.balanceTinybars;
 }
 
-export default function DepositWalletPanel() {
+function hbarToTinybars(hbar: string): string | undefined {
+  if (!/^(?:0|[1-9]\d*)(?:\.\d{0,8})?$/.test(hbar)) return undefined;
+  const [whole, fraction = ""] = hbar.split(".");
+  const tinybars = `${whole}${fraction.padEnd(8, "0")}`.replace(/^0+/, "");
+  return tinybars || undefined;
+}
+
+type DepositWalletPanelProps = {
+  onConnectionChange?: (status: {
+    accountConnected: boolean;
+    walletAccount?: string;
+    balanceHbar?: string;
+  }) => void;
+};
+
+export default function DepositWalletPanel({
+  onConnectionChange,
+}: DepositWalletPanelProps) {
   const [accessToken, setAccessToken] = useState("");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authenticatedEmail, setAuthenticatedEmail] = useState("");
-  const [amountTinybars, setAmountTinybars] = useState("100000");
+  const [amountHbar, setAmountHbar] = useState("0.001");
   const [wallet, setWallet] = useState<WalletConnection>();
   const [balanceTinybars, setBalanceTinybars] = useState<string>();
   const [review, setReview] = useState<DepositWalletReview>();
@@ -83,12 +100,15 @@ export default function DepositWalletPanel() {
           const { restoreHederaWallet } =
             await import("../lib/deposit/wallet-client");
           const connection = await restoreHederaWallet(walletProjectId);
-          if (active && connection) {
-            setWallet(connection);
-            setBalanceTinybars(await loadBalance(connection.accountId));
-            setMessage(
-              `Restored wallet ${connection.accountId} on Hedera Testnet.`,
-            );
+          if (connection) {
+            const balance = await loadBalance(connection.accountId);
+            if (active) {
+              setWallet(connection);
+              setBalanceTinybars(balance);
+              setMessage(
+                `Restored wallet ${connection.accountId} on Hedera Testnet.`,
+              );
+            }
           }
         } catch {
           // WalletConnect owns its persisted session and may have none to restore.
@@ -101,6 +121,17 @@ export default function DepositWalletPanel() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    onConnectionChange?.({
+      accountConnected: Boolean(authenticatedEmail),
+      walletAccount: wallet?.accountId,
+      balanceHbar:
+        balanceTinybars === undefined
+          ? undefined
+          : formatTinybarsAsHbar(balanceTinybars),
+    });
+  }, [authenticatedEmail, balanceTinybars, onConnectionChange, wallet]);
 
   async function authenticate(mode: SupabaseAuthMode) {
     if (!supabaseUrl || !supabasePublishableKey) return;
@@ -136,14 +167,6 @@ export default function DepositWalletPanel() {
     }
   }
 
-  function disconnectAccount() {
-    clearSupabaseSession(window.localStorage);
-    setAccessToken("");
-    setAuthenticatedEmail("");
-    setAuthPassword("");
-    setMessage("Supabase account disconnected.");
-  }
-
   async function connect() {
     if (!walletProjectId) return;
     setBusy(true);
@@ -161,6 +184,18 @@ export default function DepositWalletPanel() {
     } finally {
       setBusy(false);
     }
+  }
+
+  function disconnectAccount() {
+    clearSupabaseSession(window.localStorage);
+    setAccessToken("");
+    setAuthenticatedEmail("");
+    setAuthEmail("");
+    setAuthPassword("");
+    setReview(undefined);
+    setDepositId("");
+    setIntentConfirmation("");
+    setMessage("AgentRouter account disconnected.");
   }
 
   async function disconnectWallet() {
@@ -183,6 +218,11 @@ export default function DepositWalletPanel() {
 
   async function createIntent() {
     if (!wallet) return;
+    const amountTinybars = hbarToTinybars(amountHbar);
+    if (!amountTinybars) {
+      setMessage("Enter an HBAR amount with no more than 8 decimal places.");
+      return;
+    }
     setBusy(true);
     setMessage("Binding a deposit intent to the connected payer…");
     setIntentConfirmation("");
@@ -250,17 +290,21 @@ export default function DepositWalletPanel() {
   }
 
   return (
-    <section className="wallet-deposit" aria-labelledby="wallet-deposit-title">
+    <section
+      className="wallet-deposit"
+      id="funds"
+      aria-labelledby="wallet-deposit-title"
+    >
       <div className="wallet-heading">
         <div>
           <p className="eyebrow">Live user-funded path</p>
-          <h3 id="wallet-deposit-title">Deposit HBAR with your wallet</h3>
+          <h3 id="wallet-deposit-title">Add funds</h3>
         </div>
-        <span>External signature · Testnet</span>
+        <span className="network-badge">Hedera Testnet</span>
       </div>
       <p className="wallet-copy">
-        Your wallet signs and submits the transfer. AgentRouter never receives
-        your private key or raw signed transaction.
+        Deposit HBAR securely from your wallet. You stay in control and approve
+        the transfer in your wallet.
       </p>
 
       {!walletProjectId && (
@@ -278,97 +322,179 @@ export default function DepositWalletPanel() {
         </p>
       )}
 
-      <div className="supabase-auth">
-        <label>
-          Email
-          <input
-            type="email"
-            autoComplete="email"
-            value={authEmail}
-            onChange={(event) => setAuthEmail(event.target.value)}
-            disabled={Boolean(authenticatedEmail)}
-          />
-        </label>
-        <label>
-          Password
-          <input
-            type="password"
-            autoComplete="current-password"
-            value={authPassword}
-            onChange={(event) => setAuthPassword(event.target.value)}
-            disabled={Boolean(authenticatedEmail)}
-          />
-        </label>
-        <button
-          type="button"
-          disabled={
-            !supabaseUrl ||
-            !supabasePublishableKey ||
-            !authEmail ||
-            !authPassword ||
-            busy ||
-            Boolean(authenticatedEmail)
-          }
-          onClick={() => authenticate("connect")}
-        >
-          {authenticatedEmail ? `Connected ${authenticatedEmail}` : "Connect"}
-        </button>
-        <button
-          type="button"
-          disabled={
-            !supabaseUrl ||
-            !supabasePublishableKey ||
-            !authEmail ||
-            !authPassword ||
-            busy ||
-            Boolean(authenticatedEmail)
-          }
-          onClick={() => authenticate("register")}
-        >
-          Register
-        </button>
-        {authenticatedEmail && (
-          <button type="button" disabled={busy} onClick={disconnectAccount}>
-            Disconnect account
-          </button>
-        )}
+      <div className="connection-panel">
+        <div className="subsection-heading">
+          <div>
+            <p className="eyebrow">Connections</p>
+            <h4>Ready your account</h4>
+          </div>
+          <span>
+            {[authenticatedEmail, wallet].filter(Boolean).length}/2 connected
+          </span>
+        </div>
+        <div className="connection-list">
+          <div
+            className={`connection-item ${authenticatedEmail ? "complete" : ""}`}
+          >
+            <div className="step-heading">
+              <span className="step-number">
+                {authenticatedEmail ? "✓" : "1"}
+              </span>
+              <div>
+                <h4>Your account</h4>
+                <p>
+                  {authenticatedEmail
+                    ? authenticatedEmail
+                    : "Sign in to keep your deposit history."}
+                </p>
+              </div>
+              {authenticatedEmail && (
+                <button
+                  className="text-button"
+                  type="button"
+                  onClick={disconnectAccount}
+                >
+                  Sign out
+                </button>
+              )}
+            </div>
+            {!authenticatedEmail && (
+              <div className="supabase-auth">
+                <label>
+                  Email
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    value={authEmail}
+                    onChange={(event) => setAuthEmail(event.target.value)}
+                  />
+                </label>
+                <label>
+                  Password
+                  <input
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder="Your password"
+                    value={authPassword}
+                    onChange={(event) => setAuthPassword(event.target.value)}
+                  />
+                </label>
+                <div className="auth-actions">
+                  <button
+                    className="primary-button"
+                    type="button"
+                    disabled={
+                      !supabaseUrl ||
+                      !supabasePublishableKey ||
+                      !authEmail ||
+                      !authPassword ||
+                      busy
+                    }
+                    onClick={() => authenticate("connect")}
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    className="text-button"
+                    type="button"
+                    disabled={!authEmail || !authPassword || busy}
+                    onClick={() => authenticate("register")}
+                  >
+                    Create account
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className={`connection-item ${wallet ? "complete" : ""}`}>
+            <div className="step-heading">
+              <span className="step-number">{wallet ? "✓" : "2"}</span>
+              <div>
+                <h4>Hedera wallet</h4>
+                <p>
+                  {wallet
+                    ? `${wallet.accountId} · Connected`
+                    : "Connect the wallet you want to fund from."}
+                </p>
+              </div>
+              {wallet ? (
+                <button
+                  className="text-button"
+                  type="button"
+                  disabled={busy}
+                  onClick={disconnectWallet}
+                >
+                  Disconnect
+                </button>
+              ) : (
+                <button
+                  className="secondary-button"
+                  type="button"
+                  disabled={!walletProjectId || busy}
+                  onClick={connect}
+                >
+                  Connect wallet
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="wallet-controls">
-        <label>
-          Deposit amount (tinybars)
-          <input
-            inputMode="numeric"
-            pattern="[1-9][0-9]*"
-            value={amountTinybars}
-            onChange={(event) => setAmountTinybars(event.target.value)}
-          />
-          <small>
-            {wallet && balanceTinybars !== undefined
-              ? `Available: ${formatTinybarsAsHbar(balanceTinybars)} HBAR (${balanceTinybars} tinybars). Leave enough for the network fee.`
-              : "Connect a wallet to see its testnet HBAR balance."}
-          </small>
-        </label>
-        <button
-          type="button"
-          disabled={!walletProjectId || busy}
-          onClick={connect}
-        >
-          {wallet ? `Connected ${wallet.accountId}` : "Connect Hedera wallet"}
-        </button>
-        {wallet && (
-          <button type="button" disabled={busy} onClick={disconnectWallet}>
-            Disconnect wallet
-          </button>
-        )}
-        <button
-          type="button"
-          disabled={!wallet || !accessToken || busy}
-          onClick={createIntent}
-        >
-          Create bound intent
-        </button>
-      </div>
+      {authenticatedEmail && wallet && (
+        <div className="deposit-form">
+          <div className="subsection-heading">
+            <div>
+              <p className="eyebrow">Deposit</p>
+              <h4>Choose an amount</h4>
+            </div>
+            {balanceTinybars !== undefined && (
+              <span>
+                {formatTinybarsAsHbar(balanceTinybars)} HBAR available
+              </span>
+            )}
+          </div>
+          <div className="deposit-step active">
+            <div className="step-heading">
+              <span className="step-number">3</span>
+              <div>
+                <h4>Deposit amount</h4>
+                <p>Choose how much HBAR to add.</p>
+              </div>
+            </div>
+            <div className="amount-row">
+              <label>
+                Amount
+                <span className="amount-input">
+                  <input
+                    inputMode="decimal"
+                    aria-label="Deposit amount in HBAR"
+                    value={amountHbar}
+                    onChange={(event) => setAmountHbar(event.target.value)}
+                  />
+                  <strong>HBAR</strong>
+                </span>
+                {balanceTinybars !== undefined && (
+                  <small>
+                    Available: {formatTinybarsAsHbar(balanceTinybars)} HBAR.
+                    Keep a little aside for the network fee.
+                  </small>
+                )}
+              </label>
+              <button
+                className="primary-button"
+                type="button"
+                disabled={!hbarToTinybars(amountHbar) || busy}
+                onClick={createIntent}
+              >
+                Review deposit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {intentConfirmation && (
         <div className="wallet-confirmation" role="status" aria-live="polite">
@@ -382,7 +508,7 @@ export default function DepositWalletPanel() {
 
       {review && (
         <div className="wallet-review">
-          <h4>Exact wallet approval</h4>
+          <h4>Review your deposit</h4>
           <dl>
             {Object.entries(review).map(([label, value]) => (
               <div key={label}>

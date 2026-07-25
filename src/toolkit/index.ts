@@ -24,3 +24,10 @@ export {
   zgComputeFailureCodes,
   type ZgComputeFailureCode,
 } from "./compute/0g-router";
+export {
+  ZgStorageError,
+  ZgStorageEvidenceAdapter,
+  zgStorageFailureCodes,
+  type ZgStorageFailureCode,
+  type ZgStorageUploader,
+} from "./storage/0g";

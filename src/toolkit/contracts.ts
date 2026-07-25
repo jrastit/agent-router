@@ -78,6 +78,7 @@ export type StorageEvidenceRequest = Readonly<{
   content: Uint8Array;
   mediaType: string;
   idempotencyKey: string;
+  classification: "public-non-secret";
 }>;
 
 export type StorageEvidenceReference = Readonly<{

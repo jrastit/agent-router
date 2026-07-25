@@ -48,6 +48,16 @@ export const serverEnvSchema = z
     ZG_ROUTER_BASE_URL: z.string().url().default("https://router-api.0g.ai/v1"),
     ZG_COMPUTE_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(5).default(3),
     ZG_COMPUTE_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
+    ZG_STORAGE_EVM_RPC_URL: z
+      .string()
+      .url()
+      .default("https://evmrpc-testnet.0g.ai"),
+    ZG_STORAGE_INDEXER_URL: z
+      .string()
+      .url()
+      .default("https://indexer-storage-testnet-turbo.0g.ai"),
+    ZG_STORAGE_TIMEOUT_MS: z.coerce.number().int().positive().default(120_000),
+    ZG_STORAGE_PRIVATE_KEY: optionalSecret,
     SUPABASE_URL: z.string().url().optional(),
     SUPABASE_SERVICE_ROLE_KEY: optionalSecret,
   })
@@ -77,6 +87,10 @@ export const serverOnlyEnvKeys = [
   "ZG_ROUTER_BASE_URL",
   "ZG_COMPUTE_MAX_ATTEMPTS",
   "ZG_COMPUTE_TIMEOUT_MS",
+  "ZG_STORAGE_EVM_RPC_URL",
+  "ZG_STORAGE_INDEXER_URL",
+  "ZG_STORAGE_TIMEOUT_MS",
+  "ZG_STORAGE_PRIVATE_KEY",
   "SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
 ] as const;

@@ -27,6 +27,8 @@ const providerListSchema = z.object({
         verifiability: z.string().min(1).optional(),
         trust_mode: z.string().min(1).optional(),
         tee_attested: z.boolean().optional(),
+        service_type: z.string().min(1).optional(),
+        is_healthy: z.boolean().optional(),
       }),
     )
     .default([]),
@@ -77,6 +79,12 @@ export class ZgRouterCatalogAdapter implements ModelCatalogAdapter {
         ).data;
 
         return providers
+          .filter(
+            (provider) =>
+              provider.is_healthy !== false &&
+              (provider.service_type === undefined ||
+                provider.service_type === "chatbot"),
+          )
           .filter(
             (provider) =>
               query.privacy === "public" ||

@@ -31,6 +31,8 @@ describe("ZgRouterCatalogAdapter", () => {
                 verifiability: "TeeML",
                 trust_mode: "private",
                 tee_attested: true,
+                service_type: "chatbot",
+                is_healthy: true,
               },
             ]
           : [
@@ -38,6 +40,8 @@ describe("ZgRouterCatalogAdapter", () => {
                 address: address("2"),
                 latency: null,
                 trust_mode: "standard",
+                service_type: "text-to-image",
+                is_healthy: true,
               },
             ],
       });
@@ -63,6 +67,9 @@ describe("ZgRouterCatalogAdapter", () => {
         provenance: expect.objectContaining({ verification: "TeeML" }),
       }),
     ]);
+    await expect(
+      adapter.list({ capability: "chat", privacy: "public" }),
+    ).resolves.toHaveLength(1);
   });
 
   it("returns no routes for unsupported capabilities", async () => {

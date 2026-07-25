@@ -10,7 +10,7 @@ const authResponseSchema = z.object({
 export type SupabaseAuthMode = "connect" | "register";
 
 export async function authenticateWithSupabase(
-  config: { url: string; anonKey: string },
+  config: { url: string; publishableKey: string },
   credentials: { email: string; password: string },
   mode: SupabaseAuthMode,
   fetchImpl: typeof fetch = fetch,
@@ -22,7 +22,7 @@ export async function authenticateWithSupabase(
   const response = await fetchImpl(endpoint, {
     method: "POST",
     headers: {
-      apikey: config.anonKey,
+      apikey: config.publishableKey,
       "content-type": "application/json",
     },
     body: JSON.stringify(credentials),

@@ -4,7 +4,7 @@ import { authenticateWithSupabase } from "./supabase";
 
 const config = {
   url: "https://project.supabase.co/",
-  anonKey: "browser-safe-anon-key",
+  publishableKey: "browser-safe-publishable-key",
 };
 const credentials = { email: "user@example.com", password: "secret-pass" };
 
@@ -26,7 +26,7 @@ describe("authenticateWithSupabase", () => {
     expect(fetchImpl).toHaveBeenCalledWith(
       "https://project.supabase.co/auth/v1/token?grant_type=password",
       expect.objectContaining({
-        headers: expect.objectContaining({ apikey: config.anonKey }),
+        headers: expect.objectContaining({ apikey: config.publishableKey }),
       }),
     );
   });

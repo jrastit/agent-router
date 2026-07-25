@@ -23,7 +23,7 @@ type BalanceResponse = { balanceTinybars: string };
 
 const walletProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 export default function DepositWalletPanel() {
   const [accessToken, setAccessToken] = useState("");
@@ -41,7 +41,7 @@ export default function DepositWalletPanel() {
   const [message, setMessage] = useState("");
 
   async function authenticate(mode: SupabaseAuthMode) {
-    if (!supabaseUrl || !supabaseAnonKey) return;
+    if (!supabaseUrl || !supabasePublishableKey) return;
     setBusy(true);
     setMessage(
       mode === "register"
@@ -50,7 +50,7 @@ export default function DepositWalletPanel() {
     );
     try {
       const session = await authenticateWithSupabase(
-        { url: supabaseUrl, anonKey: supabaseAnonKey },
+        { url: supabaseUrl, publishableKey: supabasePublishableKey },
         { email: authEmail, password: authPassword },
         mode,
       );
@@ -184,11 +184,11 @@ export default function DepositWalletPanel() {
         </p>
       )}
 
-      {(!supabaseUrl || !supabaseAnonKey) && (
+      {(!supabaseUrl || !supabasePublishableKey) && (
         <p className="wallet-warning" role="status">
           Set the browser-safe NEXT_PUBLIC_SUPABASE_URL and
-          NEXT_PUBLIC_SUPABASE_ANON_KEY to enable user accounts. Never use the
-          service-role key here.
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY to enable user accounts. Never
+          use the service-role key here.
         </p>
       )}
 
@@ -217,7 +217,7 @@ export default function DepositWalletPanel() {
           type="button"
           disabled={
             !supabaseUrl ||
-            !supabaseAnonKey ||
+            !supabasePublishableKey ||
             !authEmail ||
             !authPassword ||
             busy ||
@@ -231,7 +231,7 @@ export default function DepositWalletPanel() {
           type="button"
           disabled={
             !supabaseUrl ||
-            !supabaseAnonKey ||
+            !supabasePublishableKey ||
             !authEmail ||
             !authPassword ||
             busy ||

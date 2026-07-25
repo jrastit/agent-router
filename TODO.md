@@ -165,12 +165,29 @@ the combined exit criterion remains dependent on Phase 5.
       deposit ID, user pseudonymous identifier or hash, Hedera transaction hash,
       exact tinybars, verification timestamp, and version; never publish
       personal data, credentials, or raw application requests.
-- [ ] Select and document one Graph-compatible event source:
+- [x] Select and document one Graph-compatible event source:
   - preferred experiment: a payable Hedera EVM deposit contract whose event can
     be indexed reliably by a self-hosted Graph Node through Hedera's
     JSON-RPC Relay; or
   - fallback: a server relayer emits the already mirror-verified deposit
     reference from a minimal contract on Base Sepolia.
+- [x] Add a repeatable Hedera Subgraph validation probe that checks Testnet
+      chain identity, the finalized contract log, Subgraph health and indexing
+      progress, and exact transaction/block correlation for returned app-event
+      history.
+- [ ] Implement and test the minimal Hedera EVM app-event contract, including
+      stable event identifiers, event kind, pseudonymous subject, payload
+      digest, and no private application data.
+- [ ] Add the deployable Subgraph manifest, ABI, schema, generated bindings, and
+      event mapping for the documented `AppEvent` history query contract.
+- [ ] Provision a self-hosted Graph Node with Hedera Testnet JSON-RPC Relay,
+      PostgreSQL, and IPFS connectivity; keep its administration and indexing
+      status ports private.
+- [ ] Deploy the app-event contract and Subgraph, emit one deterministic
+      Testnet event, and record the contract address, deployment transaction,
+      Subgraph identifier, start block, and query endpoint without secrets.
+- [ ] Run `npm run validate:hedera-subgraph` against that live event and retain
+      its successful JSON output as reproducible deployment evidence.
 - [ ] Treat a fallback Base Sepolia relay event as monitoring/projection
       evidence only; it must never replace Hedera Mirror Node as payment truth.
 - [ ] Implement a Subgraph for `DepositObserved`, balance-credit, debit,

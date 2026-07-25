@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 
+import { evaluateProjectionAuthority } from "../lib/projection/status";
+
 const providers = [
   {
     name: "Scaleway Generative APIs",
@@ -31,6 +33,8 @@ const timeline = [
 const transactionUrl =
   "https://hashscan.io/testnet/transaction/0.0.9651299@1784940981.712442947";
 const topicUrl = "https://hashscan.io/testnet/topic/0.0.9676520";
+const projectionRunbookUrl =
+  "https://github.com/jrastit/agent-router/blob/main/docs/PHASE6B_HEDERA_PROJECTION.md";
 
 const balances = [
   ["Pending", "0 tinybars"],
@@ -39,6 +43,54 @@ const balances = [
   ["Spent", "4,000,000 tinybars"],
   ["Refunded", "2,000,000 tinybars"],
   ["Reconciliation", "0 tinybars"],
+] as const;
+
+const projectionEvidence = evaluateProjectionAuthority({
+  creditState: "credited",
+  hedera: {
+    state: "mirror_verified",
+    transactionHash: "0.0.9651299@1784940981.712442947",
+    evidenceUrl: transactionUrl,
+  },
+  evm: {
+    state: "not_ready",
+    chainId: "1337",
+    transactionHash: null,
+    evidenceUrl: projectionRunbookUrl,
+  },
+  graph: {
+    state: "not_ready",
+    entityId: null,
+    evidenceUrl: projectionRunbookUrl,
+  },
+  trust: "allowlisted-relayer-monitoring-only",
+});
+
+const projectionPlanes = [
+  {
+    label: "Hedera source",
+    state: "Mirror verified",
+    detail: "Authoritative payment proof · Hedera Testnet",
+    linkLabel: "Open HashScan source ↗",
+    evidenceUrl: projectionEvidence.status.hedera.evidenceUrl,
+    authority: true,
+  },
+  {
+    label: "EVM projection",
+    state: "Awaiting live replay",
+    detail: "Monitoring projection · local Ganache chain 1337",
+    linkLabel: "Open local deployment evidence ↗",
+    evidenceUrl: projectionEvidence.status.evm.evidenceUrl,
+    authority: false,
+  },
+  {
+    label: "Graph indexing",
+    state: "Not indexed",
+    detail: "Monitoring query · independent of spendable credit",
+    linkLabel: "Open indexing runbook ↗",
+    evidenceUrl: projectionEvidence.status.graph.evidenceUrl,
+    authority: false,
+  },
 ] as const;
 
 function cents(amount: number) {
@@ -234,12 +286,38 @@ export default function Home() {
               </div>
             ))}
           </dl>
+          <div className="projection-heading">
+            <div>
+              <p className="eyebrow">Phase 6B monitoring</p>
+              <h4>Three independent evidence states</h4>
+            </div>
+            <span className="trust-label">
+              Relayer trust boundary · monitoring only
+            </span>
+          </div>
           <div className="evidence-planes">
-            <span>Hedera · Mirror verified</span>
-            <span>Projection · pending independently</span>
-            <span>Graph · indexing pending</span>
+            {projectionPlanes.map((plane) => (
+              <article
+                className={`evidence-plane ${
+                  plane.authority ? "authoritative" : ""
+                }`}
+                key={plane.label}
+              >
+                <span>{plane.label}</span>
+                <strong>{plane.state}</strong>
+                <p>{plane.detail}</p>
+                {plane.evidenceUrl && (
+                  <a href={plane.evidenceUrl} target="_blank" rel="noreferrer">
+                    {plane.linkLabel}
+                  </a>
+                )}
+              </article>
+            ))}
           </div>
           <p className="conversion-note">
+            Spendable: {projectionEvidence.spendable ? "yes" : "no"} ·
+            authority: Hedera Mirror verification + atomic Postgres credit. EVM
+            and Graph status cannot create, duplicate, reverse, or delay funds.
             No direct or automatic HBAR-to-0G conversion is claimed.
           </p>
         </section>

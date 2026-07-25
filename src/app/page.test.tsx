@@ -21,7 +21,16 @@ describe("mid-hackathon demo", () => {
     expect(html).toContain("Spent");
     expect(html).toContain("Refunded");
     expect(html).toContain("Reconciliation");
-    expect(html).toContain("Projection · pending independently");
+    expect(html).toContain("Three independent evidence states");
+    expect(html).toContain("Hedera source");
+    expect(html).toContain("EVM projection");
+    expect(html).toContain("Graph indexing");
+    expect(html).toContain("Open HashScan source");
+    expect(html).toContain("Open local deployment evidence");
+    expect(html).toContain("Relayer trust boundary · monitoring only");
+    expect(html).toContain(
+      "EVM and Graph status cannot create, duplicate, reverse, or delay funds",
+    );
     expect(html).toContain(
       "No direct or automatic HBAR-to-0G conversion is claimed",
     );

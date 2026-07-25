@@ -375,17 +375,62 @@ h4 {
   color: #f5f7f2;
   font-size: 13px;
 }
-.evidence-planes {
+.projection-heading {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  align-items: end;
+  justify-content: space-between;
 }
-.evidence-planes span {
+.projection-heading .eyebrow {
+  margin-bottom: 7px;
+}
+.projection-heading h4 {
+  margin: 0;
+  font-size: 17px;
+}
+.trust-label {
   padding: 7px 10px;
-  color: #5ce6ad;
-  border: 1px solid #315048;
+  color: #f0b47f;
+  border: 1px solid #65482e;
   border-radius: 999px;
   font-size: 10px;
+  text-transform: uppercase;
+}
+.evidence-planes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.evidence-plane {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #2a3d38;
+  border-radius: 12px;
+  background: #101e1b;
+}
+.evidence-plane.authoritative {
+  border-color: #3c6d5c;
+  background: #122721;
+}
+.evidence-plane > span {
+  color: #82938d;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.evidence-plane strong {
+  color: #5ce6ad;
+  font-size: 14px;
+}
+.evidence-plane p {
+  color: #82938d;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.evidence-plane a {
+  color: #c9d4d0;
+  font-size: 11px;
 }
 .evidence {
   padding: 92px 0;
@@ -510,6 +555,14 @@ h4 {
   }
   .balance-grid {
     grid-template-columns: 1fr 1fr;
+  }
+  .projection-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .evidence-planes {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -265,7 +265,7 @@ application credit.
 - [x] Add projection reconciliation for credited Hedera events missing
       destination anchors, destination anchors missing durable relay records,
       and Subgraph entities lagging their finalized destination transactions.
-- [ ] Keep application credit and provider execution gated only by authoritative
+- [x] Keep application credit and provider execution gated only by authoritative
       Hedera Mirror verification and atomic Postgres proof consumption; EVM
       projection and Graph indexing may change monitoring completeness but must
       not create, duplicate, reverse, or delay spendable funds.

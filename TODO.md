@@ -229,25 +229,25 @@ instead. The projection is asynchronous monitoring evidence: Mirror verification
 and atomic Postgres proof consumption remain the only path to application
 credit.
 
-- [ ] Define a versioned `HederaEventAnchor` payload binding the Hedera network,
+- [x] Define a versioned `HederaEventAnchor` payload binding the Hedera network,
       source contract or HCS topic, transaction hash, consensus timestamp,
       event kind, non-secret payload digest, and schema version.
-- [ ] Define a stable source-event ID from the complete Hedera source identity;
+- [x] Define a stable source-event ID from the complete Hedera source identity;
       use it as the destination contract replay key and the relayer
       idempotency key.
-- [ ] Implement a Hedera Mirror Node event reader that requests only the
+- [x] Implement a Hedera Mirror Node event reader that requests only the
       configured contract logs or HCS topic messages and resumes from a durable
       consensus-timestamp cursor.
-- [ ] Require independent Mirror Node verification before enqueueing an event
+- [x] Require independent Mirror Node verification before enqueueing an event
       for projection; never infer payment validity from the destination EVM
       event or Subgraph entity.
 - [ ] Persist the verified source event, projection attempt, destination
       transaction, retry state, and terminal failure before broadcasting
       progress.
-- [ ] Implement a minimal destination EVM contract that rejects duplicate
+- [x] Implement a minimal destination EVM contract that rejects duplicate
       source-event IDs and emits `HederaEventAnchored` without storing prompts,
       credentials, personal data, or raw provider results.
-- [ ] Bind the destination contract to an allowlisted relayer or an explicit
+- [x] Bind the destination contract to an allowlisted relayer or an explicit
       M-of-N signer policy and document that this is a relay trust boundary, not
       native cross-chain Hedera consensus verification.
 - [ ] Submit destination transactions with bounded retries, fee limits, and one

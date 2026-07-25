@@ -374,7 +374,7 @@ state without duplicate payment or secret exposure.
       checklist.
 - [ ] Recheck current event rules and all three official sponsor requirements
       immediately before submission.
-- [ ] Verify public repository access and third-party attribution.
+- [x] Verify public repository access and third-party attribution.
 - [ ] Test screen recording, microphone, readable font size, and backup capture.
 - [ ] Record a demo within the event time limit.
 - [x] Add the final project name and infrastructure-focused short description.

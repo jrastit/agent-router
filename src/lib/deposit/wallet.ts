@@ -53,10 +53,12 @@ export function assertWalletCanSign(
 
 export function parseWalletTransactionId(result: unknown): string {
   const parsed = z
-    .strictObject({ transactionId: transactionIdSchema })
+    .object({ transactionId: transactionIdSchema })
     .safeParse(result);
   if (!parsed.success) {
-    throw new Error("Wallet did not return a Hedera transaction ID");
+    throw new Error(
+      "The wallet responded, but AgentRouter could not read the Hedera transaction ID. Check your wallet activity before retrying so you do not submit the payment twice.",
+    );
   }
   return parsed.data.transactionId;
 }

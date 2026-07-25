@@ -49,12 +49,14 @@ describe("external wallet deposit contract", () => {
     expect(
       parseWalletTransactionId({
         transactionId: "0.0.1001@1785012345.123456789",
+        nodeId: "0.0.3",
+        transactionHash: "documented-wallet-response-hash",
       }),
     ).toBe("0.0.1001@1785012345.123456789");
     expect(() =>
       parseWalletTransactionId({
         transactionId: "0xprivate-transaction-payload",
       }),
-    ).toThrow("transaction ID");
+    ).toThrow("Check your wallet activity before retrying");
   });
 });

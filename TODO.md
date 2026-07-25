@@ -145,14 +145,14 @@ the combined exit criterion remains dependent on Phase 5.
 
 ## Phase 7 — product experience
 
-- [ ] Build task, budget, and privacy-policy input.
-- [ ] Show discovered providers and normalized quotes.
-- [ ] Show exclusions and concise selection evidence.
+- [x] Build task, budget, and privacy-policy input.
+- [x] Show discovered providers and normalized quotes.
+- [x] Show exclusions and concise selection evidence.
 - [ ] Stream the persisted workflow timeline over SSE.
 - [ ] Display “payment confirmed; verifying public record” during mirror lag.
 - [ ] Restore the timeline after refresh or reconnect.
 - [ ] Render delivery, total spend, remaining budget, and receipt.
-- [ ] Link Hedera evidence to HashScan.
+- [x] Link Hedera evidence to HashScan.
 - [ ] Make loading, empty, retryable, and terminal failure states explicit.
 
 Exit criterion: a new observer can understand the request, alternatives,

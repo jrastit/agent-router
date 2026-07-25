@@ -14,9 +14,28 @@ type WalletConnection = {
 type WalletRuntime = {
   appKit: AppKit;
   provider: import("@hashgraph/hedera-wallet-connect/dist/reown/providers/HederaProvider").HederaProvider;
+  optionalNamespaces: unknown;
 };
 
 let runtimePromise: Promise<WalletRuntime> | undefined;
+
+type RestorableHederaProvider = {
+  session?: unknown;
+  nativeProvider?: unknown;
+  connect(params: {
+    optionalNamespaces: unknown;
+    skipPairing: boolean;
+  }): Promise<unknown>;
+};
+
+export async function initializeRestoredHederaProvider(
+  provider: RestorableHederaProvider,
+  optionalNamespaces: unknown,
+): Promise<void> {
+  if (provider.session && !provider.nativeProvider) {
+    await provider.connect({ optionalNamespaces, skipPairing: true });
+  }
+}
 
 async function getRuntime(projectId: string): Promise<WalletRuntime> {
   runtimePromise ??= (async () => {
@@ -27,8 +46,9 @@ async function getRuntime(projectId: string): Promise<WalletRuntime> {
         import("@hashgraph/hedera-wallet-connect/dist/reown/providers/HederaProvider"),
         import("@hashgraph/hedera-wallet-connect/dist/reown/utils/chains"),
       ]);
-    const { HederaChainDefinition, hederaNamespace } = chains;
+    const { createNamespaces, HederaChainDefinition, hederaNamespace } = chains;
     const network = HederaChainDefinition.Native.Testnet;
+    const optionalNamespaces = createNamespaces([network]);
     const metadata = {
       name: "AgentRouter",
       description: "User-funded AgentRouter deposit",
@@ -42,6 +62,7 @@ async function getRuntime(projectId: string): Promise<WalletRuntime> {
       namespaceMode: "required",
     });
     const provider = await HederaProvider.init({ projectId, metadata });
+    await initializeRestoredHederaProvider(provider, optionalNamespaces);
     const appKit = createAppKit({
       adapters: [adapter],
       universalProvider: provider,
@@ -56,7 +77,7 @@ async function getRuntime(projectId: string): Promise<WalletRuntime> {
         socials: false,
       },
     });
-    return { appKit, provider };
+    return { appKit, provider, optionalNamespaces };
   })();
 
   return runtimePromise;
@@ -82,6 +103,10 @@ function createWalletConnection(
     },
     async signAndExecute(review) {
       assertWalletCanSign(review, accountId);
+      await initializeRestoredHederaProvider(
+        runtime.provider,
+        runtime.optionalNamespaces,
+      );
       const [{ AccountId, Hbar, TransferTransaction }, sharedUtils] =
         await Promise.all([
           import("@hiero-ledger/sdk"),

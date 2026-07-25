@@ -26,6 +26,7 @@ export type ZgAgentRequest = Readonly<{
   policyHash: string;
   policy: RoutingPolicy;
   idempotencyKey: string;
+  provenanceNetwork: string;
 }>;
 
 export async function runZgAgent(
@@ -63,7 +64,7 @@ export async function runZgAgent(
     selected: decision.selected,
     execution: execution.evidence,
     storage,
-    network: "0g-galileo-testnet",
+    network: request.provenanceNetwork,
     timestamp: dependencies.now?.() ?? new Date().toISOString(),
   });
   const receiptHash = hashRoutingReceipt(receipt);

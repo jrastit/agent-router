@@ -29,6 +29,7 @@ describe.skipIf(!liveEnabled)("live 0G Phase 5 path", () => {
       rpcUrl: process.env.ZG_CHAIN_RPC_URL ?? "https://evmrpc-testnet.0g.ai",
       privateKey: process.env.ZG_CHAIN_PRIVATE_KEY!,
       contractAddress: process.env.ZG_CHAIN_CONTRACT_ADDRESS!,
+      network: process.env.ZG_CHAIN_NETWORK ?? "0g-galileo-testnet",
     });
     const result = await runZgAgent(
       {
@@ -43,6 +44,7 @@ describe.skipIf(!liveEnabled)("live 0G Phase 5 path", () => {
             process.env.ZG_STORAGE_INDEXER_URL ??
             "https://indexer-storage-testnet-turbo.0g.ai",
           privateKey: process.env.ZG_STORAGE_PRIVATE_KEY!,
+          network: process.env.ZG_STORAGE_NETWORK ?? "0g-galileo-testnet",
         }),
         provenanceAnchor: provenance,
         provenanceVerifier: provenance,
@@ -53,6 +55,7 @@ describe.skipIf(!liveEnabled)("live 0G Phase 5 path", () => {
         policyHash: keccak256(toUtf8Bytes("confidential-lowest-price")),
         policy: { requireConfidential: true },
         idempotencyKey: `phase-5-live-${Date.now()}`,
+        provenanceNetwork: process.env.ZG_CHAIN_NETWORK ?? "0g-galileo-testnet",
       },
     );
 

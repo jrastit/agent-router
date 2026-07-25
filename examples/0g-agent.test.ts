@@ -77,6 +77,7 @@ describe("example 0G agent", () => {
         policyHash: `0x${"22".repeat(32)}`,
         policy: { requireConfidential: true },
         idempotencyKey: "example-1",
+        provenanceNetwork: "0g-galileo-testnet",
       },
     );
 

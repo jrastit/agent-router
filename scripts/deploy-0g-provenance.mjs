@@ -3,11 +3,30 @@ import { readFile } from "node:fs/promises";
 import { ContractFactory, JsonRpcProvider, Wallet } from "ethers";
 import solc from "solc";
 
-if (process.argv[2] !== "--confirm-live-testnet") {
-  throw new Error("Pass --confirm-live-testnet to deploy");
+const networks = {
+  "0g-galileo-testnet": {
+    chainId: 16602n,
+    confirmation: "--confirm-live-testnet",
+    defaultRpcUrl: "https://evmrpc-testnet.0g.ai",
+  },
+  "0g-aristotle-mainnet": {
+    chainId: 16661n,
+    confirmation: "--confirm-live-mainnet",
+    defaultRpcUrl: "https://evmrpc.0g.ai",
+  },
+};
+const networkName = process.env.ZG_CHAIN_NETWORK ?? "0g-galileo-testnet";
+const networkConfig = networks[networkName];
+if (!networkConfig) {
+  throw new Error(`Unsupported ZG_CHAIN_NETWORK: ${networkName}`);
+}
+if (process.argv[2] !== networkConfig.confirmation) {
+  throw new Error(
+    `Pass ${networkConfig.confirmation} to deploy on ${networkName}`,
+  );
 }
 
-const rpcUrl = process.env.ZG_CHAIN_RPC_URL ?? "https://evmrpc-testnet.0g.ai";
+const rpcUrl = process.env.ZG_CHAIN_RPC_URL ?? networkConfig.defaultRpcUrl;
 const privateKey = process.env.ZG_CHAIN_PRIVATE_KEY;
 if (!privateKey) throw new Error("ZG_CHAIN_PRIVATE_KEY is required");
 
@@ -42,6 +61,11 @@ const compiled = output.contracts[file].ZgRoutingProvenance;
 const provider = new JsonRpcProvider(rpcUrl);
 const signer = new Wallet(privateKey, provider);
 const network = await provider.getNetwork();
+if (network.chainId !== networkConfig.chainId) {
+  throw new Error(
+    `Refusing deployment: ${networkName} requires chain ID ${networkConfig.chainId}, RPC returned ${network.chainId}`,
+  );
+}
 const factory = new ContractFactory(
   compiled.abi,
   `0x${compiled.evm.bytecode.object}`,
@@ -59,7 +83,7 @@ if (!receipt || receipt.status !== 1) {
 console.log(
   JSON.stringify(
     {
-      network: "0g-galileo-testnet",
+      network: networkName,
       chainId: network.chainId.toString(),
       contractAddress: await contract.getAddress(),
       deploymentTransaction: deployment.hash,

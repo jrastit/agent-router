@@ -63,8 +63,22 @@ chain ID, address, deployment transaction, block, compiler, and EVM target.
 Record that JSON below after deployment and add the contract address to
 `ZG_CHAIN_CONTRACT_ADDRESS`.
 
-Deployment evidence: **not yet recorded; no 0G Chain signer is configured in
-this workspace.**
+Deployment evidence: **not yet recorded.**
+
+### Aristotle mainnet
+
+The same EVM signer can deploy on Aristotle mainnet. Set
+`ZG_CHAIN_NETWORK=0g-aristotle-mainnet` and
+`ZG_CHAIN_RPC_URL=https://evmrpc.0g.ai`, then run:
+
+```sh
+npm run deploy:0g-provenance:mainnet
+```
+
+The script refuses to sign unless the RPC reports Aristotle chain ID `16661`.
+This spends real 0G. Mainnet Chain support does not imply mainnet Storage
+support: the live end-to-end test must remain disabled until an authoritative
+mainnet Storage indexer is configured and documented.
 
 The live integration is deliberately guarded because it spends testnet funds:
 

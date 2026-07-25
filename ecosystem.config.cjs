@@ -8,6 +8,7 @@ module.exports = {
       script: "node_modules/next/dist/bin/next",
       args: ["start", "--hostname", "127.0.0.1", "--port", "29000"],
       interpreter: "node",
+      node_args: ["--env-file=.env"],
       instances: 1,
       exec_mode: "fork",
       autorestart: true,

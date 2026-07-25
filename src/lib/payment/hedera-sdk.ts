@@ -16,7 +16,7 @@ export function createHederaTransferTransport(): HederaTransferTransport {
     throw new Error("Hedera operator credentials are not configured");
   }
   const operatorId = AccountId.fromString(serverEnv.HEDERA_OPERATOR_ID);
-  const operatorKey = PrivateKey.fromStringDer(serverEnv.HEDERA_OPERATOR_KEY);
+  const operatorKey = PrivateKey.fromString(serverEnv.HEDERA_OPERATOR_KEY);
   const client = Client.forTestnet().setOperator(operatorId, operatorKey);
 
   return {

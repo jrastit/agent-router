@@ -122,6 +122,8 @@ export const receiptSchema = z.strictObject({
   paymentId: id,
   deliveryId: id,
   total: fiatMoneySchema,
+  hashscanTransactionUrl: z.string().url().optional(),
+  hashscanTopicUrl: z.string().url().optional(),
   createdAt: timestamp,
 });
 

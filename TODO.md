@@ -175,6 +175,21 @@ milestone.
 - [ ] Prove one live flow in which a user-signed testnet HBAR deposit is
       Mirror-verified, credits exactly once, and funds one policy-approved 0G
       operation from treasury inventory while projection proceeds independently.
+  - [ ] Deploy the reviewed commerce, prepaid-credit, and projection migrations
+        to the production Supabase database with tracked versions and a
+        post-deployment schema probe.
+  - [ ] Expose authenticated server endpoints for creating a bound deposit
+        intent and submitting a user-signed Hedera transaction proof without
+        accepting or handling the user's private key.
+  - [ ] Add an external Hedera wallet signing path that displays the exact
+        payer, treasury, network, tinybar amount, memo, and expiry before the
+        user approves the transfer.
+  - [ ] Mirror-verify and atomically credit the signed deposit exactly once,
+        then reserve and settle one policy-approved 0G operation against that
+        credit while the separately funded 0G treasury pays the network.
+  - [ ] Persist the credited deposit's relay record and correlate its
+        exactly-once EVM anchor with the indexed Graph entity, including replay
+        rejection and independent authority labels.
 
 Exit criterion: a user deposit follows `HBAR deposit → Hedera Mirror
 verification → atomic Postgres proof consumption and application credit`, and

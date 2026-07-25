@@ -88,6 +88,7 @@ The production application exposes two server-only persistence boundaries:
 ```text
 POST /api/deposits/intents
 POST /api/deposits/{depositId}/proof
+POST /api/deposits/{depositId}/verify
 ```
 
 Both require a Supabase user access token in the `Authorization: Bearer`
@@ -104,6 +105,13 @@ The proof endpoint accepts only the finalized Hedera transaction ID. It marks
 the owner-bound deposit submitted and explicitly reports that independent
 Mirror verification is still pending. Neither endpoint accepts a private key,
 raw signed transaction bytes, or authority to submit another payment.
+
+The verification endpoint reloads the owner-bound intent and submitted proof
+under the user's bearer token, independently queries Hedera Mirror Node, and
+then uses a service-only RPC with that verified owner ID. The RPC locks the
+deposit and atomically consumes the unique proof, credits the integer-tinybar
+balance, appends its journal entry, and enqueues monitoring. Repeating the same
+verified request returns the existing balance without creating another credit.
 
 ## External wallet approval
 

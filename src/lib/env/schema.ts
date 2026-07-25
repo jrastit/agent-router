@@ -27,6 +27,7 @@ export const serverEnvSchema = z
       .string()
       .url()
       .default("https://testnet.mirrornode.hedera.com"),
+    DEPOSIT_PSEUDONYM_SALT: optionalSecret,
     HEDERA_PROJECTION_PUBLIC_QUERY_URL: z
       .string()
       .url()
@@ -85,6 +86,7 @@ export const serverOnlyEnvKeys = [
   "HEDERA_TRANSFER_HBAR",
   "HEDERA_TOPIC_ID",
   "HEDERA_MIRROR_NODE_URL",
+  "DEPOSIT_PSEUDONYM_SALT",
   "HEDERA_PROJECTION_PUBLIC_QUERY_URL",
   "DISCOVERY_SOURCE",
   "GRAPH_ENDPOINT",

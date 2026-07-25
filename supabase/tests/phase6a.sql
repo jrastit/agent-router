@@ -13,6 +13,7 @@ select public.create_deposit_intent(
   'agent-router:deposit-1', now() + interval '5 minutes', 'deposit-request-1'
 );
 select public.submit_deposit_proof('deposit-1', 'proof-deposit-1');
+set local role service_role;
 select public.credit_verified_deposit(
   'deposit-1', 'proof-deposit-1',
   extract(epoch from now())::bigint::text || '.000000001', now(),
@@ -24,22 +25,54 @@ select public.credit_verified_deposit(
   repeat('a', 64), '0xabc', 'credit-deposit-1'
 );
 
+set local role authenticated;
+select public.create_deposit_intent(
+  'deposit-server-credit', '1', '0.0.1000', '0.0.2000', 'testnet', 1000000,
+  'agent-router:deposit-server-credit', now() + interval '5 minutes',
+  'deposit-request-server-credit'
+);
+select public.submit_deposit_proof(
+  'deposit-server-credit', 'proof-deposit-server-credit'
+);
+set local role service_role;
+select public.credit_verified_deposit_for_user(
+  '00000000-0000-0000-0000-000000000001',
+  'deposit-server-credit', 'proof-deposit-server-credit',
+  extract(epoch from now())::bigint::text || '.000000001', now(),
+  repeat('b', 64), '0xdef', 'credit:deposit-server-credit'
+);
+select public.credit_verified_deposit_for_user(
+  '00000000-0000-0000-0000-000000000001',
+  'deposit-server-credit', 'proof-deposit-server-credit',
+  extract(epoch from now())::bigint::text || '.000000001', now(),
+  repeat('b', 64), '0xdef', 'credit:deposit-server-credit'
+);
+
+set local role authenticated;
 select public.reserve_user_credit(
   'reservation-6a', 'job-1', 6000000,
   '{"hbarUsd":"0.20","ogUsd":"1.00","capturedAt":"2026-07-25T12:00:00Z"}',
   6000000, 'reserve-6a'
 );
+set local role service_role;
 select public.settle_user_credit('reservation-6a', 4000000, 'settle-6a');
 
+set local role authenticated;
 do $$
 begin
   if not exists (
     select 1 from public.credit_accounts
-    where available_tinybar = 6000000 and reserved_tinybar = 0
+    where available_tinybar = 7000000 and reserved_tinybar = 0
       and spent_tinybar = 4000000 and refunded_tinybar = 2000000
   ) then raise exception 'credit account totals are incorrect'; end if;
   if (select count(*) from public.credit_journal where deposit_id = 'deposit-1') <> 1 then
     raise exception 'deposit was not credited exactly once';
+  end if;
+  if (
+    select count(*) from public.credit_journal
+    where deposit_id = 'deposit-server-credit'
+  ) <> 1 then
+    raise exception 'server deposit was not credited exactly once';
   end if;
   if (select count(*) from public.deposit_intents where idempotency_key = 'deposit-request-1') <> 1 then
     raise exception 'duplicate deposit intent was created';

@@ -24,6 +24,14 @@ evidence are recorded in
 The complete Phase 5 SDK, network, receipt, deployment, and verification
 contract is recorded in [docs/0G_PHASE5.md](docs/0G_PHASE5.md).
 
+Submission quick links:
+
+- [live application](https://www.router.fexhu.com);
+- [demo and submission runbook](docs/DEMO_RUNBOOK.md);
+- [architecture and trust boundaries](docs/ARCHITECTURE.md);
+- [working external example agent](examples/0g-agent.ts); and
+- [production deployment](docs/PRODUCTION_DEPLOYMENT.md).
+
 ## 0G Infrastructure track scope
 
 The target is **Best Infrastructure & Tooling on 0G**, specifically a

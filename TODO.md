@@ -366,7 +366,7 @@ state without duplicate payment or secret exposure.
 - [ ] Complete one deployed end-to-end testnet commerce run.
 - [ ] Seed deterministic backup providers and a completed receipt.
 - [ ] Capture decision, payment, mirror, execution, and completion timestamps.
-- [ ] Add setup, architecture, payment-flow, and sponsor-integration
+- [x] Add setup, architecture, payment-flow, and sponsor-integration
       documentation.
 - [x] Record the selected tracks and qualification requirements in
       `docs/PRIZE_STRATEGY.md`.
@@ -377,16 +377,16 @@ state without duplicate payment or secret exposure.
 - [ ] Verify public repository access and third-party attribution.
 - [ ] Test screen recording, microphone, readable font size, and backup capture.
 - [ ] Record a demo within the event time limit.
-- [ ] Add the final project name and infrastructure-focused short description.
+- [x] Add the final project name and infrastructure-focused short description.
 - [ ] Add all 0G contract addresses, deployment transactions, and explorer
       links.
 - [ ] Publish the repository and verify README setup from a clean clone.
 - [ ] Link a live demo and demo video under three minutes.
-- [ ] Explain each 0G feature and SDK actually used.
+- [x] Explain each 0G feature and SDK actually used.
 - [ ] Include team names and required Telegram and X contacts in the submission
       form; keep personal contacts out of Git unless approved.
-- [ ] Link the working example-agent source prominently from the README.
-- [ ] Export a submission-ready architecture diagram covering 0G Compute,
+- [x] Link the working example-agent source prominently from the README.
+- [x] Export a submission-ready architecture diagram covering 0G Compute,
       Storage, Chain, and optional Agentic ID.
 
 Exit criterion: the public toolkit, example agent, deployed demo, and

@@ -8,10 +8,34 @@ validation lab without replacing AgentRouter's newer The Graph and 0G design.
 
 ## Product boundary
 
-AgentRouter is a commerce orchestration layer. It owns provider discovery,
-policy evaluation, routing, payment coordination, and audit evidence. It does
-not attempt to become a general-purpose model host, blockchain database, or
-unrestricted provider marketplace in the hackathon MVP.
+AgentRouter's primary artifact is a reusable TypeScript model-routing and
+provenance toolkit for 0G. It owns catalog normalization, policy evaluation,
+routing, 0G Compute invocation, 0G Storage evidence references, canonical
+receipts, and 0G Chain verification. The Next.js experience is a working
+example built on the toolkit, not the product boundary.
+
+Hedera settlement and The Graph discovery demonstrate adapter extensibility,
+but neither may replace a load-bearing 0G Compute, Storage, and Chain path.
+
+## 0G-native toolkit flow
+
+```mermaid
+flowchart LR
+    agent["Example or third-party agent"] --> api["AgentRouter public API"]
+    api --> catalog["0G model catalog adapters"]
+    catalog --> policy["Deterministic policy router"]
+    policy --> compute["0G Compute selected model"]
+    compute --> storage["0G Storage evidence or memory"]
+    storage --> receipt["Canonical routing receipt"]
+    receipt --> chain["0G Chain provenance anchor"]
+    chain --> verify["Independent verifier"]
+    verify --> agent
+    identity["Optional Agentic ID"] -. "caller identity" .-> receipt
+```
+
+The public API must be usable without importing UI, database, Hedera, or The
+Graph modules. Platform adapters implement narrow contracts so other teams can
+add catalogs, policies, storage strategies, and verifiers.
 
 ## System responsibilities
 

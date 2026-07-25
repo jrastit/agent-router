@@ -7,14 +7,15 @@ submission because sponsors may update their requirements.
 
 ## Selected tracks
 
-| Sponsor                                                               | Target track                    | Why AgentRouter fits                                                                        |
-| --------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------- |
-| [0G](https://ethglobal.com/events/lisbon2026/prizes/0g)               | Best AI Product on 0G           | The user-facing product routes confidential inference through 0G Compute / Private Computer |
-| [Hedera](https://ethglobal.com/events/lisbon2026/prizes/hedera)       | AI & Agentic Payments on Hedera | An agent discovers services, selects an offer under policy, and pays for it in HBAR         |
-| [The Graph](https://ethglobal.com/events/lisbon2026/prizes/the-graph) | Best AI Use Case of The Graph   | The agent uses a live indexed provider registry on a supported EVM chain to select services |
+| Sponsor                                                               | Target track                        | Why AgentRouter fits                                                                               |
+| --------------------------------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- |
+| [0G](https://ethglobal.com/events/lisbon2026/prizes/0g)               | Best Infrastructure & Tooling on 0G | Reusable routing across 0G-hosted models with Storage evidence and provenance verified on 0G Chain |
+| [Hedera](https://ethglobal.com/events/lisbon2026/prizes/hedera)       | AI & Agentic Payments on Hedera     | An agent discovers services, selects an offer under policy, and pays for it in HBAR                |
+| [The Graph](https://ethglobal.com/events/lisbon2026/prizes/the-graph) | Best AI Use Case of The Graph       | The agent uses a live indexed provider registry on a supported EVM chain to select services        |
 
-Do not submit AgentRouter to 0G's Infrastructure track unless the shipped
-artifact becomes reusable developer tooling rather than an end-user product.
+The primary 0G submission is the Infrastructure & Tooling track. The shipped
+artifact must therefore be a reusable framework with a public API; the
+end-user-facing application is only the required working example.
 Do not claim The Graph's composable-data track unless the implementation
 actually composes two Graph products or meaningfully uses a standardized
 schema. Continuity-only prizes are out of scope unless ETHGlobal confirms that
@@ -45,12 +46,23 @@ The demo must use live sponsor integrations. Deterministic fixtures are useful
 for tests and fallback explanation, but do not satisfy The Graph's live-data
 qualification or 0G's working-compute requirement.
 
-## 0G qualification
+## 0G Infrastructure & Tooling qualification
+
+Target idea: **model-routing or provenance layer across 0G's hosted models,
+with verification tracked on-chain**.
 
 ### Required implementation
 
-- Run actual inference through 0G Compute / Private Computer; a logo, SDK
-  import, mocked response, or storage-only integration is insufficient.
+- Ship importable routing and provenance primitives that another team can use
+  without the example application.
+- Compare at least two 0G-hosted model routes and prove that policy or price
+  changes selection without changing application code.
+- Run actual inference through 0G Compute; a logo, SDK import, mocked response,
+  or planned integration is insufficient.
+- Store non-secret evidence or memory through 0G Storage and bind its returned
+  reference into the routing receipt.
+- Deploy a minimal provenance contract on 0G Chain, anchor the canonical
+  routing-receipt hash, and verify it independently.
 - Preserve proof that the inference used 0G. Record only non-sensitive
   identifiers, attestation or verification evidence, model information, and
   relevant explorer links supported by the chosen service.
@@ -60,6 +72,8 @@ qualification or 0G's working-compute requirement.
   confidential input to a non-private provider.
 - Document the exact 0G SDK, service, network, endpoints, and guarantees used.
   Avoid privacy or verifiability claims that the implementation cannot prove.
+- Include at least one working example agent built through the public toolkit
+  API and link its code prominently from the README.
 - Keep all credentials server-side and exclude prompts and private artifacts
   from logs, HCS payloads, and public receipts.
 - Provide a deployed product or reproducible runnable build.
@@ -69,20 +83,28 @@ qualification or 0G's working-compute requirement.
 - Project name and short description.
 - Public GitHub repository with README and complete setup instructions.
 - Live demo link and a demo video under three minutes.
-- Contract deployment addresses, or an explicit “not applicable” explanation
-  if the selected integration deploys no contract and the form permits it.
+- 0G provenance contract address, network, deployment transaction, verified
+  source, and explorer link.
 - A concise explanation of the 0G features and SDKs used.
 - Team member names plus Telegram and X contact details in the submission form.
-- Proof in the demo and README that inference runs through 0G Compute / Private
-  Computer.
+- Proof in the demo and README that routing spans comparable 0G models,
+  inference runs through 0G Compute, evidence reaches 0G Storage, and the
+  routing receipt verifies against 0G Chain.
+- An architecture diagram showing Compute, Storage, Chain, and optional
+  Agentic ID boundaries.
 - If Agentic ID is added, a link to the minted ID on the 0G explorer.
 
 ### Acceptance evidence
 
-- A successful live 0G request captured in the application timeline.
-- A redacted receipt containing the 0G execution/proof identifiers.
+- A successful live routed 0G request captured in the example timeline.
+- A redacted receipt containing the selected model, 0G execution identifier,
+  Storage reference, canonical hash, Chain transaction, and verification state.
+- A test or demo where changing model price or policy changes selection.
+- A tamper test where a modified receipt fails on-chain provenance
+  verification.
 - A negative test proving confidential workloads do not fall back insecurely.
-- A README section that lets a reviewer reproduce the 0G path.
+- A README section that lets a reviewer install the toolkit and reproduce the
+  complete 0G path.
 
 ## Hedera qualification
 

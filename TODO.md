@@ -89,19 +89,37 @@ separate.
 Exit criterion: the planner explains a decision that the deterministic policy
 engine independently validates.
 
-## Phase 5 — execution and 0G privacy routing
+## Phase 5 — reusable 0G model-routing toolkit
 
-- [ ] Define a typed execution-adapter interface.
-- [ ] Add a deterministic standard provider adapter.
-- [ ] Research and document the exact 0G private-compute guarantees used.
-- [ ] Implement the 0G execution adapter.
-- [ ] Route confidential requirements only to eligible private execution.
-- [ ] Prevent confidential inputs and artifacts from entering logs or public
-      audit payloads.
-- [ ] Validate typed delivery output and failure behavior.
+- [ ] Define a public framework API independent of Next.js, Supabase, Hedera,
+      and the example UI.
+- [ ] Export typed `ModelCatalogAdapter`, `ModelRouter`,
+      `ComputeExecutionAdapter`, `StorageEvidenceAdapter`, and
+      `ProvenanceVerifier` contracts.
+- [ ] Normalize at least two comparable 0G-hosted model routes with capability,
+      exact price, privacy, latency, model identity, and endpoint provenance.
+- [ ] Document the exact 0G Compute, Storage, and Chain SDKs, networks,
+      guarantees, and verification fields actually used.
+- [ ] Implement live 0G Compute execution with typed results, bounded retries,
+      and stable failure codes.
+- [ ] Persist non-secret evidence or memory through 0G Storage and retain its
+      content-addressed reference.
+- [ ] Define a versioned canonical routing receipt binding request and policy
+      hashes, candidates, selected model, quote, execution evidence, storage
+      reference, optional caller/Agentic ID, network, and timestamp.
+- [ ] Deploy a minimal 0G Chain provenance contract and record its network,
+      address, deployment transaction, verified source, and deployment command.
+- [ ] Anchor the receipt hash on 0G Chain and independently verify it.
+- [ ] Prevent prompts, confidential artifacts, secrets, and raw outputs from
+      entering public receipts, chain events, or logs.
+- [ ] Export a documented package entry point and working example agent.
+- [ ] Add unit, adapter-contract, tamper-detection, timeout, and guarded live
+      integration tests.
 
-Exit criterion: changing a task from public to confidential changes provider
-eligibility and routes execution through the verified 0G path.
+Exit criterion: an external example agent imports the toolkit, discovers at
+least two 0G model routes, changes selection through policy or price, executes
+through 0G Compute, stores non-secret evidence in 0G Storage, and verifies its
+routing receipt against the 0G Chain anchor.
 
 ## Phase 6 — Hedera payment and audit
 
@@ -173,10 +191,22 @@ state without duplicate payment or secret exposure.
 - [ ] Verify public repository access and third-party attribution.
 - [ ] Test screen recording, microphone, readable font size, and backup capture.
 - [ ] Record a demo within the event time limit.
+- [ ] Add the final project name and infrastructure-focused short description.
+- [ ] Add all 0G contract addresses, deployment transactions, and explorer
+      links.
+- [ ] Publish the repository and verify README setup from a clean clone.
+- [ ] Link a live demo and demo video under three minutes.
+- [ ] Explain each 0G feature and SDK actually used.
+- [ ] Include team names and required Telegram and X contacts in the submission
+      form; keep personal contacts out of Git unless approved.
+- [ ] Link the working example-agent source prominently from the README.
+- [ ] Export a submission-ready architecture diagram covering 0G Compute,
+      Storage, Chain, and optional Agentic ID.
 
-Exit criterion: the deployed demo and backup recording prove autonomous
-discovery, policy-constrained routing, execution, real HBAR settlement, and
-auditable evidence.
+Exit criterion: the public toolkit, example agent, deployed demo, and
+under-three-minute recording prove policy-constrained routing across 0G-hosted
+models plus independently verifiable 0G provenance. Optional sponsor
+integrations remain clearly secondary.
 
 ## Explicitly deferred
 

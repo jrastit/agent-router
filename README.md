@@ -1,9 +1,13 @@
 # AgentRouter
 
-AgentRouter is a policy-driven commerce routing layer for autonomous AI agents.
-It enables an agent to discover services, compare providers, enforce execution
-policies, execute workloads, settle payments, and preserve an auditable record
-of every decision.
+AgentRouter is a reusable, policy-driven model-routing and provenance toolkit
+for agents built on 0G. It lets developers discover hosted models, compare
+routes, execute inference, and preserve independently verifiable routing
+evidence.
+
+The repository also contains a small example application that exercises the
+toolkit end to end. The application demonstrates the infrastructure; it is not
+the primary submission artifact.
 
 Rather than focusing only on how an agent pays, AgentRouter focuses on how an
 agent decides to spend.
@@ -11,8 +15,31 @@ agent decides to spend.
 > Project status: the application scaffold, deterministic commerce-domain
 > routing, durable storage, fixture/live provider-discovery adapters, the
 > Scaleway-backed typed planner, and Hedera testnet settlement/audit are
-> implemented. A live Graph deployment and execution integration remain
-> planned until linked to a commit and marked complete in [TODO.md](TODO.md).
+> implemented. The reusable package boundary and live 0G Compute, Storage, and
+> Chain integrations remain planned until linked to a commit and marked
+> complete in [TODO.md](TODO.md).
+
+## 0G Infrastructure track scope
+
+The target is **Best Infrastructure & Tooling on 0G**, specifically a
+**model-routing or provenance layer across 0G-hosted models, with verification
+tracked on-chain**. The shipped artifact must expose reusable APIs that another
+agent can import without depending on the example UI.
+
+The minimum reusable surface will include:
+
+- a model catalog and quote-normalization contract for at least two comparable
+  0G-hosted model routes;
+- deterministic routing by capability, exact integer price, privacy, latency,
+  and caller-supplied policy;
+- a 0G Compute adapter with explicit execution provenance;
+- a 0G Storage adapter for non-secret evidence or memory references;
+- a canonical routing receipt anchored and independently verified on 0G Chain;
+  and
+- one documented example agent built only through the public toolkit API.
+
+Agentic ID is optional. If implemented, it identifies the calling agent and is
+bound into the receipt; it is not a prerequisite for the core routing proof.
 
 ## Problem
 
@@ -96,15 +123,17 @@ eligibility, budget, quote expiry, ranking, and selection.
 
 ## Target architecture
 
-| Layer                | Planned technology                | Responsibility                                          |
-| -------------------- | --------------------------------- | ------------------------------------------------------- |
-| Frontend             | Next.js, TypeScript, Tailwind CSS | Task input, policy, progress, result, receipts          |
-| Planner              | Vercel AI SDK + Scaleway GenAI    | Requirement extraction and candidate assessment         |
-| Application database | Supabase/Postgres                 | Durable jobs, policies, quotes, decisions, and receipts |
-| Provider registry    | Base Sepolia EVM contract         | Advertised cross-chain provider metadata and offers     |
-| Provider discovery   | The Graph                         | Index and query the Base Sepolia provider registry      |
-| Private execution    | 0G Compute / Private Compute      | Confidential workload execution                         |
-| Settlement and audit | Hedera                            | HBAR payment, HCS audit events, HashScan evidence       |
+| Layer               | Planned technology                  | Responsibility                                            |
+| ------------------- | ----------------------------------- | --------------------------------------------------------- |
+| Toolkit API         | TypeScript package + typed adapters | Reusable routing, execution, and verification primitives  |
+| Example application | Next.js, TypeScript, Tailwind CSS   | Demonstrate one agent using only the public toolkit API   |
+| Policy router       | Deterministic TypeScript core       | Compare 0G model routes under caller-supplied constraints |
+| Model execution     | 0G Compute                          | Execute inference and retain execution provenance         |
+| Evidence / memory   | 0G Storage                          | Store non-secret artifacts and content-addressed evidence |
+| Provenance anchor   | 0G Chain                            | Anchor and verify canonical routing-receipt hashes        |
+| Durable state       | Supabase/Postgres                   | Jobs, policies, quotes, decisions, and receipts           |
+| Optional discovery  | The Graph                           | Index external provider-registry metadata                 |
+| Optional settlement | Hedera                              | HBAR payment and an additional public audit trail         |
 
 See [Architecture](docs/ARCHITECTURE.md) for system boundaries, state
 transitions, and trust assumptions.
@@ -128,9 +157,11 @@ Hedera is the settlement and public-audit layer:
 
 ### 0G
 
-0G is the planned private-execution option. When a policy marks a request or
-its data confidential, only providers satisfying the private-compute
-requirement remain eligible.
+0G is the load-bearing platform for the primary submission: model execution
+comes from 0G Compute, non-secret evidence or memory references come from 0G
+Storage, and routing-receipt hashes are verified on 0G Chain. Privacy remains
+a hard constraint, but the integration must prove routing and provenance—not
+merely call one private-execution endpoint.
 
 ### The Graph
 

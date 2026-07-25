@@ -176,6 +176,14 @@ auditable evidence.
 
 ## Explicitly deferred
 
+- [ ] Low priority: spike a self-hosted Graph Node against Hedera Testnet
+      through Hedera's JSON-RPC Relay.
+- [ ] Low priority: verify event-only Subgraph compatibility for Hedera EVM
+      contracts, including historical logs, restart recovery, and finality.
+- [ ] Low priority: document that this path indexes emitted EVM contract events,
+      not native HBAR transfers, HTS operations, or HCS topic messages.
+- [ ] Low priority: compare the spike's reliability and sponsor value with the
+      primary Base Sepolia registry before adopting it.
 - smart-contract escrow;
 - auctions and negotiation;
 - streaming or per-token settlement;

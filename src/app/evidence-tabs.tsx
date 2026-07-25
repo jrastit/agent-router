@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import type { GraphActivity } from "../lib/projection/activity";
 import styles from "./evidence-tabs.module.css";
+import LlmInstancesPanel from "./llm-instances-panel";
 import WorkflowTimeline from "./workflow-timeline";
 
 const publicGraphUrl =
@@ -26,7 +27,9 @@ function indexedIsoTime(timestamp: string) {
 }
 
 export default function EvidenceTabs() {
-  const [activeTab, setActiveTab] = useState<"run" | "graph">("run");
+  const [activeTab, setActiveTab] = useState<"run" | "graph" | "instances">(
+    "run",
+  );
   const [activity, setActivity] = useState<GraphActivity>();
   const [error, setError] = useState("");
 
@@ -68,11 +71,20 @@ export default function EvidenceTabs() {
         >
           Latest Graph activity
         </button>
+        <button
+          className={styles.tab}
+          type="button"
+          role="tab"
+          aria-selected={activeTab === "instances"}
+          onClick={() => setActiveTab("instances")}
+        >
+          LLM instances
+        </button>
       </div>
 
       {activeTab === "run" ? (
         <WorkflowTimeline />
-      ) : (
+      ) : activeTab === "graph" ? (
         <section className={styles.graphPanel} aria-live="polite">
           <div className={styles.graphHeader}>
             <div>
@@ -138,6 +150,8 @@ export default function EvidenceTabs() {
             </>
           )}
         </section>
+      ) : (
+        <LlmInstancesPanel />
       )}
     </>
   );

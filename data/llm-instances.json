@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "instances": [
+    {
+      "id": "scaleway-qwen-public",
+      "name": "Scaleway Qwen",
+      "provider": "scaleway",
+      "model": "qwen3.5-27b",
+      "baseUrl": "https://api.scaleway.ai/v1",
+      "capabilities": ["chat", "summarize"],
+      "privacy": "public",
+      "enabled": true,
+      "expectedLatencyMs": 1800,
+      "notes": "API credentials are supplied separately through server environment variables."
+    },
+    {
+      "id": "0g-private-compute",
+      "name": "0G Private Compute",
+      "provider": "0g",
+      "model": "0gm-1.0-35b-a3b",
+      "baseUrl": "https://router-api.0g.ai/v1",
+      "providerAddress": "0x4870CbC4D07d6Ac2EE5aA865588e5985FE77a4E9",
+      "capabilities": ["chat", "summarize"],
+      "privacy": "confidential",
+      "enabled": true,
+      "expectedLatencyMs": 2600,
+      "notes": "Pinned TeeML provider with routing fallbacks disabled."
+    }
+  ]
+}

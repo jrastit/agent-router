@@ -313,6 +313,16 @@ and assessment objects. A timeout, invalid schema, missing candidate, duplicate
 candidate, or unavailable model activates deterministic fallback evidence.
 Model scores never override hard policy or integer budget checks.
 
+### LLM instance catalog
+
+Non-secret routing metadata is stored in `data/llm-instances.json` so developers
+and coding agents can review or modify it directly. The LLM instances tab
+exports the current server catalog as JSON and imports a replacement through
+`PUT /api/llm-instances`. Imports are schema-validated, reject unknown fields
+such as embedded credentials, and are written atomically. Configure
+`LLM_INSTANCE_ADMIN_TOKEN` on the server and enter the matching value in the tab
+to authorize an import. The token is held only in component memory.
+
 Implementation progress and acceptance criteria live in [TODO.md](TODO.md).
 
 ### Supabase migrations

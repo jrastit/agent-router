@@ -15,5 +15,15 @@ describe("mid-hackathon demo", () => {
     expect(html).toContain("hashscan.io/testnet/transaction");
     expect(html).toContain("Discover");
     expect(html).toContain("Record");
+    expect(html).toContain("Prepaid application credit");
+    expect(html).toContain("Credited");
+    expect(html).toContain("Reserved");
+    expect(html).toContain("Spent");
+    expect(html).toContain("Refunded");
+    expect(html).toContain("Reconciliation");
+    expect(html).toContain("Projection · pending independently");
+    expect(html).toContain(
+      "No direct or automatic HBAR-to-0G conversion is claimed",
+    );
   });
 });

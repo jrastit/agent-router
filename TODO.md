@@ -127,48 +127,48 @@ milestone.
 
 ## Phase 6A — prepaid HBAR deposits and authoritative application credit
 
-- [ ] Define a versioned user-deposit intent binding the application user,
+- [x] Define a versioned user-deposit intent binding the application user,
       Hedera payer, treasury recipient, network, exact tinybar amount, memo,
       expiry, and idempotency key.
-- [ ] Change the customer-payment path from an app-operator-funded transfer to
+- [x] Change the customer-payment path from an app-operator-funded transfer to
       a user-signed HBAR deposit into the application treasury; keep the
       existing operator-funded transfer only as an explicitly labeled provider
       settlement or guarded demo path.
-- [ ] Add durable deposit states for intent created, submitted, consensus
+- [x] Add durable deposit states for intent created, submitted, consensus
       confirmed, mirror pending, mirror verified, credited, reconciliation
       required, and rejected. Track projection and Graph-indexing states
       separately so monitoring lag cannot change the authoritative balance.
-- [ ] Verify each native HBAR deposit through Hedera Mirror Node before it can
+- [x] Verify each native HBAR deposit through Hedera Mirror Node before it can
       increase spendable application balance; validate payer, recipient,
       network, exact tinybars, memo, transaction type, success, timestamp, and
       intent binding.
-- [ ] Consume each Hedera transaction proof exactly once and atomically credit
+- [x] Consume each Hedera transaction proof exactly once and atomically credit
       the user's integer-tinybar ledger balance with an immutable journal entry.
-- [ ] Define a minimal `DepositObserved` monitoring payload containing only the
+- [x] Define a minimal `DepositObserved` monitoring payload containing only the
       deposit ID, user pseudonymous identifier or hash, Hedera transaction hash,
       exact tinybars, verification timestamp, and version; never publish
       personal data, credentials, or raw application requests.
 - [x] Select Base Sepolia as the Graph-compatible destination for the
       relayer-mediated monitoring projection described in Phase 6B. This
       destination is not payment truth and is not yet deployed.
-- [ ] Enqueue the monitoring projection only after the deposit is independently
+- [x] Enqueue the monitoring projection only after the deposit is independently
       Mirror-verified and atomically credited; projection failure or Graph lag
       must not reverse, duplicate, or delay authoritative application credit.
-- [ ] Add a reconciliation path for Mirror-verified deposits that cannot be
+- [x] Add a reconciliation path for Mirror-verified deposits that cannot be
       credited, and separately reconcile credited deposits whose projection or
       indexed monitoring entity is missing, stale, or mismatched.
-- [ ] Reserve user credit atomically before 0G execution, debit the actual
+- [x] Reserve user credit atomically before 0G execution, debit the actual
       charge once, and release any unused reservation without submitting a
       second HBAR transfer.
-- [ ] Fund 0G Compute from the application's separately pre-funded 0G Payment
+- [x] Fund 0G Compute from the application's separately pre-funded 0G Payment
       Layer balance and record the exchange-rate snapshot and treasury liability
       used for the HBAR-denominated user charge.
-- [ ] Keep HBAR-to-0G treasury rebalancing outside the request transaction;
+- [x] Keep HBAR-to-0G treasury rebalancing outside the request transaction;
       document that no native or automatic HBAR-to-0G conversion is claimed.
-- [ ] Expose user-visible pending, credited, reserved, spent, refunded, and
+- [x] Expose user-visible pending, credited, reserved, spent, refunded, and
       reconciliation balances, with separate Hedera, projection, and Graph
       monitoring evidence.
-- [ ] Test duplicate deposits, Mirror lag, mismatched proofs, atomic-credit
+- [x] Test duplicate deposits, Mirror lag, mismatched proofs, atomic-credit
       retries, insufficient 0G treasury balance, partial execution charges, and
       concurrent reservations. Phase 6B owns projection and Subgraph failure
       tests.
@@ -224,36 +224,36 @@ The direct Hedera Graph Node experiment is not a production dependency. The
 configured Hedera JSON-RPC Relay can advertise transactions in a block while
 returning `null` for their receipts, so Graph Node correctly refuses to build a
 partial canonical block. Do not patch Graph Node to skip those transactions.
-Project only independently Mirror-verified Hedera events onto Base Sepolia
-instead. The projection is asynchronous monitoring evidence: Mirror verification
-and atomic Postgres proof consumption remain the only path to application
-credit.
+Project only independently Mirror-verified Hedera events onto the local Ganache
+EVM instead. The projection is asynchronous monitoring evidence: Mirror
+verification and atomic Postgres proof consumption remain the only path to
+application credit.
 
-- [ ] Define a versioned `HederaEventAnchor` payload binding the Hedera network,
+- [x] Define a versioned `HederaEventAnchor` payload binding the Hedera network,
       source contract or HCS topic, transaction hash, consensus timestamp,
       event kind, non-secret payload digest, and schema version.
-- [ ] Define a stable source-event ID from the complete Hedera source identity;
+- [x] Define a stable source-event ID from the complete Hedera source identity;
       use it as the destination contract replay key and the relayer
       idempotency key.
-- [ ] Implement a Hedera Mirror Node event reader that requests only the
+- [x] Implement a Hedera Mirror Node event reader that requests only the
       configured contract logs or HCS topic messages and resumes from a durable
       consensus-timestamp cursor.
-- [ ] Require independent Mirror Node verification before enqueueing an event
+- [x] Require independent Mirror Node verification before enqueueing an event
       for projection; never infer payment validity from the destination EVM
       event or Subgraph entity.
 - [ ] Persist the verified source event, projection attempt, destination
       transaction, retry state, and terminal failure before broadcasting
       progress.
-- [ ] Implement a minimal destination EVM contract that rejects duplicate
+- [x] Implement a minimal destination EVM contract that rejects duplicate
       source-event IDs and emits `HederaEventAnchored` without storing prompts,
       credentials, personal data, or raw provider results.
-- [ ] Bind the destination contract to an allowlisted relayer or an explicit
+- [x] Bind the destination contract to an allowlisted relayer or an explicit
       M-of-N signer policy and document that this is a relay trust boundary, not
       native cross-chain Hedera consensus verification.
 - [ ] Submit destination transactions with bounded retries, fee limits, and one
       idempotent state machine; a timeout or ambiguous receipt must reconcile
       the original transaction rather than submit a new logical anchor.
-- [ ] Deploy the projection contract to Base Sepolia and record its chain ID,
+- [ ] Deploy the projection contract to local Ganache and record its chain ID,
       address, deployment transaction, start block, source verification, and
       relayer address.
 - [ ] Implement and deploy a Subgraph for `HederaEventAnchored`, retaining the
@@ -282,10 +282,10 @@ credit.
       funding, cursor backup, contract pause/rotation, and recovery procedures.
 
 Exit criterion: one independently Mirror-verified and durably credited Hedera
-event is projected exactly once to Base Sepolia and indexed by The Graph, while
-the receipt and UI clearly preserve Hedera and Postgres as the authoritative
-payment and balance records and identify the destination event as a
-relayer-mediated monitoring projection.
+event is projected exactly once to local Ganache and indexed by the local Graph
+Node, while the receipt and UI clearly preserve Hedera and Postgres as the
+authoritative payment and balance records and identify the destination event as
+a relayer-mediated monitoring projection.
 
 ## Phase 7 — product experience
 

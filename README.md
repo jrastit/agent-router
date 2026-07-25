@@ -314,6 +314,19 @@ Use it only with disposable testnet accounts and a deliberately trivial
 `HEDERA_TRANSFER_HBAR`. The verified Phase 6 run and public HashScan evidence
 are recorded in [Hedera testnet evidence](docs/HEDERA_TESTNET_EVIDENCE.md).
 
+### Prepaid HBAR application credit
+
+Phase 6A adds the customer-funded path: the app returns a bound HBAR deposit
+intent for the user's wallet to sign, verifies the resulting transfer through
+Mirror Node, and atomically consumes that proof into an exact-tinybar
+application ledger. The app's separately pre-funded 0G inventory pays the 0G
+network; no direct or automatic HBAR-to-0G conversion is claimed. Projection
+and Graph monitoring lag are visible but never control spendable credit.
+
+The state model, security boundaries, reconciliation procedure, and validation
+commands are documented in the
+[Phase 6A prepaid credit runbook](docs/PHASE6A_PREPAID_CREDIT.md).
+
 The optional self-hosted app-event history path is documented in the
 [Hedera Subgraph production runbook](docs/HEDERA_SUBGRAPH_PRODUCTION.md). It is
 a monitoring projection and never replaces Mirror Node payment verification.

@@ -32,6 +32,15 @@ const transactionUrl =
   "https://hashscan.io/testnet/transaction/0.0.9651299@1784940981.712442947";
 const topicUrl = "https://hashscan.io/testnet/topic/0.0.9676520";
 
+const balances = [
+  ["Pending", "0 tinybars"],
+  ["Credited", "10,000,000 tinybars"],
+  ["Reserved", "0 tinybars"],
+  ["Spent", "4,000,000 tinybars"],
+  ["Refunded", "2,000,000 tinybars"],
+  ["Reconciliation", "0 tinybars"],
+] as const;
+
 function cents(amount: number) {
   return `$${(amount / 100).toFixed(2)}`;
 }
@@ -207,6 +216,33 @@ export default function Home() {
             </div>
           </div>
         </div>
+        <section className="credit-evidence" aria-labelledby="credit-title">
+          <div>
+            <p className="eyebrow">Phase 6A accounting replay</p>
+            <h3 id="credit-title">Prepaid application credit</h3>
+            <p>
+              Illustrative deterministic ledger values. A user-signed HBAR
+              deposit is spendable only after Hedera Mirror verification; the
+              separately funded 0G treasury pays the provider.
+            </p>
+          </div>
+          <dl className="balance-grid">
+            {balances.map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="evidence-planes">
+            <span>Hedera · Mirror verified</span>
+            <span>Projection · pending independently</span>
+            <span>Graph · indexing pending</span>
+          </div>
+          <p className="conversion-note">
+            No direct or automatic HBAR-to-0G conversion is claimed.
+          </p>
+        </section>
       </section>
 
       <section className="evidence">

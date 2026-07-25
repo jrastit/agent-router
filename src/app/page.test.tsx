@@ -20,6 +20,8 @@ describe("mid-hackathon demo", () => {
     expect(html).toContain("Total spend");
     expect(html).toContain("Remaining budget");
     expect(html).toContain("Open receipt");
+    expect(html).toContain("Run timeline");
+    expect(html).toContain("Latest Graph activity");
     expect(html).toContain("Prepaid application credit");
     expect(html).toContain("Deposit HBAR with your wallet");
     expect(html).toContain("AgentRouter never receives");

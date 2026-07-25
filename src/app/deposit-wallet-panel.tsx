@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 
+import {
+  authenticateWithSupabase,
+  type SupabaseAuthMode,
+} from "../lib/auth/supabase";
 import { formatTinybarsAsHbar } from "../lib/deposit/balance";
 import type { UserSigningRequest } from "../lib/deposit/workflow";
 import {
@@ -18,9 +22,14 @@ type IntentResponse = {
 type BalanceResponse = { balanceTinybars: string };
 
 const walletProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 export default function DepositWalletPanel() {
   const [accessToken, setAccessToken] = useState("");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authenticatedEmail, setAuthenticatedEmail] = useState("");
   const [amountTinybars, setAmountTinybars] = useState("100000");
   const [wallet, setWallet] = useState<WalletConnection>();
   const [balanceTinybars, setBalanceTinybars] = useState<string>();
@@ -30,6 +39,39 @@ export default function DepositWalletPanel() {
   const [reviewed, setReviewed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+
+  async function authenticate(mode: SupabaseAuthMode) {
+    if (!supabaseUrl || !supabasePublishableKey) return;
+    setBusy(true);
+    setMessage(
+      mode === "register"
+        ? "Creating your AgentRouter account…"
+        : "Connecting your AgentRouter account…",
+    );
+    try {
+      const session = await authenticateWithSupabase(
+        { url: supabaseUrl, publishableKey: supabasePublishableKey },
+        { email: authEmail, password: authPassword },
+        mode,
+      );
+      setAuthPassword("");
+      if (session.accessToken) {
+        setAccessToken(session.accessToken);
+        setAuthenticatedEmail(session.email);
+        setMessage(`Connected as ${session.email}.`);
+      } else {
+        setMessage(
+          `Registration created for ${session.email}. Confirm the email, then connect.`,
+        );
+      }
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "Authentication failed",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function connect() {
     if (!walletProjectId) return;
@@ -142,21 +184,66 @@ export default function DepositWalletPanel() {
         </p>
       )}
 
-      <div className="wallet-controls">
+      {(!supabaseUrl || !supabasePublishableKey) && (
+        <p className="wallet-warning" role="status">
+          Set the browser-safe NEXT_PUBLIC_SUPABASE_URL and
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY to enable user accounts. Never
+          use the service-role key here.
+        </p>
+      )}
+
+      <div className="supabase-auth">
         <label>
-          Signed-in user access token
+          Email
+          <input
+            type="email"
+            autoComplete="email"
+            value={authEmail}
+            onChange={(event) => setAuthEmail(event.target.value)}
+            disabled={Boolean(authenticatedEmail)}
+          />
+        </label>
+        <label>
+          Password
           <input
             type="password"
-            autoComplete="off"
-            value={accessToken}
-            onChange={(event) => setAccessToken(event.target.value)}
-            placeholder="Short-lived session token (not a Supabase API key)"
+            autoComplete="current-password"
+            value={authPassword}
+            onChange={(event) => setAuthPassword(event.target.value)}
+            disabled={Boolean(authenticatedEmail)}
           />
-          <small>
-            Identifies who receives the deposit credit. Never enter a Supabase
-            service-role or project key.
-          </small>
         </label>
+        <button
+          type="button"
+          disabled={
+            !supabaseUrl ||
+            !supabasePublishableKey ||
+            !authEmail ||
+            !authPassword ||
+            busy ||
+            Boolean(authenticatedEmail)
+          }
+          onClick={() => authenticate("connect")}
+        >
+          {authenticatedEmail ? `Connected ${authenticatedEmail}` : "Connect"}
+        </button>
+        <button
+          type="button"
+          disabled={
+            !supabaseUrl ||
+            !supabasePublishableKey ||
+            !authEmail ||
+            !authPassword ||
+            busy ||
+            Boolean(authenticatedEmail)
+          }
+          onClick={() => authenticate("register")}
+        >
+          Register
+        </button>
+      </div>
+
+      <div className="wallet-controls">
         <label>
           Deposit amount (tinybars)
           <input

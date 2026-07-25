@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 
 import { evaluateProjectionAuthority } from "../lib/projection/status";
 import DepositWalletPanel from "./deposit-wallet-panel";
-import WorkflowTimeline from "./workflow-timeline";
+import EvidenceTabs from "./evidence-tabs";
 
 const providers = [
   {
@@ -347,7 +347,7 @@ export default function Home() {
               Inspect HCS topic on HashScan ↗
             </a>
           </div>
-          <WorkflowTimeline />
+          <EvidenceTabs />
         </div>
       </section>
     </main>

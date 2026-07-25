@@ -362,7 +362,7 @@ state without duplicate payment or secret exposure.
 ## Phase 9 — deployment and demo
 
 - [ ] Configure encrypted server runtime variables.
-- [ ] Deploy early and smoke-test the production health endpoint.
+- [x] Deploy early and smoke-test the production health endpoint.
 - [ ] Complete one deployed end-to-end testnet commerce run.
 - [ ] Seed deterministic backup providers and a completed receipt.
 - [ ] Capture decision, payment, mirror, execution, and completion timestamps.

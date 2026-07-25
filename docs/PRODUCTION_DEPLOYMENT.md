@@ -49,6 +49,21 @@ pm2 status agent-router
 pm2 logs agent-router --lines 100 --nostream
 ```
 
+## Recorded production smoke test
+
+On 2026-07-25, the PM2 process `agent-router` was online with zero restarts and
+served the production build on `127.0.0.1:29000`. Both the loopback origin and
+the Apache TLS endpoint returned:
+
+```json
+{ "status": "ok", "service": "agent-router", "version": "0.1.0" }
+```
+
+The public application root at `https://www.router.fexhu.com/` returned HTTP
+200 with a certificate valid for `www.router.fexhu.com`. This verifies the
+PM2-to-Apache deployment path; it does not by itself prove a complete commerce
+run.
+
 To restore the saved PM2 process list automatically after a host reboot,
 install the system startup unit once using the command printed by:
 

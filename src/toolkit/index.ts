@@ -21,6 +21,7 @@ export type {
   StorageEvidenceRequest,
 } from "./contracts";
 export { ZgRouterCatalogAdapter } from "./catalog/0g-router";
+export { DeterministicModelRouter } from "./router";
 export {
   ZgComputeError,
   ZgRouterComputeAdapter,

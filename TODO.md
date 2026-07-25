@@ -98,22 +98,22 @@ engine independently validates.
       `ProvenanceVerifier` contracts.
 - [x] Normalize at least two comparable 0G-hosted model routes with capability,
       exact price, privacy, latency, model identity, and endpoint provenance.
-- [ ] Document the exact 0G Compute, Storage, and Chain SDKs, networks,
+- [x] Document the exact 0G Compute, Storage, and Chain SDKs, networks,
       guarantees, and verification fields actually used.
 - [x] Implement live 0G Compute execution with typed results, bounded retries,
       and stable failure codes.
 - [ ] Persist non-secret evidence or memory through 0G Storage and retain its
       content-addressed reference.
-- [ ] Define a versioned canonical routing receipt binding request and policy
+- [x] Define a versioned canonical routing receipt binding request and policy
       hashes, candidates, selected model, quote, execution evidence, storage
       reference, optional caller/Agentic ID, network, and timestamp.
 - [ ] Deploy a minimal 0G Chain provenance contract and record its network,
       address, deployment transaction, verified source, and deployment command.
 - [ ] Anchor the receipt hash on 0G Chain and independently verify it.
-- [ ] Prevent prompts, confidential artifacts, secrets, and raw outputs from
+- [x] Prevent prompts, confidential artifacts, secrets, and raw outputs from
       entering public receipts, chain events, or logs.
-- [ ] Export a documented package entry point and working example agent.
-- [ ] Add unit, adapter-contract, tamper-detection, timeout, and guarded live
+- [x] Export a documented package entry point and working example agent.
+- [x] Add unit, adapter-contract, tamper-detection, timeout, and guarded live
       integration tests.
 
 Exit criterion: an external example agent imports the toolkit, discovers at

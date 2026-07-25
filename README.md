@@ -12,16 +12,17 @@ the primary submission artifact.
 Rather than focusing only on how an agent pays, AgentRouter focuses on how an
 agent decides to spend.
 
-> Project status: the application scaffold, deterministic commerce-domain
-> routing, durable storage, fixture/live provider-discovery adapters, the
-> Scaleway-backed typed planner, and Hedera testnet settlement/audit are
-> implemented. The reusable package boundary and live 0G Compute, Storage, and
-> Chain integrations remain planned until linked to a commit and marked
-> complete in [TODO.md](TODO.md).
+> Project status: the reusable toolkit, live 0G Compute path, 0G Storage
+> adapter, canonical receipt, minimal 0G Chain contract, deterministic router,
+> and external example agent are implemented. Live Storage upload and Chain
+> deployment evidence remain gated on the missing testnet signer documented in
+> [TODO.md](TODO.md).
 
 Live 0G Compute Router configuration, privacy controls, and redacted execution
 evidence are recorded in
 [docs/0G_COMPUTE_EVIDENCE.md](docs/0G_COMPUTE_EVIDENCE.md).
+The complete Phase 5 SDK, network, receipt, deployment, and verification
+contract is recorded in [docs/0G_PHASE5.md](docs/0G_PHASE5.md).
 
 ## 0G Infrastructure track scope
 

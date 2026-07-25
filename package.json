@@ -2,6 +2,12 @@
   "name": "agent-router",
   "version": "0.1.0",
   "private": true,
+  "exports": {
+    "./toolkit": "./src/toolkit/index.ts",
+    "./toolkit/compute/server": "./src/toolkit/compute/0g-router-server.ts",
+    "./toolkit/storage/server": "./src/toolkit/storage/0g-server.ts",
+    "./toolkit/provenance/server": "./src/toolkit/provenance/0g-chain-server.ts"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

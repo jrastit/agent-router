@@ -17,7 +17,7 @@ describe("createDiscoveryAdapter", () => {
         source: "the-graph",
         endpoint: "https://gateway.thegraph.com/api/subgraphs/id/example",
         deploymentId: "QmExample",
-        network: "hedera-testnet",
+        network: "base-sepolia",
         maxStalenessMs: 60_000,
       }),
     ).toBeInstanceOf(GraphDiscoveryAdapter);

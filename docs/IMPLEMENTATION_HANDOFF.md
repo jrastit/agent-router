@@ -46,9 +46,17 @@ interface DiscoveryAdapter {
 }
 ```
 
-Use deterministic fixtures first, then implement The Graph through the same
-contract. The UI and decision evidence must identify whether results came from
-fixtures or the live index.
+Use deterministic fixtures first. Then deploy a minimal provider registry on a
+Graph-supported EVM testnet, initially Base Sepolia, index its registration and
+update events with a Subgraph, and query it through the same adapter contract.
+Seed 0G Private, 0G Standard, and Mock Public Provider offers so privacy, price,
+capability, and budget can visibly change selection.
+
+The UI and decision evidence must identify whether results came from fixtures
+or the live index, including the registry network and contract plus the
+Subgraph deployment and block. Do not describe the registry network as the
+provider's execution or settlement network. The Graph does not index Hedera or
+0G in this design; those integrations provide their own evidence.
 
 ### Private execution
 
@@ -131,7 +139,7 @@ sequence is:
 9. mirror verification, reconciliation, and replay protection;
 10. durable receipt, HCS anchor, and SSE timeline;
 11. product UI;
-12. live The Graph discovery;
+12. Base Sepolia provider registry and live The Graph discovery;
 13. verified 0G private execution;
 14. deployed end-to-end and failure hardening; and
 15. final documentation and demo recording.

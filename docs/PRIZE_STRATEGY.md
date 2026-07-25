@@ -11,7 +11,7 @@ submission because sponsors may update their requirements.
 | --------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------- |
 | [0G](https://ethglobal.com/events/lisbon2026/prizes/0g)               | Best AI Product on 0G           | The user-facing product routes confidential inference through 0G Compute / Private Computer |
 | [Hedera](https://ethglobal.com/events/lisbon2026/prizes/hedera)       | AI & Agentic Payments on Hedera | An agent discovers services, selects an offer under policy, and pays for it in HBAR         |
-| [The Graph](https://ethglobal.com/events/lisbon2026/prizes/the-graph) | Best AI Use Case of The Graph   | The agent uses live indexed blockchain data as a load-bearing input to provider selection   |
+| [The Graph](https://ethglobal.com/events/lisbon2026/prizes/the-graph) | Best AI Use Case of The Graph   | The agent uses a live indexed provider registry on a supported EVM chain to select services |
 
 Do not submit AgentRouter to 0G's Infrastructure track unless the shipped
 artifact becomes reusable developer tooling rather than an end-user product.
@@ -25,8 +25,9 @@ the team is enrolled in the relevant Continuity track.
 The strongest submission is one complete, observable commerce loop:
 
 1. A user enters a task, an exact spending limit, and a confidentiality policy.
-2. AgentRouter queries a live Graph data source for at least two provider
-   offers and displays the endpoint, query time, and source identifiers.
+2. AgentRouter queries a live Subgraph of the Base Sepolia provider registry
+   for at least two offers and displays the registry, endpoint, query time,
+   block, and deployment identifiers.
 3. The agent reasons over the live results while the deterministic policy
    engine rejects ineligible or over-budget offers.
 4. A confidential task causes the selected workload to run through 0G Compute
@@ -135,12 +136,13 @@ separate demo and documentation requirements.
 
 - Use The Graph as a load-bearing source of live blockchain data. Static JSON,
   local fixtures, or a decorative query do not qualify.
-- Query a live Subgraph, Subgraph MCP, Substreams deployment, or supported
-  self-hosted indexer through the discovery adapter.
+- Deploy a minimal provider registry on a Graph-supported EVM testnet,
+  initially Base Sepolia, and query its live Subgraph through the discovery
+  adapter.
 - Ensure the returned blockchain data materially affects agent reasoning or
-  action. For AgentRouter, live provider availability, offer state, settlement
-  identity, reputation evidence, or comparable indexed facts must change
-  eligibility, ranking, or selection.
+  action. Live provider capability, execution network, price, privacy support,
+  active state, and Hedera settlement identity must change eligibility,
+  ranking, or selection.
 - Display and persist discovery provenance: product used, subgraph or stream
   identifier, network, endpoint label, block or cursor when available, and
   query timestamp.
@@ -148,6 +150,9 @@ separate demo and documentation requirements.
   presenting fixtures as live data.
 - Document exactly which Graph products, subgraphs, endpoints, and queries are
   used.
+- State explicitly that The Graph indexes only the supported-chain registry.
+  It does not index Hedera payments, HCS events, 0G executions, prompts, or
+  results. Mirror Node and the 0G integration supply that evidence separately.
 
 ### Required submission material
 

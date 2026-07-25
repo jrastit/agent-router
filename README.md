@@ -99,7 +99,8 @@ requirements remain planned for Phase 4.
 | Frontend             | Next.js, TypeScript, Tailwind CSS | Task input, policy, progress, result, receipts          |
 | Planner              | Vercel AI SDK                     | Requirement extraction and structured routing decision  |
 | Application database | Supabase/Postgres                 | Durable jobs, policies, quotes, decisions, and receipts |
-| Provider discovery   | The Graph                         | Indexed provider and capability discovery               |
+| Provider registry    | Base Sepolia EVM contract         | Advertised cross-chain provider metadata and offers     |
+| Provider discovery   | The Graph                         | Index and query the Base Sepolia provider registry      |
 | Private execution    | 0G Compute / Private Compute      | Confidential workload execution                         |
 | Settlement and audit | Hedera                            | HBAR payment, HCS audit events, HashScan evidence       |
 
@@ -131,6 +132,12 @@ requirement remain eligible.
 
 ### The Graph
 
+The Graph powers cross-chain provider discovery by indexing a small provider
+registry deployed on a supported EVM network, initially Base Sepolia. Registry
+records describe providers that execute and settle elsewhere: capability,
+execution network, endpoint, Hedera settlement account, exact price, privacy
+support, and active status. The indexed state is a load-bearing planner input.
+
 The discovery adapter posts `DiscoverProviders` to a configured Graph endpoint,
 normalizes active offers into the same provider/offer/quote contract used by
 fixtures, and rejects empty, stale, malformed, or unavailable results without
@@ -148,6 +155,12 @@ The schema and query adapter are implemented, but a live registry deployment
 identifier is intentionally not claimed until a registry contract is indexed
 and its deployment evidence is recorded.
 
+The Graph does not index Hedera transfers, HCS messages, 0G inference events,
+private prompts, or results in this architecture. Hedera payment verification
+uses Mirror Node infrastructure, while execution evidence comes from the 0G
+integration. In short: The Graph is discovery, 0G is execution, and Hedera is
+settlement and audit.
+
 See [ETHGlobal Lisbon 2026 prize strategy](docs/PRIZE_STRATEGY.md) for the
 selected tracks, qualification gates, required evidence, and final submission
 checklist.
@@ -163,7 +176,8 @@ third-party packages, and ongoing disclosure rule are recorded in
 
 1. The user submits a task, budget, and privacy policy.
 2. The planner derives structured requirements.
-3. The Graph returns multiple eligible providers.
+3. The Graph queries the Base Sepolia provider registry and returns multiple
+   eligible cross-chain providers.
 4. The planner rejects policy violations and selects the best feasible offer.
 5. A sensitive workload routes to 0G private execution.
 6. The selected provider is paid in HBAR.

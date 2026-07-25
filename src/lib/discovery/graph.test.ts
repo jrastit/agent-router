@@ -55,7 +55,7 @@ function adapter(payload: unknown, status = 200) {
     adapter: new GraphDiscoveryAdapter({
       endpoint: "https://gateway.thegraph.com/api/subgraphs/id/example",
       deploymentId: "QmExample",
-      network: "hedera-testnet",
+      network: "base-sepolia",
       maxStalenessMs: 60_000,
       fetch,
     }),
@@ -83,7 +83,7 @@ describe("GraphDiscoveryAdapter", () => {
       kind: "the-graph",
       label: "provider-registry",
       deploymentId: "QmExample",
-      network: "hedera-testnet",
+      network: "base-sepolia",
       endpoint: "https://gateway.thegraph.com/api/subgraphs/id/example",
       blockNumber: 123,
     });
@@ -122,7 +122,7 @@ describe("GraphDiscoveryAdapter", () => {
     const configured = new GraphDiscoveryAdapter({
       endpoint: "https://gateway.thegraph.com/api/subgraphs/id/example",
       deploymentId: "QmExample",
-      network: "hedera-testnet",
+      network: "base-sepolia",
       maxStalenessMs: 60_000,
       fetch,
     });

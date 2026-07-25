@@ -21,7 +21,7 @@ describe("environment contract", () => {
         DISCOVERY_SOURCE: "the-graph",
         GRAPH_ENDPOINT: "https://gateway.thegraph.com/api/subgraphs/id/example",
         GRAPH_DEPLOYMENT_ID: "QmExample",
-        GRAPH_NETWORK: "hedera-testnet",
+        GRAPH_NETWORK: "base-sepolia",
         GRAPH_MAX_STALENESS_MS: "60000",
         GRAPH_ACCESS_TOKEN: "secret",
       }),

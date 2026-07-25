@@ -75,10 +75,16 @@ constraints and budget arithmetic must be enforced deterministically.
 
 ## Discovery
 
-The Graph adapter should return normalized provider records and versioned
-offers. Until the subgraph is implemented, deterministic fixtures may exercise
-the same adapter contract. Fixture-backed discovery must be labeled clearly in
-the UI and documentation.
+The source of truth for advertised provider metadata is a minimal registry
+contract on a Graph-supported EVM chain, initially Base Sepolia. The registry
+describes cross-chain services; a provider may execute on 0G and receive HBAR
+on Hedera without the registry chain becoming its execution or settlement
+network.
+
+The Graph indexes registry events and exposes provider records and versioned
+offers through GraphQL. The adapter normalizes those results into the same
+contract used by deterministic fixtures. Fixture-backed discovery must be
+labeled clearly in the UI and documentation.
 
 Required provider attributes include:
 
@@ -89,6 +95,17 @@ Required provider attributes include:
 - expected latency;
 - quote expiry; and
 - Hedera settlement identity.
+
+The Subgraph boundary is deliberately narrow. It does not index Hedera HBAR
+transfers, HCS messages, 0G inference events, private prompts, or results.
+Hedera Mirror Node data and 0G execution evidence enter AgentRouter through
+their own adapters and retain separate provenance.
+
+```text
+Base Sepolia registry → The Graph → discovery and selection
+0G integration                    → private execution
+Hedera SDK / Mirror Node / HCS    → settlement and audit
+```
 
 ## Private execution
 

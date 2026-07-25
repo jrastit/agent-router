@@ -113,6 +113,25 @@ deposit and atomically consumes the unique proof, credits the integer-tinybar
 balance, appends its journal entry, and enqueues monitoring. Repeating the same
 verified request returns the existing balance without creating another credit.
 
+## Browser session continuity
+
+The browser stores the Supabase user access token, rotating refresh token,
+expiry, and email in versioned local storage. On refresh it reuses an
+unexpired access token or exchanges the refresh token through the public
+Supabase Auth endpoint. Invalid, expired-without-refresh, or malformed state is
+deleted. The account disconnect control also deletes it.
+
+WalletConnect remains the authority for wallet session persistence. The
+application initializes its provider after refresh and silently reattaches a
+persisted Hedera Testnet account when one exists; it does not open a connection
+modal during restoration. The wallet disconnect control delegates deletion to
+WalletConnect.
+
+Only user-scoped Supabase tokens and WalletConnect session data enter browser
+storage. The Supabase service-role key, Hedera operator key, and other
+server-only credentials remain in the production server environment and are
+checked against the client bundle during validation.
+
 ## External wallet approval
 
 The live deposit panel uses Reown AppKit with Hedera's native WalletConnect

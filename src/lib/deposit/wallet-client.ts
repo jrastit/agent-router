@@ -71,30 +71,10 @@ function connectedAccount(
     .find((value) => /^\d+\.\d+\.\d+$/.test(value));
 }
 
-export async function connectHederaWallet(
-  projectId: string,
-): Promise<WalletConnection> {
-  const runtime = await getRuntime(projectId);
-  const accountId = await new Promise<string>((resolve, reject) => {
-    const existing = connectedAccount(runtime.provider);
-    if (existing) {
-      resolve(existing);
-      return;
-    }
-
-    const timeout = window.setTimeout(
-      () => reject(new Error("Wallet connection timed out")),
-      120_000,
-    );
-    runtime.provider.once("connect", () => {
-      window.clearTimeout(timeout);
-      const account = connectedAccount(runtime.provider);
-      if (account) resolve(account);
-      else reject(new Error("Wallet did not expose a Hedera account"));
-    });
-    void runtime.appKit.open();
-  });
-
+function createWalletConnection(
+  runtime: WalletRuntime,
+  accountId: string,
+): WalletConnection {
   return {
     accountId,
     async disconnect() {
@@ -120,4 +100,39 @@ export async function connectHederaWallet(
       return parseWalletTransactionId(result);
     },
   };
+}
+
+export async function restoreHederaWallet(
+  projectId: string,
+): Promise<WalletConnection | undefined> {
+  const runtime = await getRuntime(projectId);
+  const accountId = connectedAccount(runtime.provider);
+  return accountId ? createWalletConnection(runtime, accountId) : undefined;
+}
+
+export async function connectHederaWallet(
+  projectId: string,
+): Promise<WalletConnection> {
+  const runtime = await getRuntime(projectId);
+  const accountId = await new Promise<string>((resolve, reject) => {
+    const existing = connectedAccount(runtime.provider);
+    if (existing) {
+      resolve(existing);
+      return;
+    }
+
+    const timeout = window.setTimeout(
+      () => reject(new Error("Wallet connection timed out")),
+      120_000,
+    );
+    runtime.provider.once("connect", () => {
+      window.clearTimeout(timeout);
+      const account = connectedAccount(runtime.provider);
+      if (account) resolve(account);
+      else reject(new Error("Wallet did not expose a Hedera account"));
+    });
+    void runtime.appKit.open();
+  });
+
+  return createWalletConnection(runtime, accountId);
 }

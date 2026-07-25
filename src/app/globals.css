@@ -690,7 +690,7 @@ h4 {
 
 .wallet-controls {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr repeat(3, auto);
   gap: 12px;
   align-items: end;
   margin-top: 24px;
@@ -698,7 +698,7 @@ h4 {
 
 .supabase-auth {
   display: grid;
-  grid-template-columns: 1fr 1fr auto auto;
+  grid-template-columns: 1fr 1fr repeat(3, auto);
   gap: 12px;
   align-items: end;
   margin-top: 24px;

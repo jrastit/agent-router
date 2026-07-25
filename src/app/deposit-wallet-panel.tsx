@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   authenticateWithSupabase,
+  clearSupabaseSession,
+  restoreSupabaseSession,
+  saveSupabaseSession,
   type SupabaseAuthMode,
 } from "../lib/auth/supabase";
 import { formatTinybarsAsHbar } from "../lib/deposit/balance";
@@ -25,6 +28,16 @@ const walletProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
+async function loadBalance(accountId: string): Promise<string | undefined> {
+  const response = await fetch(
+    `/api/hedera/accounts/${encodeURIComponent(accountId)}/balance`,
+    { cache: "no-store" },
+  );
+  if (!response.ok) return undefined;
+  const balance = (await response.json()) as BalanceResponse;
+  return balance.balanceTinybars;
+}
+
 export default function DepositWalletPanel() {
   const [accessToken, setAccessToken] = useState("");
   const [authEmail, setAuthEmail] = useState("");
@@ -40,6 +53,54 @@ export default function DepositWalletPanel() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [intentConfirmation, setIntentConfirmation] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function restoreSessions() {
+      if (supabaseUrl && supabasePublishableKey) {
+        try {
+          const session = await restoreSupabaseSession(
+            {
+              url: supabaseUrl,
+              publishableKey: supabasePublishableKey,
+            },
+            window.localStorage,
+          );
+          if (active && session) {
+            setAccessToken(session.accessToken);
+            setAuthenticatedEmail(session.email);
+            setAuthEmail(session.email);
+            setMessage(`Restored account session for ${session.email}.`);
+          }
+        } catch {
+          clearSupabaseSession(window.localStorage);
+        }
+      }
+
+      if (walletProjectId) {
+        try {
+          const { restoreHederaWallet } =
+            await import("../lib/deposit/wallet-client");
+          const connection = await restoreHederaWallet(walletProjectId);
+          if (active && connection) {
+            setWallet(connection);
+            setBalanceTinybars(await loadBalance(connection.accountId));
+            setMessage(
+              `Restored wallet ${connection.accountId} on Hedera Testnet.`,
+            );
+          }
+        } catch {
+          // WalletConnect owns its persisted session and may have none to restore.
+        }
+      }
+    }
+
+    void restoreSessions();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function authenticate(mode: SupabaseAuthMode) {
     if (!supabaseUrl || !supabasePublishableKey) return;
@@ -57,6 +118,7 @@ export default function DepositWalletPanel() {
       );
       setAuthPassword("");
       if (session.accessToken) {
+        saveSupabaseSession(window.localStorage, session);
         setAccessToken(session.accessToken);
         setAuthenticatedEmail(session.email);
         setMessage(`Connected as ${session.email}.`);
@@ -74,6 +136,14 @@ export default function DepositWalletPanel() {
     }
   }
 
+  function disconnectAccount() {
+    clearSupabaseSession(window.localStorage);
+    setAccessToken("");
+    setAuthenticatedEmail("");
+    setAuthPassword("");
+    setMessage("Supabase account disconnected.");
+  }
+
   async function connect() {
     if (!walletProjectId) return;
     setBusy(true);
@@ -84,17 +154,28 @@ export default function DepositWalletPanel() {
       const connection = await connectHederaWallet(walletProjectId);
       setWallet(connection);
       setBalanceTinybars(undefined);
-      const balanceResponse = await fetch(
-        `/api/hedera/accounts/${encodeURIComponent(connection.accountId)}/balance`,
-        { cache: "no-store" },
-      );
-      if (balanceResponse.ok) {
-        const balance = (await balanceResponse.json()) as BalanceResponse;
-        setBalanceTinybars(balance.balanceTinybars);
-      }
+      setBalanceTinybars(await loadBalance(connection.accountId));
       setMessage(`Connected to ${connection.accountId} on Hedera Testnet.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Wallet failed");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function disconnectWallet() {
+    if (!wallet) return;
+    setBusy(true);
+    try {
+      await wallet.disconnect();
+      setWallet(undefined);
+      setBalanceTinybars(undefined);
+      setReview(undefined);
+      setDepositId("");
+      setIntentConfirmation("");
+      setMessage("Hedera wallet disconnected.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Disconnect failed");
     } finally {
       setBusy(false);
     }
@@ -246,6 +327,11 @@ export default function DepositWalletPanel() {
         >
           Register
         </button>
+        {authenticatedEmail && (
+          <button type="button" disabled={busy} onClick={disconnectAccount}>
+            Disconnect account
+          </button>
+        )}
       </div>
 
       <div className="wallet-controls">
@@ -270,6 +356,11 @@ export default function DepositWalletPanel() {
         >
           {wallet ? `Connected ${wallet.accountId}` : "Connect Hedera wallet"}
         </button>
+        {wallet && (
+          <button type="button" disabled={busy} onClick={disconnectWallet}>
+            Disconnect wallet
+          </button>
+        )}
         <button
           type="button"
           disabled={!wallet || !accessToken || busy}

@@ -14,9 +14,9 @@ agent decides to spend.
 
 > Project status: the reusable toolkit, live 0G Compute path, 0G Storage
 > adapter, canonical receipt, minimal 0G Chain contract, deterministic router,
-> and external example agent are implemented. Live Storage upload and Chain
-> deployment evidence remain gated on the missing testnet signer documented in
-> [TODO.md](TODO.md).
+> and external example agent are implemented. The complete private Compute,
+> Aristotle Storage, receipt-anchor, and independent-verification path is
+> verified live and recorded in [docs/0G_PHASE5.md](docs/0G_PHASE5.md).
 
 Live 0G Compute Router configuration, privacy controls, and redacted execution
 evidence are recorded in

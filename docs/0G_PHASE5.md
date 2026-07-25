@@ -113,7 +113,7 @@ The live integration is deliberately guarded because it spends funds on the
 configured network:
 
 ```sh
-ZG_LIVE_TEST=true npm test -- --run src/toolkit/0g-phase5.integration.test.ts
+ZG_LIVE_TEST=true node --env-file=.env ./node_modules/vitest/vitest.mjs run src/toolkit/0g-phase5.integration.test.ts
 ```
 
 It is skipped unless the Compute, Storage, and Chain credentials plus deployed
@@ -121,3 +121,34 @@ contract address are all present. Unit and adapter-contract coverage runs
 without credentials and includes canonicalization, policy changes,
 idempotency, timeouts, malformed evidence, unfinalized transactions, and
 tamper detection.
+
+## Verified Aristotle end-to-end evidence
+
+Verified live on 2026-07-25:
+
+- selected model: `0gm-1.0-35b-a3b`;
+- selected provider: `0x4870CbC4D07d6Ac2EE5aA865588e5985FE77a4E9`;
+- Compute execution:
+  `chatcmpl-03df2b82-60d6-409d-9aff-a2a9a4e11f84`;
+- Compute verification: `TeeML`, private trust mode, TEE attested;
+- Storage root:
+  `0xa9d9e9cbe537aca89478792a8529cb3c5e290beffbbb6c26299b96f6c24110d5`;
+- Storage transaction:
+  `0x9b6fc40c227d517276d703c4ed469f4c208e413161affb783097c69f9a5ce596`;
+- Storage block: `39767097`, status `1`, fee
+  `0.001213276002123233 0G`;
+- independent Storage download with proof found three locations and recovered
+  only the allowlisted execution evidence—no prompt or model output;
+- canonical receipt hash:
+  `0xdbb6b81fd2dcc003dcd7e0201881e524075b4088cc46585c01ac5d6b83ad43a1`;
+- anchor transaction:
+  `0x0d558261bbb2803eb6b1dc59727659c227edafc3caa43f41ca344544e47b374c`;
+- anchor block: `39767112`, status `1`, fee
+  `0.000184172000322301 0G`; and
+- verification: finalized transaction called the configured contract, emitted
+  the exact receipt hash, and the independent `anchoredAt` state read matched.
+
+The guarded live test passed in 35.40 seconds. It compared multiple live
+confidential chat routes, selected by exact price, executed through 0G Compute,
+persisted redacted evidence to 0G Storage, anchored the canonical receipt, and
+independently verified it. Prompt and output are intentionally omitted.

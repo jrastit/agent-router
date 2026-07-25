@@ -219,6 +219,69 @@ and one 0G operation consumes that credit exactly once while the app's separate
 0G treasury pays the 0G network. The UI and receipt never describe this as a
 direct HBAR-to-0G transfer.
 
+## Phase 6B — mirror-verified Hedera event projection to EVM
+
+The direct Hedera Graph Node experiment is not a production dependency. The
+configured Hedera JSON-RPC Relay can advertise transactions in a block while
+returning `null` for their receipts, so Graph Node correctly refuses to build a
+partial canonical block. Do not patch Graph Node to skip those transactions.
+Project only independently Mirror-verified Hedera events onto a
+Graph-compatible EVM chain instead.
+
+- [ ] Define a versioned `HederaEventAnchor` payload binding the Hedera network,
+      source contract or HCS topic, transaction hash, consensus timestamp,
+      event kind, non-secret payload digest, and schema version.
+- [ ] Define a stable source-event ID from the complete Hedera source identity;
+      use it as the destination contract replay key and the relayer
+      idempotency key.
+- [ ] Implement a Hedera Mirror Node event reader that requests only the
+      configured contract logs or HCS topic messages and resumes from a durable
+      consensus-timestamp cursor.
+- [ ] Require independent Mirror Node verification before enqueueing an event
+      for projection; never infer payment validity from the destination EVM
+      event or Subgraph entity.
+- [ ] Persist the verified source event, projection attempt, destination
+      transaction, retry state, and terminal failure before broadcasting
+      progress.
+- [ ] Implement a minimal destination EVM contract that rejects duplicate
+      source-event IDs and emits `HederaEventAnchored` without storing prompts,
+      credentials, personal data, or raw provider results.
+- [ ] Bind the destination contract to an allowlisted relayer or an explicit
+      M-of-N signer policy and document that this is a relay trust boundary, not
+      native cross-chain Hedera consensus verification.
+- [ ] Submit destination transactions with bounded retries, fee limits, and one
+      idempotent state machine; a timeout or ambiguous receipt must reconcile
+      the original transaction rather than submit a new logical anchor.
+- [ ] Deploy the projection contract to the selected Graph-compatible EVM
+      testnet and record its chain ID, address, deployment transaction, start
+      block, source verification, and relayer address.
+- [ ] Implement and deploy a Subgraph for `HederaEventAnchored`, retaining the
+      Hedera source identity and destination transaction provenance as
+      separate fields.
+- [ ] Add a projection reconciliation worker for Mirror-verified events missing
+      destination anchors, destination anchors missing durable relay records,
+      and Subgraph entities lagging their finalized destination transactions.
+- [ ] Keep application credit and provider execution gated by authoritative
+      Hedera Mirror verification and atomic Postgres proof consumption; Graph
+      indexing may gate monitoring completeness but must not create spendable
+      funds by itself.
+- [ ] Show separate Hedera source, EVM projection, and Graph indexing states in
+      the UI, with links to both chain explorers and an explicit relayer-trust
+      label.
+- [ ] Test duplicate Mirror responses, cursor restart, event reordering,
+      relayer crash recovery, destination replay, nonce races, EVM reorg,
+      Subgraph lag, malformed payloads, and mismatched Hedera source identity.
+- [ ] Prove one live testnet flow from Hedera event through Mirror verification,
+      durable relay record, EVM anchor, and Graph entity; demonstrate that
+      replaying the same source event does not create a second anchor.
+- [ ] Document production key custody, relayer monitoring, destination gas
+      funding, cursor backup, contract pause/rotation, and recovery procedures.
+
+Exit criterion: one independently Mirror-verified Hedera event is projected
+exactly once to a Graph-compatible EVM chain and indexed by The Graph, while
+the receipt and UI clearly preserve Hedera as the source of truth and identify
+the destination event as a relayer-mediated monitoring projection.
+
 ## Phase 7 — product experience
 
 - [x] Build task, budget, and privacy-policy input.

@@ -269,7 +269,7 @@ application credit.
       Hedera Mirror verification and atomic Postgres proof consumption; EVM
       projection and Graph indexing may change monitoring completeness but must
       not create, duplicate, reverse, or delay spendable funds.
-- [ ] Show separate Hedera source, EVM projection, and Graph indexing states in
+- [x] Show separate Hedera source, EVM projection, and Graph indexing states in
       the UI, with links to both chain explorers and an explicit relayer-trust
       label.
 - [x] Test duplicate Mirror responses, cursor restart, event reordering,

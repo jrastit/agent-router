@@ -228,6 +228,23 @@ places disposable Ganache and Graph Node on the same Compose network and uses
 the exact provider declaration `ganache-local:http://ganache:8545`. Ganache and
 every Graph operator port bind to host loopback only.
 
+The default host endpoints are:
+
+| Service             | Localhost endpoint              | Purpose                       |
+| ------------------- | ------------------------------- | ----------------------------- |
+| Ganache JSON-RPC    | `http://127.0.0.1:8545`         | Disposable destination EVM    |
+| IPFS HTTP API       | `http://127.0.0.1:5001`         | Subgraph artifact publication |
+| Graph query API     | `http://127.0.0.1:8000`         | GraphQL queries               |
+| Graph WebSocket API | `ws://127.0.0.1:8001`           | GraphQL subscriptions         |
+| Graph admin API     | `http://127.0.0.1:8020`         | Subgraph deployment           |
+| Graph status API    | `http://127.0.0.1:8030/graphql` | Indexing status               |
+| Graph metrics       | `http://127.0.0.1:8040/metrics` | Prometheus metrics            |
+
+Postgres is reachable only inside the Compose network on `postgres:5432`; it
+is intentionally not published to the host. Override the host ports with the
+variables in `deploy/graph-node/graph-node.env.example` when necessary. Do not
+change the loopback bind without a separate security review.
+
 Run the remaining verification on Linux with Docker Engine, Docker Compose v2,
 Node.js, and npm available. Keep Ganache, Graph Node, IPFS, and Postgres
 disposable and isolated from production data.

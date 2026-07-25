@@ -61,6 +61,10 @@ const probe = spawnSync(
         'creditFunction',
           to_regprocedure(
             'public.credit_verified_deposit(text,text,text,timestamptz,text,text,text)'
+          ) is not null,
+        'serverCreditFunction',
+          to_regprocedure(
+            'public.credit_verified_deposit_for_user(uuid,text,text,text,timestamptz,text,text,text)'
           ) is not null
       );
     `,

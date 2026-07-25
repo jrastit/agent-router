@@ -96,10 +96,10 @@ header. The server forwards that user token to the security-definer database
 function so `auth.uid()` remains the owner. The service-role key is used only
 as the server-side Supabase API key and never reaches the browser.
 
-The intent endpoint accepts payer account, exact integer tinybars, and an
-idempotency key. Network, treasury recipient, memo, five-minute expiry, and
-deposit ID are server-derived. It returns the saved intent and a
-`hedera-hbar-user-deposit` signing request.
+The intent endpoint accepts payer account and exact integer tinybars in its JSON
+body, plus an idempotency key in the `Idempotency-Key` request header. Network,
+treasury recipient, memo, five-minute expiry, and deposit ID are server-derived.
+It returns the saved intent and a `hedera-hbar-user-deposit` signing request.
 
 The proof endpoint accepts only the finalized Hedera transaction ID. It marks
 the owner-bound deposit submitted and explicitly reports that independent

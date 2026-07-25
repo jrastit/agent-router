@@ -23,6 +23,26 @@ describe("POST /api/deposits/intents", () => {
     expect(response.status).toBe(401);
   });
 
+  it("requires an idempotency key header", async () => {
+    const fetcher = vi.fn<typeof fetch>();
+    const response = await handler(fetcher)(
+      new Request("https://app.example.com/api/deposits/intents", {
+        method: "POST",
+        headers: {
+          authorization: "Bearer user-jwt",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          payerAccount: "0.0.1001",
+          amountTinybars: "10000000",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it("returns a server-bound external signing request", async () => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValue(
       Response.json({
@@ -45,16 +65,22 @@ describe("POST /api/deposits/intents", () => {
         headers: {
           authorization: "Bearer user-jwt",
           "content-type": "application/json",
+          "idempotency-key": "request-1",
         },
         body: JSON.stringify({
           payerAccount: "0.0.1001",
           amountTinybars: "10000000",
-          idempotencyKey: "request-1",
         }),
       }),
     );
 
     expect(response.status).toBe(201);
+    expect(fetcher).toHaveBeenCalledWith(
+      "https://supabase.example.com/rest/v1/rpc/create_deposit_intent",
+      expect.objectContaining({
+        body: expect.stringContaining('"request_key":"request-1"'),
+      }),
+    );
     await expect(response.json()).resolves.toMatchObject({
       signingRequest: {
         type: "hedera-hbar-user-deposit",

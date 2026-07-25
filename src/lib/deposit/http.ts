@@ -15,8 +15,9 @@ const intentRequestSchema = z.strictObject({
     .string()
     .regex(/^[1-9]\d*$/)
     .refine((value) => BigInt(value) <= BigInt("9223372036854775807")),
-  idempotencyKey: z.string().min(8).max(200),
 });
+
+const idempotencyKeySchema = z.string().min(8).max(200);
 
 const proofRequestSchema = z.strictObject({
   transactionId: z.string().regex(/^\d+\.\d+\.\d+[@-]\d{10}\.\d{1,9}$/),
@@ -53,7 +54,10 @@ export function createDepositIntentHandler(input: {
     const parsed = intentRequestSchema.safeParse(
       await request.json().catch(() => null),
     );
-    if (!parsed.success) {
+    const parsedIdempotencyKey = idempotencyKeySchema.safeParse(
+      request.headers.get("idempotency-key"),
+    );
+    if (!parsed.success || !parsedIdempotencyKey.success) {
       return Response.json(
         { error: "Invalid deposit request" },
         { status: 400 },
@@ -77,7 +81,7 @@ export function createDepositIntentHandler(input: {
           amountTinybars: parsed.data.amountTinybars,
           memo: `agent-router:deposit:${id}`,
           expiresAt: new Date(now.getTime() + 5 * 60_000).toISOString(),
-          idempotencyKey: parsed.data.idempotencyKey,
+          idempotencyKey: parsedIdempotencyKey.data,
         },
       );
       return Response.json(

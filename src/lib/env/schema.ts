@@ -19,6 +19,13 @@ export const serverEnvSchema = z
     HEDERA_NETWORK: z.enum(["testnet"]).default("testnet"),
     HEDERA_OPERATOR_ID: optionalSecret,
     HEDERA_OPERATOR_KEY: optionalSecret,
+    HEDERA_RECIPIENT_ID: optionalSecret,
+    HEDERA_TRANSFER_HBAR: optionalSecret,
+    HEDERA_TOPIC_ID: optionalSecret,
+    HEDERA_MIRROR_NODE_URL: z
+      .string()
+      .url()
+      .default("https://testnet.mirrornode.hedera.com"),
     DISCOVERY_SOURCE: z.enum(["fixture", "the-graph"]).default("fixture"),
     GRAPH_ENDPOINT: z.string().url().optional(),
     GRAPH_DEPLOYMENT_ID: z.string().min(1).optional(),
@@ -46,6 +53,10 @@ export const serverOnlyEnvKeys = [
   "HEDERA_NETWORK",
   "HEDERA_OPERATOR_ID",
   "HEDERA_OPERATOR_KEY",
+  "HEDERA_RECIPIENT_ID",
+  "HEDERA_TRANSFER_HBAR",
+  "HEDERA_TOPIC_ID",
+  "HEDERA_MIRROR_NODE_URL",
   "DISCOVERY_SOURCE",
   "GRAPH_ENDPOINT",
   "GRAPH_DEPLOYMENT_ID",

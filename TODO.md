@@ -53,9 +53,9 @@ double-spending its reservation.
 - [x] Add deterministic fixtures for at least two providers.
 - [ ] Define the provider registry/subgraph schema.
 - [ ] Implement and deploy the subgraph or agreed indexed data source.
-- [ ] Query The Graph through the discovery adapter.
-- [ ] Handle empty, stale, malformed, and unavailable discovery results.
-- [ ] Show discovery provenance in decision evidence.
+- [x] Query The Graph through the discovery adapter.
+- [x] Handle empty, stale, malformed, and unavailable discovery results.
+- [x] Show discovery provenance in discovery results for decision evidence.
 
 Exit criterion: the same planner flow works with fixtures and live indexed
 providers, and the demo clearly identifies which source is active.

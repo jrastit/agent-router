@@ -175,11 +175,14 @@ the combined exit criterion remains dependent on Phase 5.
       chain identity, the finalized contract log, Subgraph health and indexing
       progress, and exact transaction/block correlation for returned app-event
       history.
-- [ ] Implement and test the minimal Hedera EVM app-event contract, including
+- [x] Implement and test the minimal Hedera EVM app-event contract, including
       stable event identifiers, event kind, pseudonymous subject, payload
       digest, and no private application data.
-- [ ] Add the deployable Subgraph manifest, ABI, schema, generated bindings, and
+- [x] Add the deployable Subgraph manifest, ABI, schema, generated bindings, and
       event mapping for the documented `AppEvent` history query contract.
+- [x] Add a pinned Linux Compose stack and production runbook for Graph Node,
+      PostgreSQL, Kubo, TLS query proxying, backups, monitoring, upgrades, and
+      rollback; bind every operator interface to server loopback.
 - [ ] Provision a self-hosted Graph Node with Hedera Testnet JSON-RPC Relay,
       PostgreSQL, and IPFS connectivity; keep its administration and indexing
       status ports private.
@@ -190,7 +193,7 @@ the combined exit criterion remains dependent on Phase 5.
       its successful JSON output as reproducible deployment evidence.
 - [ ] Treat a fallback Base Sepolia relay event as monitoring/projection
       evidence only; it must never replace Hedera Mirror Node as payment truth.
-- [ ] Implement a Subgraph for `DepositObserved`, balance-credit, debit,
+- [x] Implement a Subgraph for `DepositObserved`, balance-credit, debit,
       reservation, 0G execution-charge, refund, and reconciliation events so an
       operator can monitor the complete economic lifecycle without exposing
       secrets.

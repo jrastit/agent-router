@@ -33,9 +33,11 @@ node --env-file=.env -e '
     "-f", "supabase/migrations/20260725000400_persist_planner_decision.sql",
     "-f", "supabase/migrations/20260725000600_verify_hedera_payments.sql",
     "-f", "supabase/migrations/20260725000700_store_hedera_audit_evidence.sql",
+    "-f", "supabase/migrations/20260725000800_add_prepaid_hbar_credit.sql",
     "-f", "supabase/tests/phase2.sql",
     "-f", "supabase/tests/phase4.sql",
-    "-f", "supabase/tests/phase6.sql", "-c", "rollback",
+    "-f", "supabase/tests/phase6.sql",
+    "-f", "supabase/tests/phase6a.sql", "-c", "rollback",
   ];
   const result = spawnSync(psql, args, { stdio: "inherit" });
   process.exit(result.status ?? 1);

@@ -39,7 +39,8 @@ node --env-file=.env -e '
     "-f", "supabase/tests/phase4.sql",
     "-f", "supabase/tests/phase6.sql",
     "-f", "supabase/tests/phase6a.sql",
-    "-f", "supabase/tests/phase6b.sql", "-c", "rollback",
+    "-f", "supabase/tests/phase6b.sql",
+    "-f", "supabase/tests/phase8.sql", "-c", "rollback",
   ];
   const result = spawnSync(psql, args, { stdio: "inherit" });
   process.exit(result.status ?? 1);

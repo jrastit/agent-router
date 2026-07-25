@@ -61,4 +61,20 @@ describe("Hedera payment submission", () => {
     );
     expect(submit).toHaveBeenCalledOnce();
   });
+
+  it("fails before submission completes when the on-chain balance is insufficient", async () => {
+    const submit = vi.fn(async () => {
+      throw new Error("INSUFFICIENT_PAYER_BALANCE");
+    });
+
+    await expect(
+      submitHbarPayment(challenge, { submit }),
+    ).rejects.toMatchObject({
+      state: {
+        status: "reconciliation_required",
+        reason: "INSUFFICIENT_PAYER_BALANCE",
+      },
+    });
+    expect(submit).toHaveBeenCalledOnce();
+  });
 });

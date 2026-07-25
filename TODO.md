@@ -304,15 +304,15 @@ policy, economic decision, payment, and result without narration.
 
 ## Phase 8 — failure and security hardening
 
-- [ ] Test insufficient delegated and on-chain balance.
-- [ ] Test expired quote and payment challenge.
-- [ ] Test mismatched amount, recipient, memo, network, and asset.
-- [ ] Test duplicate proof and repeated HTTP retry.
-- [ ] Test mirror indexing delay and timeout.
-- [ ] Test provider and model timeout.
-- [ ] Test invalid delivery and discovery outage.
-- [ ] Verify secrets are absent from client bundles, logs, fixtures, and errors.
-- [ ] Verify row-level security from anonymous and authenticated clients.
+- [x] Test insufficient delegated and on-chain balance.
+- [x] Test expired quote and payment challenge.
+- [x] Test mismatched amount, recipient, memo, network, and asset.
+- [x] Test duplicate proof and repeated HTTP retry.
+- [x] Test mirror indexing delay and timeout.
+- [x] Test provider and model timeout.
+- [x] Test invalid delivery and discovery outage.
+- [x] Verify secrets are absent from client bundles, logs, fixtures, and errors.
+- [x] Verify row-level security from anonymous and authenticated clients.
 
 Exit criterion: every known failure ends in a stable recoverable or terminal
 state without duplicate payment or secret exposure.

@@ -71,6 +71,45 @@ describe("ZgRouterComputeAdapter", () => {
       output: "ok",
     });
     expect(fetch).toHaveBeenCalledTimes(2);
+    for (const call of fetch.mock.calls) {
+      expect(call[1]?.headers).toMatchObject({
+        "Idempotency-Key": "job-1",
+      });
+    }
+  });
+
+  it("returns stable timeout and invalid-delivery errors without secrets", async () => {
+    const timeoutAdapter = new ZgRouterComputeAdapter({
+      apiKey: "sk-sensitive-token",
+      timeoutMs: 1,
+      fetch: vi.fn(
+        (_url: URL | RequestInfo, init?: RequestInit) =>
+          new Promise<Response>((_resolve, reject) => {
+            init?.signal?.addEventListener("abort", () =>
+              reject(new DOMException("aborted", "AbortError")),
+            );
+          }),
+      ),
+    });
+    const timeoutError = await timeoutAdapter
+      .execute({ ...request, prompt: "private customer prompt" })
+      .catch((error: unknown) => error);
+    expect(timeoutError).toMatchObject({ code: "ZG_COMPUTE_TIMEOUT" });
+    expect(String(timeoutError)).not.toMatch(
+      /sk-sensitive-token|private customer prompt/,
+    );
+
+    const invalidAdapter = new ZgRouterComputeAdapter({
+      apiKey: "sk-sensitive-token",
+      fetch: vi.fn().mockResolvedValue(Response.json({ choices: [] })),
+    });
+    const invalidError = await invalidAdapter
+      .execute({ ...request, prompt: "private customer prompt" })
+      .catch((error: unknown) => error);
+    expect(invalidError).toMatchObject({ code: "ZG_COMPUTE_RESPONSE_INVALID" });
+    expect(String(invalidError)).not.toMatch(
+      /sk-sensitive-token|private customer prompt/,
+    );
   });
 
   it("fails closed for a non-private route", async () => {

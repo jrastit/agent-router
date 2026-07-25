@@ -17,6 +17,8 @@
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "graph:codegen": "graph codegen -o graph/app-events/generated graph/app-events/subgraph.yaml",
+    "graph:build": "graph build graph/app-events/subgraph.yaml",
     "validate:supabase": "bash scripts/validate-supabase.sh",
     "validate:hedera-subgraph": "node --env-file=.env scripts/validate-hedera-subgraph.mjs",
     "demo:hedera": "node --env-file=.env scripts/run-hedera-phase6.mjs --confirm-live-testnet",
@@ -38,6 +40,8 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.98.1",
+    "@graphprotocol/graph-ts": "^0.38.2",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "24.10.1",
     "@types/react": "19.2.7",

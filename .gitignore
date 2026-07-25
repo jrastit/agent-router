@@ -12,6 +12,7 @@
 
 # production
 /build
+/graph/app-events/build
 
 # misc
 .DS_Store

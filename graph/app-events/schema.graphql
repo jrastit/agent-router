@@ -1,0 +1,17 @@
+"""
+An immutable, public monitoring projection emitted by HederaAppEventJournal.
+Payment truth remains in the Hedera transaction and Mirror Node proof.
+"""
+type AppEvent @entity(immutable: true) {
+  id: Bytes!
+  kind: String!
+  subject: Bytes!
+  payloadDigest: Bytes!
+  version: Int!
+  publisher: Bytes!
+  contractAddress: Bytes!
+  transactionHash: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  logIndex: BigInt!
+}

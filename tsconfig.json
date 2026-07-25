@@ -25,5 +25,9 @@
     "**/*.ts",
     "**/*.tsx"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "graph/app-events/generated",
+    "graph/app-events/src"
+  ]
 }

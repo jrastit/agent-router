@@ -72,13 +72,66 @@ and recovery procedures.
 
 ## Local deployment
 
-In one terminal, start the disposable local chain:
+### Topology
+
+```text
+Hedera Testnet
+  → Hedera Mirror Node verification
+  → durable application handler and cursor
+  → allowlisted relay submission
+  → HederaEventAnchor on local Ganache (chain ID 1337)
+  → local Graph Node monitoring (planned)
+```
+
+The first two arrows are authoritative for source verification and application
+credit. Ganache and the future local Graph entity are monitoring projections.
+
+### Prerequisites
+
+- Node.js and npm versions compatible with the repository lockfile;
+- dependencies installed with `npm install`;
+- local TCP port `8545` available; and
+- two terminals opened at the repository root.
+
+Ganache is a development dependency. No external EVM RPC service, faucet, or
+long-lived private key is required.
+
+### Configure
+
+The npm deployment command reads `.env`. Create it from the safe template if it
+does not already exist:
+
+```sh
+cp .env.example .env
+```
+
+The local defaults are:
+
+| Variable                               | Default                  | Meaning                                    |
+| -------------------------------------- | ------------------------ | ------------------------------------------ |
+| `LOCAL_EVM_RPC_URL`                    | `http://127.0.0.1:8545`  | Loopback JSON-RPC endpoint                 |
+| `LOCAL_EVM_CHAIN_ID`                   | `1337`                   | Required Ganache chain ID                  |
+| `LOCAL_EVM_DEPLOYER_INDEX`             | `0`                      | Unlocked account that deploys the contract |
+| `LOCAL_EVM_RELAYER_INDEX`              | `1`                      | Account allowlisted to submit anchors      |
+| `LOCAL_HEDERA_ANCHOR_CONTRACT_ADDRESS` | empty until after deploy | Address used by future relay processes     |
+
+The deployer and relayer indexes must be distinct nonnegative integers.
+
+### Start Ganache
+
+In terminal one, start the disposable local chain:
 
 ```sh
 npm run evm:local
 ```
 
-In another terminal, deploy the anchor:
+The command binds only `127.0.0.1:8545`, creates three disposable unlocked
+accounts, uses chain and network ID `1337`, and suppresses account-key logging.
+Leave this process running.
+
+### Deploy the contract
+
+In terminal two, deploy the anchor:
 
 ```sh
 npm run deploy:hedera-anchor:local
@@ -86,6 +139,105 @@ npm run deploy:hedera-anchor:local
 
 The deployment script accepts only a loopback RPC, requires chain ID `1337` by
 default, uses separate unlocked Ganache accounts for the deployer and relayer,
-waits for a successful receipt, and prints non-secret JSON evidence. Override
-the local port, chain ID, or account indexes with the `LOCAL_EVM_*` variables in
-`.env`. Never reuse Ganache accounts or keys outside local development.
+and waits for a successful receipt.
+
+The JSON result contains:
+
+| Field                     | Purpose                                            |
+| ------------------------- | -------------------------------------------------- |
+| `network`                 | Explicit `ganache-local` label                     |
+| `rpcUrl`                  | Loopback endpoint used for deployment              |
+| `chainId`                 | Verified destination chain ID                      |
+| `contractAddress`         | Address to configure in the local relay            |
+| `deploymentTransaction`   | Destination deployment transaction hash            |
+| `blockNumber`             | Deployment start block for local indexing          |
+| `deployer`                | Account that paid disposable local gas             |
+| `relayer`                 | Only account allowed to submit anchors             |
+| `compiler` / `evmVersion` | Reproducible compiler evidence                     |
+| `authority`               | Reminder that the destination is not payment truth |
+
+Copy `contractAddress` into `LOCAL_HEDERA_ANCHOR_CONTRACT_ADDRESS` only if a
+subsequent local process needs it. Do not commit `.env` or transient deployment
+output.
+
+### Verify
+
+The repository test suite includes an in-memory Ganache integration test that:
+
+1. verifies chain ID `1337`;
+2. deploys with separate deployer and relayer accounts;
+3. proves an outsider cannot submit an anchor;
+4. submits one valid source-event ID; and
+5. proves the same source-event ID cannot be anchored twice.
+
+Run it directly:
+
+```sh
+npm test -- contracts/HederaEventAnchor.integration.test.ts
+```
+
+Run the complete repository gate before committing changes:
+
+```sh
+npm run validate
+```
+
+### Stop and restart
+
+Press `Ctrl-C` in terminal one to stop Ganache. The default chain is in-memory:
+all blocks, transactions, contract addresses, and balances disappear when it
+stops. On restart:
+
+1. deploy the contract again;
+2. replace the transient local contract address;
+3. restart future relay or indexer processes from their documented state; and
+4. never interpret the reset destination as a reversal of Hedera credit.
+
+Hedera and Postgres state survive independently; local projection loss changes
+monitoring completeness only.
+
+### Troubleshooting
+
+`EADDRINUSE` or “address already in use”
+
+: Another process owns port `8545`. Stop it, or change the Ganache command and
+`LOCAL_EVM_RPC_URL` together.
+
+“RPC host must be loopback”
+
+: The deployment guard intentionally rejects remote destinations. Use
+`127.0.0.1`, `localhost`, or `::1`. A public deployment requires a separate,
+explicitly reviewed workflow.
+
+“expected chain ID 1337”
+
+: The RPC endpoint points to the wrong chain, or
+`LOCAL_EVM_CHAIN_ID` does not match the Ganache startup command. Align both
+values instead of bypassing the guard.
+
+“Deployer and relayer indexes must be distinct”
+
+: Set different unlocked account indexes. The default pair is `0` and `1`.
+
+µWS native-module warning
+
+: Ganache may fall back to its JavaScript transport on an unsupported local
+Node.js/CPU combination. This affects development performance, not EVM
+semantics. The deployment and integration test must still pass.
+
+Transaction or receipt failure
+
+: Confirm Ganache is still running, the RPC URL is correct, and the selected
+deployer account is unlocked and funded. Rerun deployment only after
+confirming the prior transaction result; future durable relay code must
+reconcile ambiguous transactions rather than create a second logical anchor.
+
+### Local security rules
+
+- Keep Ganache bound to loopback.
+- Treat every Ganache account as disposable and development-only.
+- Never reuse a Ganache mnemonic or key on a public or value-bearing network.
+- Never commit `.env`, private keys, prompts, credentials, personal data, or
+  raw provider results.
+- Persist only non-secret digests and source provenance in destination events.
+- Never use the local contract or Graph entity to grant application credit.

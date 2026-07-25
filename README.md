@@ -200,13 +200,41 @@ infrastructure, atomic application credit lives in Postgres, and execution
 evidence comes from the 0G integration.
 
 The planned monitoring path projects only independently Mirror-verified,
-non-secret Hedera event references through an allowlisted relayer to Base
-Sepolia, where a separate Subgraph can index them. This asynchronous projection
-must not create, duplicate, reverse, or delay spendable application credit. It
-is explicitly relayer-mediated monitoring evidence, not native cross-chain
-verification. The earlier direct-Hedera Graph Node deployment is retained as
-experimental evidence after its JSON-RPC Relay could not provide every receipt
-required to construct canonical blocks.
+non-secret Hedera event references through an allowlisted relayer to a local
+Ganache EVM, where a local Graph Node can index them. This asynchronous
+projection must not create, duplicate, reverse, or delay spendable application
+credit. It is explicitly relayer-mediated monitoring evidence, not native
+cross-chain verification. The Base Sepolia references elsewhere in this README
+belong to the separate provider-discovery registry. The earlier direct-Hedera
+Graph Node deployment is retained as experimental evidence after its JSON-RPC
+Relay could not provide every receipt required to construct canonical blocks.
+
+### Local Hedera monitoring relay
+
+Phase 6B uses a disposable Ganache chain on loopback, with chain ID `1337`.
+Start the chain and deploy the replay-protected anchor contract in separate
+terminals:
+
+```sh
+cp .env.example .env
+npm run evm:local
+```
+
+```sh
+npm run deploy:hedera-anchor:local
+```
+
+The deployment uses separate unlocked Ganache accounts for the deployer and
+allowlisted relayer. It refuses non-loopback RPC endpoints and unexpected chain
+IDs, waits for a successful deployment receipt, and prints non-secret evidence
+including the contract address, transaction hash, block, and relayer address.
+The chain is ephemeral: stopping and restarting Ganache invalidates the prior
+contract address.
+
+See the
+[Phase 6B local relay runbook](docs/PHASE6B_HEDERA_PROJECTION.md#local-deployment)
+for configuration, expected output, verification, shutdown behavior,
+troubleshooting, and security boundaries.
 
 See [ETHGlobal Lisbon 2026 prize strategy](docs/PRIZE_STRATEGY.md) for the
 selected tracks, qualification gates, required evidence, and final submission

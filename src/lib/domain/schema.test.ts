@@ -90,6 +90,7 @@ describe("commerce domain schemas", () => {
       createdAt: now,
     });
     const challenge = challengeSchema.parse({
+      version: "1",
       id: "cha_1",
       quoteId: quote.id,
       payerAccount: "0.0.1000",

@@ -85,6 +85,7 @@ export const decisionSchema = z.strictObject({
 });
 
 export const challengeSchema = z.strictObject({
+  version: z.literal("1"),
   id,
   quoteId: id,
   payerAccount: z.string().min(1),

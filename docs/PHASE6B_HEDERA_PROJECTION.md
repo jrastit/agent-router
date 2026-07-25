@@ -13,9 +13,10 @@ The local foundation is implemented and validated:
 The projection targets a local Ganache EVM rather than Base Sepolia. The
 repository includes a loopback-only deployment command, durable relay
 persistence, a bounded transaction state machine, and a deployable local
-`HederaEventAnchored` Subgraph. Contract and Graph deployment, the correlating
-Graph deployment, reconciliation, UI state, and the complete live replay proof
-remain open in `TODO.md`.
+`HederaEventAnchored` Subgraph. The contract deployment path, correlating Graph
+ingestion, reconciliation, three-plane UI state, recovery semantics, and
+operations contract are implemented. A verified Graph deployment and the
+complete live replay proof remain open in `TODO.md`.
 
 ## Authority and trust boundary
 
@@ -59,18 +60,11 @@ source identity.
 
 ## Required next sequence
 
-1. Add Postgres cursor, verified-event, projection-attempt, and destination
-   transaction records with restrictive RLS and atomic worker functions.
-2. Add a bounded-fee relayer state machine that reconciles an ambiguous
-   transaction hash/nonce before considering any replacement transaction.
-3. Retain non-secret local deployment evidence with each demonstration run.
-4. Deploy the `HederaEventAnchored` Subgraph and correlate indexed entities.
-5. Add reconciliation and separate Hedera, EVM, and Graph UI states.
-6. Exercise one real testnet event and retain replay and Graph query evidence.
-
-Production deployment additionally requires documented key custody, gas
-funding, monitoring, cursor backup, relayer/contract rotation, pause behavior,
-and recovery procedures.
+1. Start and verify the private Linux Graph topology.
+2. Deploy the `HederaEventAnchored` Subgraph to that running Graph Node.
+3. Project one independently Mirror-verified testnet event.
+4. Retain the destination receipt, indexed entity, cursor, and replay-rejection
+   evidence described below.
 
 ## Local deployment
 
@@ -344,3 +338,133 @@ reconcile ambiguous transactions rather than create a second logical anchor.
   raw provider results.
 - Persist only non-secret digests and source provenance in destination events.
 - Never use the local contract or Graph entity to grant application credit.
+
+## Production operations contract
+
+The committed deployment workflow is intentionally restricted to disposable
+local Ganache. This section defines the controls required before adapting the
+relay to a persistent or value-bearing destination. It does not claim that such
+a production deployment exists.
+
+### Key custody and access
+
+- Generate the relayer key inside a managed KMS or HSM that supports the
+  destination chain. The worker receives signing permission, not export access
+  to raw key material.
+- Use separate identities for deployment, relay signing, database service
+  access, and monitoring. The browser receives none of them.
+- Restrict relay signing to the reviewed destination chain ID, anchor contract,
+  `anchorHederaEvent` selector, bounded gas limit, and configured fee ceiling.
+- Require two-person approval for key-policy changes, contract replacement,
+  cursor rewinds, and destination changes. Record approval references outside
+  the public anchor payload.
+- Rotate any credential suspected of exposure before resuming. Do not copy a
+  local Ganache mnemonic or unlocked account into a persistent environment.
+
+`HederaEventAnchor` has an immutable relayer and no privileged owner after
+deployment. The deployer key has no ongoing contract authority. The configured
+relayer key is therefore the only destination write authority and must be
+treated accordingly.
+
+### Gas funding and limits
+
+- Fund only the relayer address with the minimum operational destination gas
+  float. Never fund it from user HBAR deposits or the Postgres credit ledger.
+- Alert below a documented number of worst-case anchor transactions and stop
+  dequeueing before the balance reaches zero.
+- Enforce `maxFeePerGasWei`, `gasLimit`, maximum attempts, and minimum
+  confirmations in worker configuration. A fee spike delays monitoring; it
+  does not delay or reverse Hedera credit.
+- Reconcile the reserved nonce and any known transaction hash before funding or
+  retrying. Never send a new logical anchor merely because an RPC timed out.
+
+### Monitoring and alerts
+
+Alert on:
+
+- Mirror cursor age, a cursor moving backward, repeated pages, malformed source
+  payloads, and source-identity mismatch;
+- verified-event outbox depth and age, retry count, terminal failures, and a
+  `submitting` record without a discoverable transaction at its reserved nonce;
+- relayer balance, fee-ceiling refusal, nonce conflict, receipt ambiguity,
+  explicit revert, reorg, and confirmation depth;
+- Graph indexed head age, finalized destination transactions without entities,
+  provenance mismatch, and query failures; and
+- any attempted projection of a deposit that is not already `credited`.
+
+Page immediately for source-identity mismatch, nonce conflict, destination
+reorg after confirmation, Graph provenance mismatch, or any observed credit
+mutation associated with a monitoring operation. Dashboard EVM and Graph lag
+as degraded monitoring, not as failed payment settlement.
+
+### Cursor backup and restore
+
+Back up `hedera_projection_cursors`,
+`verified_hedera_projection_events`, `hedera_projection_attempts`, and
+`hedera_projection_progress_events` with the same Postgres recovery point as
+the deposit and credit tables. Encrypt backups, test restore quarterly, and
+retain the database recovery point and schema migration version.
+
+Restore in this order:
+
+1. stop every projection and ingestion worker;
+2. restore Postgres and verify credit-journal invariants first;
+3. compare each cursor with its latest verified event and never advance a
+   cursor beyond durable event evidence;
+4. reconcile every reserved nonce or transaction hash against the destination;
+5. replay from the last durable cursor, relying on source-event IDs and the
+   destination contract replay guard; and
+6. resume Graph ingestion only after destination reconciliation completes.
+
+A conservative cursor rewind may replay durable handlers. It must never delete
+verified events or credit rows. Event-level idempotency makes replay safe; a
+cursor jump forward can lose monitoring evidence and is prohibited.
+
+### Pause and relayer rotation
+
+The current contract deliberately has no on-chain pause, owner, or relayer
+mutation function. Do not imply otherwise.
+
+Emergency pause:
+
+1. stop the relay worker and revoke its KMS signing permission;
+2. block destination RPC egress for that identity;
+3. keep Mirror verification and application credit running if their own
+   authority path is healthy;
+4. record the last cursor, reserved nonce, transaction hash, and outbox depth;
+5. reconcile ambiguity before resuming.
+
+Relayer or contract rotation:
+
+1. pause and reconcile the old worker;
+2. deploy a new contract with the replacement relayer;
+3. verify chain ID, bytecode, relayer, deployment receipt, and start block;
+4. deploy a new Subgraph data source and preserve the old deployment as
+   read-only history;
+5. update reviewed server-only configuration atomically;
+6. replay unprojected verified events from Postgres into the new contract; and
+7. resume only after duplicate submission and Graph correlation probes pass.
+
+The old immutable contract cannot be disabled. Removing signing permission from
+its relayer and stopping the worker is the effective pause. Anchors in old and
+new contracts remain monitoring records and must be correlated by source-event
+ID; neither changes authoritative credit.
+
+### Incident recovery
+
+| Incident                          | Required response                                                                                            |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Mirror unavailable                | Hold cursor; do not verify, credit, or project unseen events; resume from the durable cursor.                |
+| Database unavailable              | Stop handling before cursor advance; restore Postgres; replay idempotently.                                  |
+| Crash before broadcast            | Recover the reserved nonce; submit the same logical attempt only if no transaction or anchor exists.         |
+| Ambiguous destination receipt     | Retain the original hash/nonce and wait; do not create a replacement attempt.                                |
+| Explicit revert                   | Record retryable failure, clear reverted destination evidence, and apply the bounded retry policy.           |
+| Destination reorg                 | Record the departed block evidence, recheck `anchored`, and replay only when the old anchor is noncanonical. |
+| Ganache reset or destination loss | Redeploy and rebuild monitoring from durable verified events; never modify Hedera credit.                    |
+| Graph lag or outage               | Keep credit and execution available; retry queries from finalized destination evidence.                      |
+| Graph provenance mismatch         | Stop ingestion for the entity, retain both records, and require operator review.                             |
+
+After any incident, retain non-secret timestamps, source-event IDs, destination
+hashes, block hashes, cursor values, findings, and operator actions. Never put
+keys, prompts, personal data, provider output, or direct database credentials
+in incident evidence.

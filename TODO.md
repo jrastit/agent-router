@@ -278,7 +278,7 @@ application credit.
 - [ ] Prove one live testnet flow from Hedera event through Mirror verification,
       durable relay record, EVM anchor, and Graph entity; demonstrate that
       replaying the same source event does not create a second anchor.
-- [ ] Document production key custody, relayer monitoring, destination gas
+- [x] Document production key custody, relayer monitoring, destination gas
       funding, cursor backup, contract pause/rotation, and recovery procedures.
 
 Exit criterion: one independently Mirror-verified and durably credited Hedera

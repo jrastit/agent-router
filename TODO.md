@@ -91,9 +91,9 @@ engine independently validates.
 
 ## Phase 5 — reusable 0G model-routing toolkit
 
-- [ ] Define a public framework API independent of Next.js, Supabase, Hedera,
+- [x] Define a public framework API independent of Next.js, Supabase, Hedera,
       and the example UI.
-- [ ] Export typed `ModelCatalogAdapter`, `ModelRouter`,
+- [x] Export typed `ModelCatalogAdapter`, `ModelRouter`,
       `ComputeExecutionAdapter`, `StorageEvidenceAdapter`, and
       `ProvenanceVerifier` contracts.
 - [ ] Normalize at least two comparable 0G-hosted model routes with capability,

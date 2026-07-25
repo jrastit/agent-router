@@ -259,7 +259,7 @@ application credit.
 - [ ] Implement and deploy a Subgraph for `HederaEventAnchored`, retaining the
       Hedera source identity and destination transaction provenance as
       separate fields.
-- [ ] Add an idempotent projection and Graph-ingestion worker that correlates the
+- [x] Add an idempotent projection and Graph-ingestion worker that correlates the
       durable, credited Hedera deposit with its destination anchor and indexed
       entity.
 - [ ] Add projection reconciliation for credited Hedera events missing

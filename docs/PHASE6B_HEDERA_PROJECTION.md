@@ -14,8 +14,8 @@ The projection targets a local Ganache EVM rather than Base Sepolia. The
 repository includes a loopback-only deployment command, durable relay
 persistence, a bounded transaction state machine, and a deployable local
 `HederaEventAnchored` Subgraph. Contract and Graph deployment, the correlating
-Graph deployment, the correlating worker, UI state, and the complete live
-replay proof remain open in `TODO.md`.
+Graph deployment, reconciliation, UI state, and the complete live replay proof
+remain open in `TODO.md`.
 
 ## Authority and trust boundary
 

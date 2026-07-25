@@ -9,10 +9,10 @@ Rather than focusing only on how an agent pays, AgentRouter focuses on how an
 agent decides to spend.
 
 > Project status: the application scaffold, deterministic commerce-domain
-> routing, durable storage, and fixture/live provider-discovery adapters are
-> implemented. A live Graph deployment, execution, and payment integrations
-> remain planned until linked to a commit and marked complete in
-> [TODO.md](TODO.md).
+> routing, durable storage, fixture/live provider-discovery adapters, and the
+> Scaleway-backed typed planner are implemented. A live Graph deployment,
+> execution, and payment integrations remain planned until linked to a commit
+> and marked complete in [TODO.md](TODO.md).
 
 ## Problem
 
@@ -90,14 +90,16 @@ The implemented policy engine currently:
 Provider discovery uses one normalized contract for deterministic fixtures and
 live indexed records. The selected source is explicit, and live results retain
 deployment, network, endpoint, block, and query-time provenance. Model-derived
-requirements remain planned for Phase 4.
+requirements and candidate assessments use the Vercel AI SDK with Scaleway
+Generative APIs. The deterministic policy engine independently revalidates
+eligibility, budget, quote expiry, ranking, and selection.
 
 ## Target architecture
 
 | Layer                | Planned technology                | Responsibility                                          |
 | -------------------- | --------------------------------- | ------------------------------------------------------- |
 | Frontend             | Next.js, TypeScript, Tailwind CSS | Task input, policy, progress, result, receipts          |
-| Planner              | Vercel AI SDK                     | Requirement extraction and structured routing decision  |
+| Planner              | Vercel AI SDK + Scaleway GenAI    | Requirement extraction and candidate assessment         |
 | Application database | Supabase/Postgres                 | Durable jobs, policies, quotes, decisions, and receipts |
 | Provider registry    | Base Sepolia EVM contract         | Advertised cross-chain provider metadata and offers     |
 | Provider discovery   | The Graph                         | Index and query the Base Sepolia provider registry      |
@@ -217,12 +219,28 @@ credentials are server-only. The typed contracts in `src/lib/env` reject
 unknown or malformed configuration. Empty optional credentials keep the
 scaffold usable before those integrations are implemented.
 
+### Scaleway planner
+
+Set `SCALEWAY_GENAI_API_KEY` in the server environment to enable planning.
+`SCALEWAY_GENAI_BASE_URL` defaults to Scaleway's OpenAI-compatible
+`https://api.scaleway.ai/v1` endpoint, `SCALEWAY_GENAI_MODEL` selects the
+deployed or serverless model, and `PLANNER_TIMEOUT_MS` defaults to 15 seconds.
+
+The server entry point is `planRouteWithScaleway` in
+`src/lib/planner/server.ts`. It asks Scaleway for schema-constrained requirement
+and assessment objects. A timeout, invalid schema, missing candidate, duplicate
+candidate, or unavailable model activates deterministic fallback evidence.
+Model scores never override hard policy or integer budget checks.
+
 Implementation progress and acceptance criteria live in [TODO.md](TODO.md).
 
 ### Supabase migrations
 
 The durable commerce schema, ownership-aware row-level security, uniqueness
-guards, and atomic workflow functions live in `supabase/migrations`. Validate
+guards, and atomic workflow functions live in `supabase/migrations`. Planner
+persistence updates the extracted requirement, stores candidates, exclusions,
+scores, rationales, selection, policy snapshot, and fallback provenance in one
+transaction; a selected quote is revalidated and reserved atomically. Validate
 the configured database without applying changes with:
 
 ```sh

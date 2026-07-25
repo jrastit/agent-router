@@ -73,6 +73,27 @@ The routing decision should be schema-valid data containing at least:
 The model may derive requirements and explain a choice, but hard policy
 constraints and budget arithmetic must be enforced deterministically.
 
+## Planner model boundary
+
+The server creates an AI SDK OpenAI-compatible provider pointed at Scaleway
+Generative APIs. Both model calls use strict Zod output contracts:
+
+1. extract one typed requirement from the objective; and
+2. score and explain every discovered candidate.
+
+The model cannot set eligibility, exclusion reason codes, rank, or selection.
+Those fields come from the deterministic policy engine after it checks
+capability, privacy class, currency, integer minor-unit budgets, transaction
+limits, and quote expiry. Model timeouts, invalid objects, incomplete
+candidate coverage, and duplicate candidate evaluations are recorded as
+fallback evidence.
+
+The `persist_planner_decision` database transaction locks the job, updates the
+owned requirement, verifies the exact policy version, stores the full decision
+and evidence, and—when there is a selection—revalidates the provider/offer/quote
+binding before accepting the quote and reserving budget. Its idempotency key
+prevents a retry from reserving funds twice.
+
 ## Discovery
 
 The source of truth for advertised provider metadata is a minimal registry

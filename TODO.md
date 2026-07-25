@@ -80,11 +80,11 @@ separate.
 
 ## Phase 4 — planner and decision evidence
 
-- [ ] Use the Vercel AI SDK for typed requirement extraction.
-- [ ] Generate schema-valid provider evaluations.
-- [ ] Enforce all hard constraints and budget arithmetic outside the model.
-- [ ] Persist candidates, exclusions, scores, selection, and policy version.
-- [ ] Add timeout and invalid-model-output fallbacks.
+- [x] Use the Vercel AI SDK for typed requirement extraction.
+- [x] Generate schema-valid provider evaluations.
+- [x] Enforce all hard constraints and budget arithmetic outside the model.
+- [x] Persist candidates, exclusions, scores, selection, and policy version.
+- [x] Add timeout and invalid-model-output fallbacks.
 
 Exit criterion: the planner explains a decision that the deterministic policy
 engine independently validates.

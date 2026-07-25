@@ -1,5 +1,7 @@
 import { keccak256, toUtf8Bytes } from "ethers";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
 
 const liveEnabled =
   process.env.ZG_LIVE_TEST === "true" &&

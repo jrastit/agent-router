@@ -250,7 +250,7 @@ application credit.
 - [x] Bind the destination contract to an allowlisted relayer or an explicit
       M-of-N signer policy and document that this is a relay trust boundary, not
       native cross-chain Hedera consensus verification.
-- [ ] Submit destination transactions with bounded retries, fee limits, and one
+- [x] Submit destination transactions with bounded retries, fee limits, and one
       idempotent state machine; a timeout or ambiguous receipt must reconcile
       the original transaction rather than submit a new logical anchor.
 - [ ] Deploy the projection contract to local Ganache and record its chain ID,

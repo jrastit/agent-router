@@ -1,0 +1,21 @@
+"""
+A relayer-mediated monitoring projection of one independently verified Hedera
+source event. Hedera Mirror evidence and Postgres remain authoritative.
+"""
+type HederaEventAnchor @entity(immutable: true) {
+  id: Bytes!
+  sourceType: Int!
+  sourceId: String!
+  hederaTransactionHash: Bytes!
+  consensusTimestamp: String!
+  sourceIndex: BigInt!
+  eventKind: String!
+  payloadDigest: Bytes!
+  schemaVersion: Int!
+  relayer: Bytes!
+  destinationContract: Bytes!
+  destinationTransactionHash: Bytes!
+  destinationBlockNumber: BigInt!
+  destinationBlockTimestamp: BigInt!
+  destinationLogIndex: BigInt!
+}

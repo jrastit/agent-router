@@ -10,5 +10,6 @@ export default defineConfig([
     "coverage/**",
     "next-env.d.ts",
     "graph/app-events/generated/**",
+    "graph/hedera-projection/generated/**",
   ]),
 ]);

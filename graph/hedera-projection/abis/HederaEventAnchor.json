@@ -1,0 +1,69 @@
+[
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "sourceEventId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint8",
+        "name": "sourceType",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "sourceId",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "transactionHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "consensusTimestamp",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "sourceIndex",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "eventKind",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "payloadDigest",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16",
+        "name": "schemaVersion",
+        "type": "uint16"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "relayer",
+        "type": "address"
+      }
+    ],
+    "name": "HederaEventAnchored",
+    "type": "event"
+  }
+]

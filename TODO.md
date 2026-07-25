@@ -49,8 +49,8 @@ double-spending its reservation.
 
 ## Phase 3 — provider discovery with The Graph
 
-- [ ] Define the discovery-adapter interface and normalized provider model.
-- [ ] Add deterministic fixtures for at least two providers.
+- [x] Define the discovery-adapter interface and normalized provider model.
+- [x] Add deterministic fixtures for at least two providers.
 - [ ] Define the provider registry/subgraph schema.
 - [ ] Implement and deploy the subgraph or agreed indexed data source.
 - [ ] Query The Graph through the discovery adapter.

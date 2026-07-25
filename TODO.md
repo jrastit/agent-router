@@ -292,12 +292,12 @@ a relayer-mediated monitoring projection.
 - [x] Build task, budget, and privacy-policy input.
 - [x] Show discovered providers and normalized quotes.
 - [x] Show exclusions and concise selection evidence.
-- [ ] Stream the persisted workflow timeline over SSE.
-- [ ] Display “payment confirmed; verifying public record” during mirror lag.
-- [ ] Restore the timeline after refresh or reconnect.
-- [ ] Render delivery, total spend, remaining budget, and receipt.
+- [x] Stream the persisted workflow timeline over SSE.
+- [x] Display “payment confirmed; verifying public record” during mirror lag.
+- [x] Restore the timeline after refresh or reconnect.
+- [x] Render delivery, total spend, remaining budget, and receipt.
 - [x] Link Hedera evidence to HashScan.
-- [ ] Make loading, empty, retryable, and terminal failure states explicit.
+- [x] Make loading, empty, retryable, and terminal failure states explicit.
 
 Exit criterion: a new observer can understand the request, alternatives,
 policy, economic decision, payment, and result without narration.

@@ -170,11 +170,12 @@ merely call one private-execution endpoint.
 
 ### The Graph
 
-The Graph powers cross-chain provider discovery by indexing a small provider
-registry deployed on a supported EVM network, initially Base Sepolia. Registry
-records describe providers that execute and settle elsewhere: capability,
-execution network, endpoint, Hedera settlement account, exact price, privacy
-support, and active status. The indexed state is a load-bearing planner input.
+The Graph adapter supports cross-chain provider discovery from a small provider
+registry on a supported EVM network, initially Base Sepolia. Registry records
+describe providers that execute and settle elsewhere: capability, execution
+network, endpoint, Hedera settlement account, exact price, privacy support, and
+active status. A live provider-registry deployment is planned but not yet
+claimed.
 
 The discovery adapter posts `DiscoverProviders` to a configured Graph endpoint,
 normalizes active offers into the same provider/offer/quote contract used by
@@ -193,11 +194,19 @@ The schema and query adapter are implemented, but a live registry deployment
 identifier is intentionally not claimed until a registry contract is indexed
 and its deployment evidence is recorded.
 
-The Graph does not index Hedera transfers, HCS messages, 0G inference events,
-private prompts, or results in this architecture. Hedera payment verification
-uses Mirror Node infrastructure, while execution evidence comes from the 0G
-integration. In short: The Graph is discovery, 0G is execution, and Hedera is
-settlement and audit.
+The Graph never verifies Hedera payments and does not directly index native HBAR
+transfers as settlement truth. Hedera payment verification uses Mirror Node
+infrastructure, atomic application credit lives in Postgres, and execution
+evidence comes from the 0G integration.
+
+The planned monitoring path projects only independently Mirror-verified,
+non-secret Hedera event references through an allowlisted relayer to Base
+Sepolia, where a separate Subgraph can index them. This asynchronous projection
+must not create, duplicate, reverse, or delay spendable application credit. It
+is explicitly relayer-mediated monitoring evidence, not native cross-chain
+verification. The earlier direct-Hedera Graph Node deployment is retained as
+experimental evidence after its JSON-RPC Relay could not provide every receipt
+required to construct canonical blocks.
 
 See [ETHGlobal Lisbon 2026 prize strategy](docs/PRIZE_STRATEGY.md) for the
 selected tracks, qualification gates, required evidence, and final submission

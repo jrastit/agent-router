@@ -141,15 +141,24 @@ Required provider attributes include:
 - quote expiry; and
 - Hedera settlement identity.
 
-The Subgraph boundary is deliberately narrow. It does not index Hedera HBAR
-transfers, HCS messages, 0G inference events, private prompts, or results.
-Hedera Mirror Node data and 0G execution evidence enter AgentRouter through
-their own adapters and retain separate provenance.
+The discovery Subgraph boundary is deliberately narrow. It does not verify or
+directly index native Hedera HBAR transfers, HCS messages, 0G inference events,
+private prompts, or results. Hedera Mirror Node data and 0G execution evidence
+enter AgentRouter through their own adapters and retain separate provenance.
+
+A separate, asynchronous monitoring projection may relay an independently
+Mirror-verified, non-secret Hedera event reference to Base Sepolia for Graph
+indexing. The allowlisted relayer is an explicit trust boundary, and the
+destination event is not native cross-chain verification. Mirror verification
+plus atomic Postgres proof consumption is the only path to application credit;
+projection or indexer lag cannot create, duplicate, reverse, or delay spendable
+funds.
 
 ```text
 Base Sepolia registry → The Graph → discovery and selection
 0G integration                    → private execution
 Hedera SDK / Mirror Node / HCS    → settlement and audit
+Mirror-verified Hedera reference  → Base Sepolia → The Graph monitoring
 ```
 
 ## Private execution

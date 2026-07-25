@@ -57,8 +57,8 @@ double-spending its reservation.
 - [x] Show discovery provenance in discovery results for decision evidence.
 
 Exit criterion: the planner works with deterministic fixtures and the
-implemented Graph discovery adapter. Live Graph work is limited to Hedera
-monitoring in Phase 6A.
+implemented Graph discovery adapter. A live provider-registry deployment is not
+yet claimed. Hedera monitoring is a separate projection described in Phase 6B.
 
 ## Phase 4 — planner and decision evidence
 
@@ -121,11 +121,11 @@ routing receipt against the 0G Chain anchor.
 Exit criterion: one live paid execution produces a durable receipt, public
 transaction evidence, an HCS audit anchor, and no replay path.
 
-Phase 6 settlement/audit is verified. Phase 5 was skipped by request, so the
-live proof uses the settlement smoke flow rather than a paid provider execution;
-the combined exit criterion remains dependent on Phase 5.
+Phase 6 settlement/audit is verified. Its live proof used the settlement smoke
+flow; a combined paid provider execution remains a separate end-to-end demo
+milestone.
 
-## Phase 6A — prepaid HBAR deposits and indexed balance monitoring
+## Phase 6A — prepaid HBAR deposits and authoritative application credit
 
 - [ ] Define a versioned user-deposit intent binding the application user,
       Hedera payer, treasury recipient, network, exact tinybar amount, memo,
@@ -135,24 +135,59 @@ the combined exit criterion remains dependent on Phase 5.
       existing operator-funded transfer only as an explicitly labeled provider
       settlement or guarded demo path.
 - [ ] Add durable deposit states for intent created, submitted, consensus
-      confirmed, mirror pending, mirror verified, Graph event pending, Graph
-      indexed, credited, reconciliation required, and rejected.
+      confirmed, mirror pending, mirror verified, credited, reconciliation
+      required, and rejected. Track projection and Graph-indexing states
+      separately so monitoring lag cannot change the authoritative balance.
 - [ ] Verify each native HBAR deposit through Hedera Mirror Node before it can
       increase spendable application balance; validate payer, recipient,
       network, exact tinybars, memo, transaction type, success, timestamp, and
       intent binding.
 - [ ] Consume each Hedera transaction proof exactly once and atomically credit
       the user's integer-tinybar ledger balance with an immutable journal entry.
-- [ ] Define a minimal `DepositObserved` monitoring event containing only the
+- [ ] Define a minimal `DepositObserved` monitoring payload containing only the
       deposit ID, user pseudonymous identifier or hash, Hedera transaction hash,
       exact tinybars, verification timestamp, and version; never publish
       personal data, credentials, or raw application requests.
-- [x] Select and document one Graph-compatible event source:
-  - preferred experiment: a payable Hedera EVM deposit contract whose event can
-    be indexed reliably by a self-hosted Graph Node through Hedera's
-    JSON-RPC Relay; or
-  - fallback: a server relayer emits the already mirror-verified deposit
-    reference from a minimal contract on Base Sepolia.
+- [x] Select Base Sepolia as the Graph-compatible destination for the
+      relayer-mediated monitoring projection described in Phase 6B. This
+      destination is not payment truth and is not yet deployed.
+- [ ] Enqueue the monitoring projection only after the deposit is independently
+      Mirror-verified and atomically credited; projection failure or Graph lag
+      must not reverse, duplicate, or delay authoritative application credit.
+- [ ] Add a reconciliation path for Mirror-verified deposits that cannot be
+      credited, and separately reconcile credited deposits whose projection or
+      indexed monitoring entity is missing, stale, or mismatched.
+- [ ] Reserve user credit atomically before 0G execution, debit the actual
+      charge once, and release any unused reservation without submitting a
+      second HBAR transfer.
+- [ ] Fund 0G Compute from the application's separately pre-funded 0G Payment
+      Layer balance and record the exchange-rate snapshot and treasury liability
+      used for the HBAR-denominated user charge.
+- [ ] Keep HBAR-to-0G treasury rebalancing outside the request transaction;
+      document that no native or automatic HBAR-to-0G conversion is claimed.
+- [ ] Expose user-visible pending, credited, reserved, spent, refunded, and
+      reconciliation balances, with separate Hedera, projection, and Graph
+      monitoring evidence.
+- [ ] Test duplicate deposits, Mirror lag, mismatched proofs, atomic-credit
+      retries, insufficient 0G treasury balance, partial execution charges, and
+      concurrent reservations. Phase 6B owns projection and Subgraph failure
+      tests.
+- [ ] Prove one live flow in which a user-signed testnet HBAR deposit is
+      Mirror-verified, credits exactly once, and funds one policy-approved 0G
+      operation from treasury inventory while projection proceeds independently.
+
+Exit criterion: a user deposit follows `HBAR deposit → Hedera Mirror
+verification → atomic Postgres proof consumption and application credit`, and
+one 0G operation consumes that credit exactly once while the app's separate 0G
+treasury pays the 0G network. Projection and Graph-indexing lag remain visible
+but cannot create, duplicate, reverse, or delay spendable credit. The UI and
+receipt never describe this as a direct HBAR-to-0G transfer.
+
+### Completed direct-Hedera Graph Node experiment
+
+The following artifacts remain useful experimental evidence, but the stalled
+direct indexer is not a Phase 6A or Phase 6B production dependency:
+
 - [x] Add a repeatable Hedera Subgraph validation probe that checks Testnet
       chain identity, the finalized contract log, Subgraph health and indexing
       progress, and exact transaction/block correlation for returned app-event
@@ -171,53 +206,17 @@ the combined exit criterion remains dependent on Phase 5.
 - [x] Deploy the app-event contract and Subgraph and record the contract
       address, deployment transaction, Subgraph identifier, start block, and
       query endpoint without secrets.
-- [ ] Restore Hedera chain-head ingestion: the healthy deployment remains at
-      block `38431806` with a null chain head while the public relay has
-      advanced beyond the configured start block `38431807`.
-- [ ] Emit one deterministic Testnet event after indexing advances and retain
-      its transaction and query evidence.
-- [ ] Run `npm run validate:hedera-subgraph` against that live event and retain
-      its successful JSON output as reproducible deployment evidence.
-- [ ] Treat a fallback Base Sepolia relay event as monitoring/projection
-      evidence only; it must never replace Hedera Mirror Node as payment truth.
 - [x] Implement a Subgraph for `DepositObserved`, balance-credit, debit,
       reservation, 0G execution-charge, refund, and reconciliation events so an
       operator can monitor the complete economic lifecycle without exposing
       secrets.
-- [ ] Add an idempotent Graph ingestion worker that correlates an indexed
-      `DepositObserved` entity with the durable deposit intent and verified
-      Mirror proof.
-- [ ] Require both `mirror_verified` and `graph_indexed` before the requested
-      `deposit → Graph event → app user balance increase` path marks funds
-      spendable; tolerate either indexer lag by remaining pending rather than
-      crediting twice.
-- [ ] Add a reconciliation path for Mirror-verified deposits whose monitoring
-      event is missing or stale, and for indexed events whose Hedera proof is
-      missing or mismatched.
-- [ ] Reserve user credit atomically before 0G execution, debit the actual
-      charge once, and release any unused reservation without submitting a
-      second HBAR transfer.
-- [ ] Fund 0G Compute from the application's separately pre-funded 0G Payment
-      Layer balance and record the exchange-rate snapshot and treasury liability
-      used for the HBAR-denominated user charge.
-- [ ] Keep HBAR-to-0G treasury rebalancing outside the request transaction;
-      document that no native or automatic HBAR-to-0G conversion is claimed.
-- [ ] Expose user-visible pending, credited, reserved, spent, refunded, and
-      reconciliation balances, with links to Hedera and indexed monitoring
-      evidence.
-- [ ] Test duplicate deposits, duplicate Graph events, event reordering,
-      Subgraph lag/reorg, Mirror lag, mismatched relay data, insufficient 0G
-      treasury balance, partial execution charges, and concurrent reservations.
-- [ ] Prove one live flow in which a user-signed testnet HBAR deposit is
-      Mirror-verified, appears in the Subgraph, credits exactly once, funds one
-      policy-approved 0G operation from treasury inventory, and produces a
-      reconciled receipt.
 
-Exit criterion: a user deposit follows `HBAR deposit → Hedera Mirror
-verification → Graph-indexed monitoring event → atomic application credit`,
-and one 0G operation consumes that credit exactly once while the app's separate
-0G treasury pays the 0G network. The UI and receipt never describe this as a
-direct HBAR-to-0G transfer.
+The deployment remains healthy but blocked at block `38431806`, before start
+block `38431807`, because the configured relay exposes blocks containing
+transactions with unavailable receipts. Do not patch Graph Node to accept a
+partial canonical block. Restoring ingestion, emitting a live event, and
+retaining successful probe output are optional diagnostics rather than delivery
+gates.
 
 ## Phase 6B — mirror-verified Hedera event projection to EVM
 
@@ -225,8 +224,10 @@ The direct Hedera Graph Node experiment is not a production dependency. The
 configured Hedera JSON-RPC Relay can advertise transactions in a block while
 returning `null` for their receipts, so Graph Node correctly refuses to build a
 partial canonical block. Do not patch Graph Node to skip those transactions.
-Project only independently Mirror-verified Hedera events onto a
-Graph-compatible EVM chain instead.
+Project only independently Mirror-verified Hedera events onto Base Sepolia
+instead. The projection is asynchronous monitoring evidence: Mirror verification
+and atomic Postgres proof consumption remain the only path to application
+credit.
 
 - [ ] Define a versioned `HederaEventAnchor` payload binding the Hedera network,
       source contract or HCS topic, transaction hash, consensus timestamp,
@@ -252,19 +253,22 @@ Graph-compatible EVM chain instead.
 - [ ] Submit destination transactions with bounded retries, fee limits, and one
       idempotent state machine; a timeout or ambiguous receipt must reconcile
       the original transaction rather than submit a new logical anchor.
-- [ ] Deploy the projection contract to the selected Graph-compatible EVM
-      testnet and record its chain ID, address, deployment transaction, start
-      block, source verification, and relayer address.
+- [ ] Deploy the projection contract to Base Sepolia and record its chain ID,
+      address, deployment transaction, start block, source verification, and
+      relayer address.
 - [ ] Implement and deploy a Subgraph for `HederaEventAnchored`, retaining the
       Hedera source identity and destination transaction provenance as
       separate fields.
-- [ ] Add a projection reconciliation worker for Mirror-verified events missing
+- [ ] Add an idempotent projection and Graph-ingestion worker that correlates the
+      durable, credited Hedera deposit with its destination anchor and indexed
+      entity.
+- [ ] Add projection reconciliation for credited Hedera events missing
       destination anchors, destination anchors missing durable relay records,
       and Subgraph entities lagging their finalized destination transactions.
-- [ ] Keep application credit and provider execution gated by authoritative
-      Hedera Mirror verification and atomic Postgres proof consumption; Graph
-      indexing may gate monitoring completeness but must not create spendable
-      funds by itself.
+- [ ] Keep application credit and provider execution gated only by authoritative
+      Hedera Mirror verification and atomic Postgres proof consumption; EVM
+      projection and Graph indexing may change monitoring completeness but must
+      not create, duplicate, reverse, or delay spendable funds.
 - [ ] Show separate Hedera source, EVM projection, and Graph indexing states in
       the UI, with links to both chain explorers and an explicit relayer-trust
       label.
@@ -277,10 +281,11 @@ Graph-compatible EVM chain instead.
 - [ ] Document production key custody, relayer monitoring, destination gas
       funding, cursor backup, contract pause/rotation, and recovery procedures.
 
-Exit criterion: one independently Mirror-verified Hedera event is projected
-exactly once to a Graph-compatible EVM chain and indexed by The Graph, while
-the receipt and UI clearly preserve Hedera as the source of truth and identify
-the destination event as a relayer-mediated monitoring projection.
+Exit criterion: one independently Mirror-verified and durably credited Hedera
+event is projected exactly once to Base Sepolia and indexed by The Graph, while
+the receipt and UI clearly preserve Hedera and Postgres as the authoritative
+payment and balance records and identify the destination event as a
+relayer-mediated monitoring projection.
 
 ## Phase 7 — product experience
 

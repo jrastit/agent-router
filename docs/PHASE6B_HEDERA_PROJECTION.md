@@ -14,7 +14,8 @@ The projection targets a local Ganache EVM rather than Base Sepolia. The
 repository includes a loopback-only deployment command, durable relay
 persistence, a bounded transaction state machine, and a deployable local
 `HederaEventAnchored` Subgraph. Contract and Graph deployment, the correlating
-worker, UI state, and the complete live replay proof remain open in `TODO.md`.
+Graph deployment, the correlating worker, UI state, and the complete live
+replay proof remain open in `TODO.md`.
 
 ## Authority and trust boundary
 
@@ -182,6 +183,31 @@ Run the complete repository gate before committing changes:
 ```sh
 npm run validate
 ```
+
+### Recorded local deployment
+
+The following disposable deployment was completed on 2026-07-25 with the
+documented command. It proves the local deployment path; it is not a persistent
+or value-bearing network:
+
+| Field                   | Recorded value                                                       |
+| ----------------------- | -------------------------------------------------------------------- |
+| Network                 | `ganache-local`                                                      |
+| Chain ID                | `1337`                                                               |
+| Contract                | `0xd98662DbEB5B731404C6109C01C34f51cB4Ba39e`                         |
+| Deployment transaction  | `0x226d573e3454f229fbfb48af5513f90781b6175175ecc8969fb8b58a1910e326` |
+| Start block             | `1`                                                                  |
+| Deployer                | `0x0fbF7d3629EfFeFcd8689673B57FCA6a5706ad78`                         |
+| Allowlisted relayer     | `0xd7C5B5FBAAb17B048e0568E0Ade7Da55e65aDE28`                         |
+| Solidity compiler       | `0.8.36+commit.8a079791.Emscripten.clang`                            |
+| EVM version             | `shanghai`                                                           |
+| Source verification     | committed source, ABI-alignment test, and Ganache integration test   |
+| Authoritative truth     | Hedera Mirror verification and atomic Postgres proof consumption     |
+| Destination trust model | relayer-mediated monitoring only                                     |
+
+The in-memory Ganache process was stopped after recording the receipt, so this
+address and transaction are historical local evidence rather than a live
+endpoint. A fresh process requires a fresh deployment and new manifest values.
 
 ### Stop and restart
 

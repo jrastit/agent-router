@@ -211,6 +211,28 @@ The in-memory Ganache process was stopped after recording the receipt, so this
 address and transaction are historical local evidence rather than a live
 endpoint. A fresh process requires a fresh deployment and new manifest values.
 
+### Deploy the projection Subgraph
+
+With Ganache and a Graph Node configured for the `ganache-local` network
+running, set the fresh contract address and deployment block in `.env`:
+
+```sh
+LOCAL_HEDERA_ANCHOR_CONTRACT_ADDRESS=0x...
+LOCAL_HEDERA_ANCHOR_START_BLOCK=1
+```
+
+Then deploy through the loopback-only Graph admin and IPFS APIs:
+
+```sh
+npm run deploy:hedera-projection-subgraph:local
+```
+
+The command validates the address and start block, rejects non-loopback admin
+or IPFS URLs, writes its generated network file with mode `0600`, removes the
+temporary directory, and reports the query URL and monitoring-only authority
+label. A successful `graph build` does not satisfy the deployment milestone;
+retain the actual deployment and indexed-entity evidence before checking it.
+
 ### Stop and restart
 
 Press `Ctrl-C` in terminal one to stop Ganache. The default chain is in-memory:

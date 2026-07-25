@@ -273,4 +273,50 @@ describe("readVerifiedHederaEvents", () => {
       }),
     ).rejects.toThrow("mismatched HCS topic");
   });
+
+  it("parses the native Mirror HCS transaction ID object", async () => {
+    const handle = vi.fn();
+    await readVerifiedHederaEvents({
+      mirrorNodeUrl: "https://mirror.example",
+      source: { type: "hcs_message", id: "0.0.8001" },
+      cursorStore: memoryCursor(),
+      fetcher: async () =>
+        new Response(
+          JSON.stringify({
+            messages: [
+              {
+                topic_id: "0.0.8001",
+                consensus_timestamp: "1784941222.395471303",
+                sequence_number: 3,
+                message: "cHVibGlj",
+                chunk_info: {
+                  initial_transaction_id: {
+                    account_id: "0.0.9651299",
+                    transaction_valid_start: "1784941214.275325011",
+                    scheduled: false,
+                    nonce: 0,
+                  },
+                  number: 1,
+                  total: 1,
+                },
+              },
+            ],
+            links: { next: null },
+          }),
+        ),
+      handle,
+    });
+
+    expect(handle).toHaveBeenCalledWith({
+      sourceEventId: expect.stringMatching(/^0x[a-f0-9]{64}$/),
+      mirrorVerified: true,
+      anchor: expect.objectContaining({
+        sourceType: "hcs_message",
+        sourceId: "0.0.8001",
+        transactionHash: expect.stringMatching(/^0x[a-f0-9]{64}$/),
+        consensusTimestamp: "1784941222.395471303",
+        sourceIndex: 3,
+      }),
+    });
+  });
 });

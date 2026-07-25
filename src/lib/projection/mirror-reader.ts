@@ -29,6 +29,18 @@ const contractLogsResponseSchema = z
   })
   .passthrough();
 
+const initialTransactionIdSchema = z.union([
+  z.string().min(1),
+  z
+    .object({
+      account_id: z.string().regex(/^\d+\.\d+\.\d+$/),
+      transaction_valid_start: z.string().regex(/^\d+\.\d{1,9}$/),
+      scheduled: z.boolean().optional(),
+      nonce: z.number().int().nonnegative().optional(),
+    })
+    .passthrough(),
+]);
+
 const topicMessageSchema = z
   .object({
     topic_id: z.string(),
@@ -36,7 +48,7 @@ const topicMessageSchema = z
     sequence_number: z.number().int().nonnegative(),
     message: z.string(),
     chunk_info: z
-      .object({ initial_transaction_id: z.string() })
+      .object({ initial_transaction_id: initialTransactionIdSchema })
       .passthrough()
       .optional(),
   })
@@ -73,6 +85,18 @@ function nextUrl(
 ): string | null {
   if (!next) return null;
   return new URL(next, `${baseUrl.replace(/\/$/, "")}/`).toString();
+}
+
+function canonicalInitialTransactionId(
+  value: z.infer<typeof initialTransactionIdSchema>,
+): string {
+  if (typeof value === "string") return value;
+  return [
+    value.account_id,
+    value.transaction_valid_start,
+    value.scheduled === true ? "scheduled" : "not-scheduled",
+    String(value.nonce ?? 0),
+  ].join("|");
 }
 
 export async function readVerifiedHederaEvents(input: {
@@ -159,7 +183,10 @@ export async function readVerifiedHederaEvents(input: {
           sourceType: "hcs_message",
           sourceId: message.topic_id,
           transactionHash: sha256Bytes32(
-            message.chunk_info?.initial_transaction_id ??
+            (message.chunk_info &&
+              canonicalInitialTransactionId(
+                message.chunk_info.initial_transaction_id,
+              )) ??
               `${message.topic_id}@${message.consensus_timestamp}`,
           ),
           consensusTimestamp: message.consensus_timestamp,

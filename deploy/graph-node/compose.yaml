@@ -68,11 +68,7 @@ services:
       - "127.0.0.1:${GRAPH_STATUS_PORT:-8030}:8030"
       - "127.0.0.1:${GRAPH_METRICS_PORT:-8040}:8040"
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          'curl --fail --silent --show-error http://127.0.0.1:8030/graphql -H ''content-type: application/json'' --data ''{"query":"{ indexingStatuses { subgraph } }"}'' >/dev/null',
-        ]
+      test: ["CMD", "nc", "-z", "127.0.0.1", "8030"]
       interval: 15s
       timeout: 10s
       retries: 20

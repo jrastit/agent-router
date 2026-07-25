@@ -8,7 +8,9 @@ interface ComposeService {
   ports?: string[];
   environment?: Record<string, string>;
   volumes?: string[];
-  healthcheck?: unknown;
+  healthcheck?: {
+    test: string[];
+  };
 }
 
 interface ComposeFile {
@@ -61,5 +63,15 @@ describe("production Graph Node Compose configuration", () => {
         ({ healthcheck }) => healthcheck !== undefined,
       ),
     ).toBe(true);
+  });
+
+  it("uses a health-check client included in the Graph Node image", () => {
+    expect(compose.services["graph-node"].healthcheck?.test).toEqual([
+      "CMD",
+      "nc",
+      "-z",
+      "127.0.0.1",
+      "8030",
+    ]);
   });
 });

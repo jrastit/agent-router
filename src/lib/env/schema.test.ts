@@ -10,6 +10,8 @@ describe("environment contract", () => {
     expect(serverEnvSchema.parse({})).toMatchObject({
       APP_ENV: "development",
       HEDERA_NETWORK: "testnet",
+      HEDERA_PROJECTION_PUBLIC_QUERY_URL:
+        "https://graph.router.fexhu.com/subgraphs/name/agent-router/hedera-projection",
       DISCOVERY_SOURCE: "fixture",
       GRAPH_MAX_STALENESS_MS: 300_000,
       ZG_ROUTER_BASE_URL: "https://router-api.0g.ai/v1",
@@ -46,6 +48,17 @@ describe("environment contract", () => {
       DISCOVERY_SOURCE: "the-graph",
       GRAPH_MAX_STALENESS_MS: 60_000,
     });
+  });
+
+  it("keeps the projection query endpoint server-side", () => {
+    const url =
+      "https://graph.router.fexhu.com/subgraphs/name/agent-router/hedera-projection";
+    expect(
+      serverEnvSchema.parse({
+        HEDERA_PROJECTION_PUBLIC_QUERY_URL: url,
+      }).HEDERA_PROJECTION_PUBLIC_QUERY_URL,
+    ).toBe(url);
+    expect(serverOnlyEnvKeys).toContain("HEDERA_PROJECTION_PUBLIC_QUERY_URL");
   });
 
   it("rejects malformed server configuration", () => {

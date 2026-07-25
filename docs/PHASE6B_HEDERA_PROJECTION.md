@@ -245,6 +245,19 @@ is intentionally not published to the host. Override the host ports with the
 variables in `deploy/graph-node/graph-node.env.example` when necessary. Do not
 change the loopback bind without a separate security review.
 
+Application ingestion uses the server-only
+`HEDERA_PROJECTION_PUBLIC_QUERY_URL`. Its safe default is the POST-only public
+query endpoint:
+
+```text
+https://graph.router.fexhu.com/subgraphs/name/agent-router/hedera-projection
+```
+
+The local proof runner continues to use
+`HEDERA_PROJECTION_SUBGRAPH_QUERY_URL` and rejects non-loopback endpoints. This
+separation prevents a production URL from weakening the guarded local
+deployment workflow.
+
 Run the remaining verification on Linux with Docker Engine, Docker Compose v2,
 Node.js, and npm available. Keep Ganache, Graph Node, IPFS, and Postgres
 disposable and isolated from production data.

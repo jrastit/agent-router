@@ -168,7 +168,7 @@ milestone.
 - [x] Expose user-visible pending, credited, reserved, spent, refunded, and
       reconciliation balances, with separate Hedera, projection, and Graph
       monitoring evidence.
-- [ ] Test duplicate deposits, Mirror lag, mismatched proofs, atomic-credit
+- [x] Test duplicate deposits, Mirror lag, mismatched proofs, atomic-credit
       retries, insufficient 0G treasury balance, partial execution charges, and
       concurrent reservations. Phase 6B owns projection and Subgraph failure
       tests.

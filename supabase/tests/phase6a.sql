@@ -8,6 +8,10 @@ select public.create_deposit_intent(
   'deposit-1', '1', '0.0.1000', '0.0.2000', 'testnet', 10000000,
   'agent-router:deposit-1', now() + interval '5 minutes', 'deposit-request-1'
 );
+select public.create_deposit_intent(
+  'deposit-1', '1', '0.0.1000', '0.0.2000', 'testnet', 10000000,
+  'agent-router:deposit-1', now() + interval '5 minutes', 'deposit-request-1'
+);
 select public.submit_deposit_proof('deposit-1', 'proof-deposit-1');
 select public.credit_verified_deposit(
   'deposit-1', 'proof-deposit-1',
@@ -37,6 +41,9 @@ begin
   if (select count(*) from public.credit_journal where deposit_id = 'deposit-1') <> 1 then
     raise exception 'deposit was not credited exactly once';
   end if;
+  if (select count(*) from public.deposit_intents where idempotency_key = 'deposit-request-1') <> 1 then
+    raise exception 'duplicate deposit intent was created';
+  end if;
   if not exists (
     select 1 from public.deposits
     where id = 'deposit-1' and state = 'credited'
@@ -51,6 +58,16 @@ begin
       'reservation-too-large', 'job-1', 6000001, '{}', 6000001, 'reserve-too-large'
     );
     raise exception 'insufficient credit reservation succeeded';
+  exception when sqlstate 'P0001' then null;
+  end;
+  -- reserve_user_credit locks credit_accounts FOR UPDATE. A concurrent request
+  -- serializes behind the first and observes this reduced available balance.
+  begin
+    perform public.reserve_user_credit(
+      'reservation-concurrent-loser', 'job-1', 6000001, '{}', 6000001,
+      'reserve-concurrent-loser'
+    );
+    raise exception 'serialized concurrent reservation overspent the account';
   exception when sqlstate 'P0001' then null;
   end;
 end

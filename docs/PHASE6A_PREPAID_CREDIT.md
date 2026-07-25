@@ -80,3 +80,27 @@ user-signing material, and insufficient 0G treasury inventory.
 A new live user-wallet deposit and combined 0G operation must be recorded
 before marking the final Phase 6A live-proof checkbox complete. Do not reuse the
 operator-funded Phase 6 settlement smoke as that evidence.
+
+## Authenticated deposit API
+
+The production application exposes two server-only persistence boundaries:
+
+```text
+POST /api/deposits/intents
+POST /api/deposits/{depositId}/proof
+```
+
+Both require a Supabase user access token in the `Authorization: Bearer`
+header. The server forwards that user token to the security-definer database
+function so `auth.uid()` remains the owner. The service-role key is used only
+as the server-side Supabase API key and never reaches the browser.
+
+The intent endpoint accepts payer account, exact integer tinybars, and an
+idempotency key. Network, treasury recipient, memo, five-minute expiry, and
+deposit ID are server-derived. It returns the saved intent and a
+`hedera-hbar-user-deposit` signing request.
+
+The proof endpoint accepts only the finalized Hedera transaction ID. It marks
+the owner-bound deposit submitted and explicitly reports that independent
+Mirror verification is still pending. Neither endpoint accepts a private key,
+raw signed transaction bytes, or authority to submit another payment.

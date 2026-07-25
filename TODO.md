@@ -178,7 +178,7 @@ milestone.
   - [x] Deploy the reviewed commerce, prepaid-credit, and projection migrations
         to the production Supabase database with tracked versions and a
         post-deployment schema probe.
-  - [ ] Expose authenticated server endpoints for creating a bound deposit
+  - [x] Expose authenticated server endpoints for creating a bound deposit
         intent and submitting a user-signed Hedera transaction proof without
         accepting or handling the user's private key.
   - [ ] Add an external Hedera wallet signing path that displays the exact

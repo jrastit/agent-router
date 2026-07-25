@@ -1,6 +1,8 @@
 import "server-only";
 
 import { serverEnv } from "../env/server";
+import { createAiSdkGenerator } from "./generate";
+import { planRoute, type PlannerInput, type PlannerResult } from "./planner";
 import { createScalewayModel } from "./scaleway";
 
 export function getPlannerModel() {
@@ -13,4 +15,17 @@ export function getPlannerModel() {
     baseUrl: serverEnv.SCALEWAY_GENAI_BASE_URL,
     model: serverEnv.SCALEWAY_GENAI_MODEL,
   });
+}
+
+export async function planRouteWithScaleway(
+  input: Omit<PlannerInput, "timeoutMs"> & { timeoutMs?: number },
+): Promise<PlannerResult> {
+  const model = getPlannerModel();
+  return planRoute(
+    {
+      ...input,
+      timeoutMs: input.timeoutMs ?? serverEnv.PLANNER_TIMEOUT_MS,
+    },
+    createAiSdkGenerator(model),
+  );
 }

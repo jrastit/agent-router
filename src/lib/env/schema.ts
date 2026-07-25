@@ -29,7 +29,13 @@ export const serverEnvSchema = z
       .nonnegative()
       .default(300_000),
     GRAPH_ACCESS_TOKEN: optionalSecret,
-    OPENAI_API_KEY: optionalSecret,
+    SCALEWAY_GENAI_API_KEY: optionalSecret,
+    SCALEWAY_GENAI_BASE_URL: z
+      .string()
+      .url()
+      .default("https://api.scaleway.ai/v1"),
+    SCALEWAY_GENAI_MODEL: z.string().min(1).default("qwen3.5-27b"),
+    PLANNER_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
     SUPABASE_SERVICE_ROLE_KEY: optionalSecret,
   })
   .strict();
@@ -45,6 +51,9 @@ export const serverOnlyEnvKeys = [
   "GRAPH_NETWORK",
   "GRAPH_MAX_STALENESS_MS",
   "GRAPH_ACCESS_TOKEN",
-  "OPENAI_API_KEY",
+  "SCALEWAY_GENAI_API_KEY",
+  "SCALEWAY_GENAI_BASE_URL",
+  "SCALEWAY_GENAI_MODEL",
+  "PLANNER_TIMEOUT_MS",
   "SUPABASE_SERVICE_ROLE_KEY",
 ] as const;

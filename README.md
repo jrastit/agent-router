@@ -19,6 +19,10 @@ agent decides to spend.
 > Chain integrations remain planned until linked to a commit and marked
 > complete in [TODO.md](TODO.md).
 
+Live 0G Compute Router configuration, privacy controls, and redacted execution
+evidence are recorded in
+[docs/0G_COMPUTE_EVIDENCE.md](docs/0G_COMPUTE_EVIDENCE.md).
+
 ## 0G Infrastructure track scope
 
 The target is **Best Infrastructure & Tooling on 0G**, specifically a

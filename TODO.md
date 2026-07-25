@@ -100,7 +100,7 @@ engine independently validates.
       exact price, privacy, latency, model identity, and endpoint provenance.
 - [ ] Document the exact 0G Compute, Storage, and Chain SDKs, networks,
       guarantees, and verification fields actually used.
-- [ ] Implement live 0G Compute execution with typed results, bounded retries,
+- [x] Implement live 0G Compute execution with typed results, bounded retries,
       and stable failure codes.
 - [ ] Persist non-secret evidence or memory through 0G Storage and retain its
       content-addressed reference.

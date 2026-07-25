@@ -12,7 +12,24 @@ describe("environment contract", () => {
       HEDERA_NETWORK: "testnet",
       DISCOVERY_SOURCE: "fixture",
       GRAPH_MAX_STALENESS_MS: 300_000,
+      ZG_ROUTER_BASE_URL: "https://router-api.0g.ai/v1",
+      ZG_COMPUTE_MAX_ATTEMPTS: 3,
+      ZG_COMPUTE_TIMEOUT_MS: 30_000,
     });
+  });
+
+  it("keeps both 0G Router credentials server-only", () => {
+    const parsed = serverEnvSchema.parse({
+      G_API_KEY_PRIVATE: "sk-inference",
+      G_API_KEY_MANAGEMENT: "mk-management",
+    });
+    expect(parsed).toMatchObject({
+      G_API_KEY_PRIVATE: "sk-inference",
+      G_API_KEY_MANAGEMENT: "mk-management",
+    });
+    expect(serverOnlyEnvKeys).toEqual(
+      expect.arrayContaining(["G_API_KEY_PRIVATE", "G_API_KEY_MANAGEMENT"]),
+    );
   });
 
   it("parses server-only Graph discovery configuration", () => {

@@ -43,6 +43,11 @@ export const serverEnvSchema = z
       .default("https://api.scaleway.ai/v1"),
     SCALEWAY_GENAI_MODEL: z.string().min(1).default("qwen3.5-27b"),
     PLANNER_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
+    G_API_KEY_PRIVATE: optionalSecret,
+    G_API_KEY_MANAGEMENT: optionalSecret,
+    ZG_ROUTER_BASE_URL: z.string().url().default("https://router-api.0g.ai/v1"),
+    ZG_COMPUTE_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(5).default(3),
+    ZG_COMPUTE_TIMEOUT_MS: z.coerce.number().int().positive().default(30_000),
     SUPABASE_URL: z.string().url().optional(),
     SUPABASE_SERVICE_ROLE_KEY: optionalSecret,
   })
@@ -67,6 +72,11 @@ export const serverOnlyEnvKeys = [
   "SCALEWAY_GENAI_BASE_URL",
   "SCALEWAY_GENAI_MODEL",
   "PLANNER_TIMEOUT_MS",
+  "G_API_KEY_PRIVATE",
+  "G_API_KEY_MANAGEMENT",
+  "ZG_ROUTER_BASE_URL",
+  "ZG_COMPUTE_MAX_ATTEMPTS",
+  "ZG_COMPUTE_TIMEOUT_MS",
   "SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
 ] as const;

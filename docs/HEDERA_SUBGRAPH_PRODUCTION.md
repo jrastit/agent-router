@@ -117,6 +117,17 @@ cd /opt/agent-router
 npm run deploy:hedera-app-events
 ```
 
+For an existing native Hedera operator, including an Ed25519 account, configure
+`HEDERA_OPERATOR_ID` and `HEDERA_OPERATOR_KEY` instead and run:
+
+```sh
+npm run deploy:hedera-app-events:sdk
+```
+
+This path uses `ContractCreateFlow` and binds the publisher to the operator's
+long-zero Solidity address. It waits for JSON-RPC bytecode visibility before
+reporting a start block.
+
 Retain the JSON output. Set its `contractAddress` and `startBlock` in `.env`:
 
 ```text
@@ -127,6 +138,9 @@ HEDERA_APP_EVENT_START_BLOCK=123456
 The contract publisher is the deployment signer. Keep that key in the intended
 server-side secret manager if the application will publish more events, or
 remove it from the deployment host when event publication happens elsewhere.
+
+The verified Testnet identifiers and current indexing state are recorded in
+[Hedera Subgraph deployment evidence](HEDERA_SUBGRAPH_EVIDENCE.md).
 
 ## 4. Deploy the Subgraph
 

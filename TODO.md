@@ -183,12 +183,17 @@ the combined exit criterion remains dependent on Phase 5.
 - [x] Add a pinned Linux Compose stack and production runbook for Graph Node,
       PostgreSQL, Kubo, TLS query proxying, backups, monitoring, upgrades, and
       rollback; bind every operator interface to server loopback.
-- [ ] Provision a self-hosted Graph Node with Hedera Testnet JSON-RPC Relay,
+- [x] Provision a self-hosted Graph Node with Hedera Testnet JSON-RPC Relay,
       PostgreSQL, and IPFS connectivity; keep its administration and indexing
       status ports private.
-- [ ] Deploy the app-event contract and Subgraph, emit one deterministic
-      Testnet event, and record the contract address, deployment transaction,
-      Subgraph identifier, start block, and query endpoint without secrets.
+- [x] Deploy the app-event contract and Subgraph and record the contract
+      address, deployment transaction, Subgraph identifier, start block, and
+      query endpoint without secrets.
+- [ ] Restore Hedera chain-head ingestion: the healthy deployment remains at
+      block `38431806` with a null chain head while the public relay has
+      advanced beyond the configured start block `38431807`.
+- [ ] Emit one deterministic Testnet event after indexing advances and retain
+      its transaction and query evidence.
 - [ ] Run `npm run validate:hedera-subgraph` against that live event and retain
       its successful JSON output as reproducible deployment evidence.
 - [ ] Treat a fallback Base Sepolia relay event as monitoring/projection

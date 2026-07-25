@@ -96,7 +96,7 @@ engine independently validates.
 - [x] Export typed `ModelCatalogAdapter`, `ModelRouter`,
       `ComputeExecutionAdapter`, `StorageEvidenceAdapter`, and
       `ProvenanceVerifier` contracts.
-- [ ] Normalize at least two comparable 0G-hosted model routes with capability,
+- [x] Normalize at least two comparable 0G-hosted model routes with capability,
       exact price, privacy, latency, model identity, and endpoint provenance.
 - [ ] Document the exact 0G Compute, Storage, and Chain SDKs, networks,
       guarantees, and verification fields actually used.

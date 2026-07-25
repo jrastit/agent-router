@@ -17,3 +17,4 @@ export type {
   StorageEvidenceReference,
   StorageEvidenceRequest,
 } from "./contracts";
+export { ZgRouterCatalogAdapter } from "./catalog/0g-router";

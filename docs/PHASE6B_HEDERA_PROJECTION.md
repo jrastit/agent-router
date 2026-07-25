@@ -96,7 +96,9 @@ credit. Ganache and the future local Graph entity are monitoring projections.
 - two terminals opened at the repository root.
 
 Ganache is a development dependency. No external EVM RPC service, faucet, or
-long-lived private key is required.
+long-lived private key is required. The repository launcher suppresses
+Ganache's generated wallet banner so disposable private keys and its mnemonic
+do not enter terminal logs.
 
 ### Configure
 

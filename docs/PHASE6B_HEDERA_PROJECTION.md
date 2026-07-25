@@ -227,6 +227,58 @@ Then deploy through the loopback-only Graph admin and IPFS APIs:
 npm run deploy:hedera-projection-subgraph:local
 ```
 
+### Linux verification handoff
+
+The repository does not yet ship a verified Compose topology for the local
+projection. The attempted macOS/Colima topology reached Ganache and registered
+its chain in Graph Node, but Graph Node rejected the deployment with
+`no network ganache-local found on chain ethereum`. Do not treat a successful
+Subgraph build as deployment evidence.
+
+Run the remaining verification on Linux with Docker Engine, Docker Compose v2,
+Node.js, and npm available. Keep Ganache, Graph Node, IPFS, and Postgres
+disposable and isolated from production data.
+
+1. Start Ganache and leave it running:
+
+   ```sh
+   npm run evm:local
+   ```
+
+2. In another terminal, deploy a fresh anchor and retain its JSON output:
+
+   ```sh
+   npm run deploy:hedera-anchor:local
+   ```
+
+3. Start a private Graph Node configured with the exact provider argument
+   `ganache-local:http://127.0.0.1:8545`. If Graph Node runs in a container,
+   ensure that the URL resolves inside its network namespace; do not publish
+   Ganache beyond the Linux host.
+
+4. Export the fresh deployment values without committing them:
+
+   ```sh
+   export LOCAL_HEDERA_ANCHOR_CONTRACT_ADDRESS=0x...
+   export LOCAL_HEDERA_ANCHOR_START_BLOCK=1
+   ```
+
+5. Deploy through the loopback Graph admin and IPFS APIs:
+
+   ```sh
+   npm run deploy:hedera-projection-subgraph:local
+   ```
+
+6. Query the reported URL and retain non-secret evidence showing the deployment
+   ID, indexed head block, and at least one projected entity. Also retain Graph
+   Node startup lines proving that `ganache-local` passed provider checks.
+
+If the registrar error repeats on Linux, capture the Graph Node version,
+provider startup logs, the `public.chains` row for `ganache-local`, and the
+exact deployment error before changing clients or versions. Hardhat is the
+next candidate local EVM, but it has not yet been implemented or verified
+here.
+
 The command validates the address and start block, rejects non-loopback admin
 or IPFS URLs, writes its generated network file with mode `0600`, removes the
 temporary directory, and reports the query URL and monitoring-only authority

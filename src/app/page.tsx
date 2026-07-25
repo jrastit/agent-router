@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 
 import { evaluateProjectionAuthority } from "../lib/projection/status";
@@ -115,8 +116,17 @@ export default function Home() {
       <header className="shell hero">
         <nav>
           <a className="brand" href="#">
-            <span className="brand-mark">AR</span>
-            AgentRouter
+            <Image
+              className="brand-mark"
+              src="/hackathon/agentrouter-logo-512.png"
+              alt=""
+              width={42}
+              height={42}
+              priority
+            />
+            <span>
+              Agent<span>Router</span>
+            </span>
           </a>
           <span className="status">
             <i /> Hedera testnet replay
@@ -124,7 +134,7 @@ export default function Home() {
         </nav>
 
         <div className="hero-grid">
-          <div>
+          <div className="hero-copy">
             <p className="eyebrow">Economic decision infrastructure</p>
             <h1>Watch an agent choose, pay, and prove.</h1>
             <p className="lede">
@@ -132,13 +142,22 @@ export default function Home() {
               enforced, and settlement verified on Hedera.
             </p>
           </div>
-          <div className="proof-card">
-            <span>Verified public evidence</span>
-            <strong>0.001 HBAR</strong>
-            <p>SUCCESS · CRYPTOTRANSFER</p>
-            <a href={transactionUrl} target="_blank" rel="noreferrer">
-              View transaction on HashScan ↗
-            </a>
+          <div className="hero-proof">
+            <div className="route-graphic" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+              <b />
+              <span>✓</span>
+            </div>
+            <div className="proof-card">
+              <span>Verified public evidence</span>
+              <strong>0.001 HBAR</strong>
+              <p>SUCCESS · CRYPTOTRANSFER</p>
+              <a href={transactionUrl} target="_blank" rel="noreferrer">
+                View transaction on HashScan ↗
+              </a>
+            </div>
           </div>
         </div>
       </header>

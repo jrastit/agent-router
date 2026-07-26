@@ -30,4 +30,27 @@ describe("GET /api/llm-job-instances", () => {
     expect(body).not.toMatch(/service-secret|apiKey|providerAddress/);
     expect(fetcher.mock.calls[0]?.[0]).toContain("enabled=eq.true");
   });
+
+  it.each([
+    [401, "catalog_unauthorized"],
+    [403, "catalog_unauthorized"],
+    [400, "catalog_query_failed"],
+    [500, "catalog_query_failed"],
+  ])("classifies a Supabase %s response as %s", async (status, code) => {
+    const response = await createRunnableLlmCatalogHandler({
+      supabaseUrl: "https://supabase.example.com",
+      serviceRoleKey: "service-secret",
+      fetcher: vi.fn().mockResolvedValue(new Response(null, { status })),
+    })();
+    expect(response.status).toBe(502);
+    expect(await response.json()).toMatchObject({ code });
+  });
+
+  it("distinguishes missing server configuration", async () => {
+    const response = await createRunnableLlmCatalogHandler({})();
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({
+      code: "configuration_error",
+    });
+  });
 });

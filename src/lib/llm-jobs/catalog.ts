@@ -27,7 +27,10 @@ export function createRunnableLlmCatalogHandler(input: {
   return async function GET() {
     if (!input.supabaseUrl || !input.serviceRoleKey) {
       return Response.json(
-        { error: "Runnable LLM catalog unavailable" },
+        {
+          error: "Runnable LLM catalog is not configured",
+          code: "configuration_error",
+        },
         { status: 503 },
       );
     }
@@ -42,14 +45,30 @@ export function createRunnableLlmCatalogHandler(input: {
           signal: AbortSignal.timeout(10_000),
         },
       );
-      if (!response.ok) throw new Error("catalog query failed");
+      if (!response.ok) {
+        return Response.json(
+          response.status === 401 || response.status === 403
+            ? {
+                error: "Runnable LLM catalog authorization failed",
+                code: "catalog_unauthorized",
+              }
+            : {
+                error: "Runnable LLM catalog query failed",
+                code: "catalog_query_failed",
+              },
+          { status: 502 },
+        );
+      }
       return Response.json(
         runnableLlmInstancesSchema.parse(await response.json()),
         { headers: { "cache-control": "no-store" } },
       );
     } catch {
       return Response.json(
-        { error: "Runnable LLM catalog unavailable" },
+        {
+          error: "Runnable LLM catalog response is invalid",
+          code: "catalog_response_invalid",
+        },
         { status: 502 },
       );
     }

@@ -33,7 +33,16 @@ export function createLlmMcpClient(input: {
   return {
     async listInstances() {
       const response = await input.catalogHandler();
-      if (!response.ok) throw new Error("LLM instance catalog unavailable");
+      if (!response.ok) {
+        const failure = z
+          .object({ error: z.string() })
+          .safeParse(await response.json().catch(() => null));
+        throw new Error(
+          failure.success
+            ? failure.data.error
+            : "LLM instance catalog unavailable",
+        );
+      }
       const instances = runnableLlmInstancesSchema.parse(await response.json());
       return listLlmInstancesOutputSchema.parse({
         tool: "list_llm_instances",

@@ -17,6 +17,7 @@ const storedJobKey = "agent-router.last-llm-job.v1";
 
 export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
   const [instances, setInstances] = useState<RunnableLlmInstance[]>([]);
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
   const [instanceId, setInstanceId] = useState("");
   const [prompt, setPrompt] = useState(
     "Summarize why durable, exact accounting matters for autonomous agents.",
@@ -31,14 +32,24 @@ export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
   useEffect(() => {
     fetch("/api/llm-job-instances", { cache: "no-store" })
       .then(async (response) => {
-        if (!response.ok) throw new Error("catalog unavailable");
-        return runnableLlmInstancesSchema.parse(await response.json());
+        const payload: unknown = await response.json();
+        if (!response.ok) {
+          throw new Error(runnableCatalogMessage(payload));
+        }
+        return runnableLlmInstancesSchema.parse(payload);
       })
       .then((catalog) => {
         setInstances(catalog);
         setInstanceId((current) => current || catalog[0]?.id || "");
       })
-      .catch(() => setError("Runnable LLM instances are unavailable."));
+      .catch((reason: unknown) =>
+        setError(
+          reason instanceof Error
+            ? reason.message
+            : "Runnable LLM instances are unavailable.",
+        ),
+      )
+      .finally(() => setCatalogLoaded(true));
   }, []);
 
   useEffect(() => {
@@ -141,6 +152,11 @@ export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
               ))}
             </select>
           </label>
+          {catalogLoaded && instances.length === 0 && !error && (
+            <p className={styles.error}>
+              No enabled chat instances currently have fresh execution prices.
+            </p>
+          )}
           <label>
             Private prompt
             <textarea
@@ -253,6 +269,29 @@ export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
       </div>
     </section>
   );
+}
+
+export function runnableCatalogMessage(payload: unknown) {
+  if (
+    typeof payload !== "object" ||
+    payload === null ||
+    !("code" in payload) ||
+    typeof payload.code !== "string"
+  ) {
+    return "Runnable LLM instances are unavailable.";
+  }
+  switch (payload.code) {
+    case "configuration_error":
+      return "Runnable LLM catalog is not configured on the server.";
+    case "catalog_unauthorized":
+      return "Runnable LLM catalog authentication failed.";
+    case "catalog_query_failed":
+      return "Runnable LLM catalog schema or query is unavailable.";
+    case "catalog_response_invalid":
+      return "Runnable LLM catalog returned invalid data.";
+    default:
+      return "Runnable LLM instances are unavailable.";
+  }
 }
 
 async function restore(

@@ -86,4 +86,22 @@ describe("LLM MCP client", () => {
       "Authentication required",
     );
   });
+
+  it("preserves safe runnable-catalog diagnostics", async () => {
+    const client = createLlmMcpClient({
+      catalogHandler: vi.fn().mockResolvedValue(
+        Response.json(
+          {
+            error: "Runnable LLM catalog query failed",
+            code: "catalog_query_failed",
+          },
+          { status: 502 },
+        ),
+      ),
+      submissionHandler: vi.fn(),
+    });
+    await expect(client.listInstances()).rejects.toThrow(
+      "Runnable LLM catalog query failed",
+    );
+  });
 });

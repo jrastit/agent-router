@@ -358,6 +358,11 @@ export default function DepositWalletPanel({
       setTransactionId(id);
       setMessage("Transaction submitted. Verifying it with Hedera Mirror…");
       const state = await verifySubmittedDeposit(depositId, accessToken);
+      if (state === "credited") {
+        setReview(undefined);
+        setReviewed(false);
+        setIntentConfirmation("");
+      }
       setMessage(
         state === "credited"
           ? "Deposit verified and credited. Your live balance is updating."
@@ -627,7 +632,7 @@ export default function DepositWalletPanel({
           target="_blank"
           rel="noreferrer"
         >
-          Inspect submitted transaction on HashScan ↗
+          View validated transaction on HashScan ↗
         </a>
       )}
     </section>

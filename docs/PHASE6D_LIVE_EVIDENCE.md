@@ -61,3 +61,17 @@ The handler now distinguishes missing configuration, catalog authorization,
 Supabase query/schema failure, invalid response data, and a valid empty
 runnable set. The frontend and MCP no longer collapse those states into one
 generic unavailable message.
+
+## Catalog score deployment
+
+Migration `20260726001100` added the bounded performance score and its versioned
+basis. After both provider synchronizations, a production read-only probe
+returned 41 catalog rows with zero null scores and zero null bases. Scores
+ranged from 60 to 95. The shared MCP runnable projection returned 28 rows with
+scores from 85 to 95.
+
+`catalog-readiness-v1` estimates operational agent performance from enabled
+state, chat capability, exact-price completeness, healthy-route redundancy, and
+expected latency. It is not presented as an intelligence or benchmark score.
+The interactive replay filters by a minimum score and then orders candidates by
+increasing exact estimated price.

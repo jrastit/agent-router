@@ -329,6 +329,14 @@ defaults to 1,000,000 input and 10,000 output tokens, exposes independent
 0–1,000,000 token sliders, shows both per-million rates, and conservatively
 rounds the estimated job cost up to the next micro-EUR.
 
+Each synchronized model also receives a `0–100` estimated agent
+performance/readiness score with basis `catalog-readiness-v1`. It combines
+enabled state, chat capability, complete exact pricing, healthy-route
+redundancy, and expected latency. This is an operational routing estimate, not
+a model-quality benchmark. The replay places the decision above the quotes,
+filters on a user-controlled minimum score, and orders visible candidates by
+increasing estimated price.
+
 The 0G synchronizer uses upstream `pricing_eur` values when present. If either
 EUR field is missing and `pricing_usd` is available, it fetches the dated
 [ECB USD reference rate](https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml)

@@ -318,19 +318,19 @@ delay application credit.
       service-role key or another user's pseudonym, balance, or history.
 - [x] Add the required user-owned tables to the Supabase Realtime publication
       through a tracked, idempotent migration.
-- [ ] Load an authoritative initial fund snapshot after restoring the Supabase
+- [x] Load an authoritative initial fund snapshot after restoring the Supabase
       browser session, then subscribe to user-scoped Postgres changes and
       refresh from the authoritative read model after each notification.
-- [ ] Handle token refresh, reconnect, duplicate notifications, visibility
+- [x] Handle token refresh, reconnect, duplicate notifications, visibility
       changes, sign-out, and component teardown without leaking channels or
       applying stale user data.
-- [ ] Replace the direct-Hedera Graph economic-events dependency in the fund UI
+- [x] Replace the direct-Hedera Graph economic-events dependency in the fund UI
       with Supabase-backed application activity. Show Ganache/Graph projection
       state separately with explicit relayer-mediated and indexing-lag labels.
-- [ ] Remove the browser GET link to the POST-only GraphQL endpoint. Link only
+- [x] Remove the browser GET link to the POST-only GraphQL endpoint. Link only
       verifiable Hedera evidence to HashScan; present local Ganache block
       numbers as non-clickable monitoring metadata.
-- [ ] Add database, RLS, client lifecycle, exact-arithmetic, empty, reconnect,
+- [x] Add database, RLS, client lifecycle, exact-arithmetic, empty, reconnect,
       malformed-response, and unavailable-service tests.
 - [ ] Deploy the migration and application, then verify one authenticated
       credited deposit appears after refresh and through Realtime without

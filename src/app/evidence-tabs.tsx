@@ -7,9 +7,6 @@ import styles from "./evidence-tabs.module.css";
 import LlmInstancesPanel from "./llm-instances-panel";
 import WorkflowTimeline from "./workflow-timeline";
 
-const publicGraphUrl =
-  "https://graph.router.fexhu.com/subgraphs/name/agent-router/hedera-projection";
-
 function shortHash(hash: string) {
   return `${hash.slice(0, 10)}…${hash.slice(-6)}`;
 }
@@ -28,7 +25,7 @@ function indexedIsoTime(timestamp: string) {
 
 export default function EvidenceTabs() {
   const [activeTab, setActiveTab] = useState<"run" | "graph" | "instances">(
-    "run",
+    "graph",
   );
   const [activity, setActivity] = useState<GraphActivity>();
   const [error, setError] = useState("");
@@ -88,17 +85,13 @@ export default function EvidenceTabs() {
         <section className={styles.graphPanel} aria-live="polite">
           <div className={styles.graphHeader}>
             <div>
-              <h3>Latest indexed evidence</h3>
-              <p>Public monitoring data from the AgentRouter Graph Node.</p>
+              <h3>Live Graph audit projection</h3>
+              <p>
+                Relayer-mediated Hedera evidence indexed from Ganache chain 1337
+                by the AgentRouter Graph Node.
+              </p>
             </div>
-            <a
-              className={styles.source}
-              href={publicGraphUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Open Graph endpoint ↗
-            </a>
+            <span className={styles.source}>Live GraphQL · POST query</span>
           </div>
 
           {!activity && !error && <p className={styles.empty}>Loading…</p>}
@@ -115,8 +108,8 @@ export default function EvidenceTabs() {
                   <strong>{activity.hederaEventAnchors.length}</strong>
                 </div>
                 <div>
-                  <span>Indexing errors</span>
-                  <strong>No</strong>
+                  <span>Source chain</span>
+                  <strong>Hedera Testnet</strong>
                 </div>
               </div>
               <div className={styles.eventList}>

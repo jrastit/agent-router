@@ -48,6 +48,7 @@ function hbarToTinybars(hbar: string): string | undefined {
 type DepositWalletPanelProps = {
   onConnectionChange?: (status: {
     accountConnected: boolean;
+    accessToken?: string;
     walletAccount?: string;
     balanceHbar?: string;
   }) => void;
@@ -57,6 +58,7 @@ export default function DepositWalletPanel({
   onConnectionChange,
 }: DepositWalletPanelProps) {
   const [accessToken, setAccessToken] = useState("");
+  const [sessionExpiresAt, setSessionExpiresAt] = useState<number>();
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authenticatedEmail, setAuthenticatedEmail] = useState("");
@@ -86,6 +88,7 @@ export default function DepositWalletPanel({
           );
           if (active && session) {
             setAccessToken(session.accessToken);
+            setSessionExpiresAt(session.expiresAt);
             setAuthenticatedEmail(session.email);
             setAuthEmail(session.email);
             setMessage(`Restored account session for ${session.email}.`);
@@ -123,15 +126,60 @@ export default function DepositWalletPanel({
   }, []);
 
   useEffect(() => {
+    if (
+      !sessionExpiresAt ||
+      !supabaseUrl ||
+      !supabasePublishableKey ||
+      !accessToken
+    ) {
+      return;
+    }
+    let active = true;
+    const refreshAt = Math.max(1_000, sessionExpiresAt - Date.now() - 29_000);
+    const timer = window.setTimeout(async () => {
+      try {
+        const session = await restoreSupabaseSession(
+          { url: supabaseUrl, publishableKey: supabasePublishableKey },
+          window.localStorage,
+        );
+        if (active && session) {
+          setAccessToken(session.accessToken);
+          setSessionExpiresAt(session.expiresAt);
+          setAuthenticatedEmail(session.email);
+        }
+      } catch {
+        if (active) {
+          clearSupabaseSession(window.localStorage);
+          setAccessToken("");
+          setSessionExpiresAt(undefined);
+          setAuthenticatedEmail("");
+          setMessage("Your account session expired. Connect again.");
+        }
+      }
+    }, refreshAt);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [accessToken, sessionExpiresAt]);
+
+  useEffect(() => {
     onConnectionChange?.({
       accountConnected: Boolean(authenticatedEmail),
+      accessToken: accessToken || undefined,
       walletAccount: wallet?.accountId,
       balanceHbar:
         balanceTinybars === undefined
           ? undefined
           : formatTinybarsAsHbar(balanceTinybars),
     });
-  }, [authenticatedEmail, balanceTinybars, onConnectionChange, wallet]);
+  }, [
+    accessToken,
+    authenticatedEmail,
+    balanceTinybars,
+    onConnectionChange,
+    wallet,
+  ]);
 
   async function authenticate(mode: SupabaseAuthMode) {
     if (!supabaseUrl || !supabasePublishableKey) return;
@@ -151,6 +199,7 @@ export default function DepositWalletPanel({
       if (session.accessToken) {
         saveSupabaseSession(window.localStorage, session);
         setAccessToken(session.accessToken);
+        setSessionExpiresAt(session.expiresAt);
         setAuthenticatedEmail(session.email);
         setMessage(`Connected as ${session.email}.`);
       } else {
@@ -189,6 +238,7 @@ export default function DepositWalletPanel({
   function disconnectAccount() {
     clearSupabaseSession(window.localStorage);
     setAccessToken("");
+    setSessionExpiresAt(undefined);
     setAuthenticatedEmail("");
     setAuthEmail("");
     setAuthPassword("");

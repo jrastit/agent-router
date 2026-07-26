@@ -592,7 +592,7 @@ h4 {
   margin-top: 8px;
 }
 
-.fund-activity-heading > a {
+.fund-source-status {
   flex: none;
   color: var(--cyan);
   font-size: 12px;
@@ -689,9 +689,14 @@ h4 {
 }
 
 .fund-history article span,
-.fund-history article code {
+.fund-history article code,
+.fund-history article a {
   color: var(--muted);
   font-size: 11px;
+}
+
+.fund-history article a {
+  color: var(--cyan);
 }
 
 .fund-history article b {

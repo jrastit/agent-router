@@ -36,6 +36,7 @@ export default function Home() {
   const [privacy, setPrivacy] = useState<"public" | "confidential">("public");
   const [fundingStatus, setFundingStatus] = useState<{
     accountConnected: boolean;
+    accessToken?: string;
     walletAccount?: string;
     balanceHbar?: string;
   }>({ accountConnected: false });
@@ -241,7 +242,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-        <EconomicActivityPanel />
+        <EconomicActivityPanel accessToken={fundingStatus.accessToken} />
         <DepositWalletPanel onConnectionChange={updateFundingStatus} />
       </section>
 

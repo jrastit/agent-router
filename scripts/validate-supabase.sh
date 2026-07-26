@@ -41,6 +41,7 @@ node --env-file=.env -e '
     "-f", "supabase/migrations/20260726000200_expose_deposit_verification_planes.sql",
     "-f", "supabase/migrations/20260726000300_complete_deposit_graph_projection.sql",
     "-f", "supabase/migrations/20260726000400_add_llm_instance_catalog.sql",
+    "-f", "supabase/migrations/20260726000500_add_llm_token_pricing.sql",
     "-f", "supabase/tests/phase2.sql",
     "-f", "supabase/tests/phase4.sql",
     "-f", "supabase/tests/phase6.sql",

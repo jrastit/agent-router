@@ -302,6 +302,45 @@ Node, while the receipt and UI clearly preserve Hedera and Postgres as the
 authoritative payment and balance records and identify the destination event as
 a relayer-mediated monitoring projection.
 
+### Supabase Realtime application activity
+
+Supabase/Postgres is the authoritative source for application balances and
+ledger history. Hedera Mirror Node verification is the only payment-proof
+authority. The Ganache relay and Graph Subgraph remain asynchronous,
+privacy-safe audit evidence and must never gate, create, duplicate, reverse, or
+delay application credit.
+
+- [ ] Define a user-scoped, exact-integer fund activity read model derived from
+      the durable credit ledger, deposits, reservations, charges, refunds, and
+      reconciliation records.
+- [ ] Add authenticated RLS policies and grants that expose only the signed-in
+      user's rows through the Supabase publishable key; never expose the
+      service-role key or another user's pseudonym, balance, or history.
+- [ ] Add the required user-owned tables to the Supabase Realtime publication
+      through a tracked, idempotent migration.
+- [ ] Load an authoritative initial fund snapshot after restoring the Supabase
+      browser session, then subscribe to user-scoped Postgres changes and
+      refresh from the authoritative read model after each notification.
+- [ ] Handle token refresh, reconnect, duplicate notifications, visibility
+      changes, sign-out, and component teardown without leaking channels or
+      applying stale user data.
+- [ ] Replace the direct-Hedera Graph economic-events dependency in the fund UI
+      with Supabase-backed application activity. Show Ganache/Graph projection
+      state separately with explicit relayer-mediated and indexing-lag labels.
+- [ ] Remove the browser GET link to the POST-only GraphQL endpoint. Link only
+      verifiable Hedera evidence to HashScan; present local Ganache block
+      numbers as non-clickable monitoring metadata.
+- [ ] Add database, RLS, client lifecycle, exact-arithmetic, empty, reconnect,
+      malformed-response, and unavailable-service tests.
+- [ ] Deploy the migration and application, then verify one authenticated
+      credited deposit appears after refresh and through Realtime without
+      depending on Graph availability.
+
+Exit criterion: an authenticated user sees only their authoritative Supabase
+fund balance and history immediately after session restoration and receives
+Realtime refreshes after durable ledger commits. Graph lag or outage changes
+only the separately labeled public audit status.
+
 ## Phase 6C — reusable Graph payment-evidence MCP
 
 - [ ] Define a reusable MCP server, independent of the AgentRouter UI, for

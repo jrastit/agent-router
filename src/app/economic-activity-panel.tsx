@@ -180,13 +180,24 @@ export default function EconomicActivityPanel({
               <dt>Deposit verification planes</dt>
               <dd>
                 <span>{hbar(activity.availableTinybars)}</span>
-                <small title="Submitted on Hedera; not spendable until Mirror verification">
-                  ({hbar(activity.pendingVerificationTinybars)} Mirror pending)
-                </small>
-                <small title="Credited in Supabase; Graph is monitoring only">
-                  ({hbar(activity.graphPendingTinybars)} Graph pending ·{" "}
-                  {hbar(activity.graphIndexedTinybars)} indexed)
-                </small>
+                {activity.pendingVerificationTinybars !== "0" && (
+                  <small title="Submitted on Hedera; not spendable until Mirror verification">
+                    ({hbar(activity.pendingVerificationTinybars)} Mirror
+                    pending)
+                  </small>
+                )}
+                {(activity.graphPendingTinybars !== "0" ||
+                  activity.graphIndexedTinybars !== "0") && (
+                  <small title="Credited in Supabase; Graph is monitoring only">
+                    {activity.graphPendingTinybars !== "0" &&
+                      `(${hbar(activity.graphPendingTinybars)} Graph pending)`}
+                    {activity.graphPendingTinybars !== "0" &&
+                      activity.graphIndexedTinybars !== "0" &&
+                      " · "}
+                    {activity.graphIndexedTinybars !== "0" &&
+                      `(${hbar(activity.graphIndexedTinybars)} Graph indexed)`}
+                  </small>
+                )}
               </dd>
               <p>Spendable · awaiting verification · public monitoring</p>
             </div>

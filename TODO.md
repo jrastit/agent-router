@@ -332,9 +332,16 @@ delay application credit.
       numbers as non-clickable monitoring metadata.
 - [x] Add database, RLS, client lifecycle, exact-arithmetic, empty, reconnect,
       malformed-response, and unavailable-service tests.
-- [ ] Deploy the migration and application, then verify one authenticated
+- [x] Deploy the migration and application, then verify one authenticated
       credited deposit appears after refresh and through Realtime without
       depending on Graph availability.
+
+Production evidence (26 July 2026): the guarded reconciler Mirror-verified and
+atomically credited three previously submitted WalletConnect deposits with no
+pending or rejected proofs. The authenticated browser refreshed
+`get_my_fund_activity`, one private credit account reported a positive balance,
+and the public Realtime WebSocket completed an authenticated upgrade. The
+separately queried Graph projection remained healthy at indexed block 2.
 
 Exit criterion: an authenticated user sees only their authoritative Supabase
 fund balance and history immediately after session restoration and receives

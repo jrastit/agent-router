@@ -415,20 +415,20 @@ catalog, job payload, browser session, result, receipt, or logs.
 - [x] Estimate the maximum exact charge from the selected price snapshot and
       token limits, then atomically reserve sufficient user credit before the
       provider request.
-- [ ] Implement Scaleway workload execution separately from the Scaleway
+- [x] Implement Scaleway workload execution separately from the Scaleway
       planner, using its OpenAI-compatible chat-completions API with a bounded
       timeout, explicit token limit, typed response validation, and stable
       provider evidence.
-- [ ] Connect the existing 0G Compute adapter to the durable job flow while
+- [x] Connect the existing 0G Compute adapter to the durable job flow while
       retaining the pinned provider address, private trust mode, disabled
       fallbacks, bounded retries, timeout, and idempotency key.
-- [ ] Capture provider-reported prompt, completion, and total token usage;
+- [x] Capture provider-reported prompt, completion, and total token usage;
       preserve integer token counts and exact-decimal price snapshots and never
       calculate charges with binary floating point.
-- [ ] Validate the returned result before delivery: require the expected
+- [x] Validate the returned result before delivery: require the expected
       provider/model identity, non-empty schema-valid output, usage within the
       requested limits, and provider-specific execution evidence.
-- [ ] Label 0G Router private trust-mode and TeeML catalog evidence precisely;
+- [x] Label 0G Router private trust-mode and TeeML catalog evidence precisely;
       do not describe it as an independently verified TEE attestation unless an
       independent attestation verifier is implemented.
 - [ ] Atomically convert the reservation into one actual charge, release unused

@@ -1,11 +1,13 @@
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 
 import type { GraphPaymentEvidenceClient } from "./graph-client";
+import type { LlmMcpClient } from "./llm-client";
 import { createGraphEvidenceMcpServer } from "./server";
 
 export async function handleGraphEvidenceMcpHttp(
   request: Request,
   graphClient: GraphPaymentEvidenceClient,
+  llmClient?: LlmMcpClient,
 ) {
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) {
@@ -22,7 +24,7 @@ export async function handleGraphEvidenceMcpHttp(
     sessionIdGenerator: undefined,
     enableJsonResponse: true,
   });
-  const server = createGraphEvidenceMcpServer(graphClient);
+  const server = createGraphEvidenceMcpServer(graphClient, llmClient);
   await server.connect(transport);
   return transport.handleRequest(request);
 }

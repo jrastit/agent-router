@@ -13,5 +13,8 @@ describe("Graph evidence MCP panel", () => {
     );
     expect(html).toContain("Hedera Mirror verification");
     expect(html).toContain("No Graph key");
+    expect(html).toContain("MCP instance selection");
+    expect(html).toContain("list_llm_instances");
+    expect(html).toContain("Create job with MCP");
   });
 });

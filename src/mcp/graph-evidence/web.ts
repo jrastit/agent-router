@@ -1,11 +1,14 @@
 import { z } from "zod";
 
 import {
+  createLlmJobInputSchema,
   findPaymentInputSchema,
+  listLlmInstancesInputSchema,
   listAgentTransactionsInputSchema,
   verifyReceiptHistoryInputSchema,
 } from "./contracts";
 import type { GraphPaymentEvidenceClient } from "./graph-client";
+import type { LlmMcpClient } from "./llm-client";
 import {
   graphEvidenceToolNames,
   invokeGraphEvidenceToolThroughMcp,
@@ -25,10 +28,19 @@ const webRequestSchema = z.discriminatedUnion("tool", [
     tool: z.literal("verify_receipt_history"),
     input: verifyReceiptHistoryInputSchema,
   }),
+  z.strictObject({
+    tool: z.literal("list_llm_instances"),
+    input: listLlmInstancesInputSchema,
+  }),
+  z.strictObject({
+    tool: z.literal("create_llm_job"),
+    input: createLlmJobInputSchema,
+  }),
 ]);
 
 export function createGraphEvidenceWebHandler(
   graphClient: GraphPaymentEvidenceClient,
+  llmClient?: LlmMcpClient,
 ) {
   return async function POST(request: Request) {
     let parsed: z.infer<typeof webRequestSchema>;
@@ -48,6 +60,7 @@ export function createGraphEvidenceWebHandler(
         graphClient,
         parsed.tool as GraphEvidenceToolName,
         parsed.input,
+        llmClient,
       );
       return Response.json(
         {

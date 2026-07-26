@@ -247,7 +247,7 @@ export default function Home() {
         <EconomicActivityPanel accessToken={fundingStatus.accessToken} />
         <DepositWalletPanel onConnectionChange={updateFundingStatus} />
         <LlmJobPanel accessToken={fundingStatus.accessToken} />
-        <GraphEvidencePanel />
+        <GraphEvidencePanel accessToken={fundingStatus.accessToken} />
       </section>
 
       <section className="evidence">

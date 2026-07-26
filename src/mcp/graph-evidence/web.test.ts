@@ -76,4 +76,44 @@ describe("Graph evidence web adapter", () => {
       );
     }
   });
+
+  it("exposes instance discovery and selected-instance job creation", async () => {
+    const llmClient = {
+      listInstances: vi.fn().mockResolvedValue({
+        tool: "list_llm_instances",
+        instances: [],
+      }),
+      createJob: vi.fn().mockResolvedValue({
+        tool: "create_llm_job",
+        job: { id: "llm-job:1", state: "accepted", instanceId: "42" },
+      }),
+    };
+    const handler = createGraphEvidenceWebHandler(
+      {} as never,
+      llmClient as never,
+    );
+    const listed = await handler(
+      request({ tool: "list_llm_instances", input: {} }),
+    );
+    expect(await listed.json()).toMatchObject({
+      protocol: "mcp",
+      result: { tool: "list_llm_instances", instances: [] },
+    });
+
+    const input = {
+      instanceId: "42",
+      prompt: "Summarize this",
+      capability: "chat",
+      privacy: "confidential",
+      maximumInputTokens: 512,
+      maximumOutputTokens: 128,
+      spendCeilingTinybars: "10000",
+      idempotencyKey: "mcp-request-001",
+    };
+    const created = await handler(request({ tool: "create_llm_job", input }));
+    expect(await created.json()).toMatchObject({
+      result: { job: { instanceId: "42" } },
+    });
+    expect(llmClient.createJob).toHaveBeenCalledWith(input);
+  });
 });

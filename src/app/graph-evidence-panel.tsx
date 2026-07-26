@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 
 import {
   findPaymentOutputSchema,
+  createLlmJobOutputSchema,
+  listLlmInstancesOutputSchema,
   listAgentTransactionsOutputSchema,
   verifyReceiptHistoryOutputSchema,
 } from "../mcp/graph-evidence/contracts";
@@ -36,6 +38,18 @@ type WebResponse = z.infer<typeof webResponseSchema>;
 type PaymentEvidence =
   | z.infer<typeof findPaymentOutputSchema>["matches"][number]
   | z.infer<typeof verifyReceiptHistoryOutputSchema>["entries"][number];
+type McpLlmInstance = z.infer<
+  typeof listLlmInstancesOutputSchema
+>["instances"][number];
+
+const llmWebResponseSchema = z.strictObject({
+  protocol: z.literal("mcp"),
+  toolCall: z.object({
+    name: z.enum(["list_llm_instances", "create_llm_job"]),
+    arguments: z.record(z.string(), z.unknown()),
+  }),
+  result: z.union([listLlmInstancesOutputSchema, createLlmJobOutputSchema]),
+});
 
 const toolCopy: Record<
   ToolName,
@@ -58,12 +72,34 @@ const toolCopy: Record<
   },
 };
 
-export default function GraphEvidencePanel() {
+export default function GraphEvidencePanel({
+  accessToken,
+}: {
+  accessToken?: string;
+}) {
   const [tool, setTool] = useState<ToolName>("find_payment");
   const [reference, setReference] = useState(recordedSourceEventId);
   const [response, setResponse] = useState<WebResponse>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [instances, setInstances] = useState<McpLlmInstance[]>([]);
+  const [instanceId, setInstanceId] = useState("");
+  const [jobPrompt, setJobPrompt] = useState(
+    "Summarize why verifiable payment evidence matters for autonomous agents.",
+  );
+  const [jobMessage, setJobMessage] = useState("");
+  const [jobBusy, setJobBusy] = useState(false);
+
+  useEffect(() => {
+    void callLlmMcp("list_llm_instances", {}, accessToken)
+      .then((payload) => {
+        if (payload.result.tool !== "list_llm_instances") return;
+        const discovered = payload.result.instances;
+        setInstances(discovered);
+        setInstanceId((current) => current || discovered[0]?.id || "");
+      })
+      .catch(() => setError("MCP LLM instances are unavailable."));
+  }, [accessToken]);
 
   const evidence = useMemo(() => {
     if (!response) return [];
@@ -117,6 +153,40 @@ export default function GraphEvidencePanel() {
     }
   }
 
+  async function createJob() {
+    const selected = instances.find((instance) => instance.id === instanceId);
+    if (!selected || !accessToken) return;
+    setJobBusy(true);
+    setJobMessage("");
+    setError("");
+    try {
+      const payload = await callLlmMcp(
+        "create_llm_job",
+        {
+          instanceId: selected.id,
+          prompt: jobPrompt,
+          capability: "chat",
+          privacy: selected.privacy,
+          maximumInputTokens: 512,
+          maximumOutputTokens: 128,
+          spendCeilingTinybars: "1000000",
+          idempotencyKey: `mcp-ui-${crypto.randomUUID()}`,
+        },
+        accessToken,
+      );
+      if (payload.result.tool !== "create_llm_job") {
+        throw new Error("Unexpected MCP response");
+      }
+      setJobMessage(
+        `${payload.result.job.id} · ${payload.result.job.state} · instance ${payload.result.job.instanceId}`,
+      );
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "MCP job failed");
+    } finally {
+      setJobBusy(false);
+    }
+  }
+
   const provenance = response && primaryProvenance(response.result);
 
   return (
@@ -130,13 +200,59 @@ export default function GraphEvidencePanel() {
           <p className="eyebrow">Reusable Graph payment-evidence MCP</p>
           <h2 id="graph-evidence-title">Inspect public agent transactions</h2>
         </div>
-        <span>Read-only monitoring</span>
+        <span>Monitoring + idempotent job creation</span>
       </div>
       <p className={styles.intro}>
-        Run the same MCP tools exposed to Claude, Cursor, ChatGPT, and generic
-        MCP clients. Hedera Mirror verification and Postgres remain payment and
-        credit authority.
+        Run the same payment-evidence and LLM instance tools exposed to Claude,
+        Cursor, ChatGPT, and generic MCP clients. Hedera Mirror verification and
+        Postgres remain payment and credit authority.
       </p>
+
+      <div className={styles.llm}>
+        <div>
+          <span>MCP instance selection</span>
+          <strong>{instances.length} runnable instances</strong>
+          <small>
+            Exact tinybar prices are loaded with <code>list_llm_instances</code>
+            .
+          </small>
+        </div>
+        <label>
+          Instance for new job
+          <select
+            value={instanceId}
+            onChange={(event) => setInstanceId(event.target.value)}
+          >
+            {instances.map((instance) => (
+              <option key={instance.id} value={instance.id}>
+                {instance.provider} · {instance.model} · {instance.privacy} ·{" "}
+                {instance.inputPriceTinybarsPerMillionTokens}/
+                {instance.outputPriceTinybarsPerMillionTokens} tinybar / 1M
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Job prompt
+          <textarea
+            value={jobPrompt}
+            onChange={(event) => setJobPrompt(event.target.value)}
+          />
+        </label>
+        <button
+          type="button"
+          disabled={jobBusy || !accessToken || !instanceId || !jobPrompt.trim()}
+          onClick={() => void createJob()}
+        >
+          {jobBusy ? "Creating through MCP…" : "Create job with MCP"}
+        </button>
+        <small>
+          {accessToken
+            ? "The selected instance is revalidated before persistence."
+            : "Sign in first; MCP authentication stays in the HTTP transport."}
+        </small>
+        {jobMessage && <code>{jobMessage}</code>}
+      </div>
 
       <div className={styles.workspace}>
         <form
@@ -252,6 +368,28 @@ export default function GraphEvidencePanel() {
       </div>
     </section>
   );
+}
+
+async function callLlmMcp(
+  tool: "list_llm_instances" | "create_llm_job",
+  input: Record<string, unknown>,
+  accessToken?: string,
+) {
+  const response = await fetch("/api/graph-evidence", {
+    method: "POST",
+    headers: {
+      ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({ tool, input }),
+  });
+  const payload: unknown = await response.json();
+  if (!response.ok) {
+    throw new Error(
+      isErrorPayload(payload) ? payload.error : "MCP LLM request failed",
+    );
+  }
+  return llmWebResponseSchema.parse(payload);
 }
 
 function EvidenceCard({ entry }: { entry: PaymentEvidence }) {

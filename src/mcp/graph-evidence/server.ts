@@ -5,23 +5,31 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   findPaymentInputSchema,
   findPaymentOutputSchema,
+  createLlmJobInputSchema,
+  createLlmJobOutputSchema,
+  listLlmInstancesInputSchema,
+  listLlmInstancesOutputSchema,
   listAgentTransactionsInputSchema,
   listAgentTransactionsOutputSchema,
   verifyReceiptHistoryInputSchema,
   verifyReceiptHistoryOutputSchema,
 } from "./contracts";
 import type { GraphPaymentEvidenceClient } from "./graph-client";
+import type { LlmMcpClient } from "./llm-client";
 
 export const graphEvidenceToolNames = [
   "find_payment",
   "list_agent_transactions",
   "verify_receipt_history",
+  "list_llm_instances",
+  "create_llm_job",
 ] as const;
 
 export type GraphEvidenceToolName = (typeof graphEvidenceToolNames)[number];
 
 export function createGraphEvidenceMcpServer(
   client: GraphPaymentEvidenceClient,
+  llmClient?: LlmMcpClient,
 ) {
   const server = new McpServer({
     name: "agent-router-graph-evidence",
@@ -69,6 +77,39 @@ export function createGraphEvidenceMcpServer(
       toolResult(await client.verifyReceiptHistory(references)),
   );
 
+  if (llmClient) {
+    server.registerTool(
+      "list_llm_instances",
+      {
+        title: "List runnable LLM instances",
+        description:
+          "List enabled, chat-capable LLM instances with exact tinybar token prices that can be selected for a job.",
+        inputSchema: listLlmInstancesInputSchema,
+        outputSchema: listLlmInstancesOutputSchema,
+        annotations: { readOnlyHint: true, openWorldHint: true },
+      },
+      async () => toolResult(await llmClient.listInstances()),
+    );
+
+    server.registerTool(
+      "create_llm_job",
+      {
+        title: "Create an LLM job on a selected instance",
+        description:
+          "Create an authenticated LLM job using an exact instance ID returned by list_llm_instances. Server-side policy revalidates instance eligibility, privacy, pricing, and provider credentials.",
+        inputSchema: createLlmJobInputSchema,
+        outputSchema: createLlmJobOutputSchema,
+        annotations: {
+          readOnlyHint: false,
+          destructiveHint: false,
+          idempotentHint: true,
+          openWorldHint: true,
+        },
+      },
+      async (input) => toolResult(await llmClient.createJob(input)),
+    );
+  }
+
   return server;
 }
 
@@ -76,10 +117,11 @@ export async function invokeGraphEvidenceToolThroughMcp(
   graphClient: GraphPaymentEvidenceClient,
   name: GraphEvidenceToolName,
   args: Record<string, unknown>,
+  llmClient?: LlmMcpClient,
 ) {
   const [clientTransport, serverTransport] =
     InMemoryTransport.createLinkedPair();
-  const server = createGraphEvidenceMcpServer(graphClient);
+  const server = createGraphEvidenceMcpServer(graphClient, llmClient);
   const client = new Client({
     name: "agent-router-web-adapter",
     version: "1.0.0",

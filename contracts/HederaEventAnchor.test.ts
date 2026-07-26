@@ -77,6 +77,7 @@ describe("HederaEventAnchor", () => {
     expect(source).toContain("msg.sender != relayer");
     expect(source).toContain("anchored[sourceEventId]");
     expect(source).toContain("SourceEventAlreadyAnchored");
+    expect(source).toContain("NATIVE_TRANSFER = 3");
     expect(source).toContain("MUST NOT be used to create application credit");
     expect(source).not.toMatch(
       /privateKey|credential|prompt|providerResult|creditBalance/i,

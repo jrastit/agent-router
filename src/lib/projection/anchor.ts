@@ -29,9 +29,17 @@ const hcsMessageAnchorSchema = z.strictObject({
   sourceIndex: z.number().int().nonnegative(),
 });
 
+const nativeTransferAnchorSchema = z.strictObject({
+  ...commonAnchorFields,
+  sourceType: z.literal("native_transfer"),
+  sourceId: hederaEntityIdSchema,
+  sourceIndex: z.literal(0),
+});
+
 export const hederaEventAnchorSchema = z.discriminatedUnion("sourceType", [
   contractLogAnchorSchema,
   hcsMessageAnchorSchema,
+  nativeTransferAnchorSchema,
 ]);
 
 export type HederaEventAnchor = z.infer<typeof hederaEventAnchorSchema>;

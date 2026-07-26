@@ -39,6 +39,7 @@ node --env-file=.env -e '
     "-f", "supabase/migrations/20260725001100_add_server_deposit_credit.sql",
     "-f", "supabase/migrations/20260726000100_add_realtime_fund_activity.sql",
     "-f", "supabase/migrations/20260726000200_expose_deposit_verification_planes.sql",
+    "-f", "supabase/migrations/20260726000300_complete_deposit_graph_projection.sql",
     "-f", "supabase/tests/phase2.sql",
     "-f", "supabase/tests/phase4.sql",
     "-f", "supabase/tests/phase6.sql",

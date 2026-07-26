@@ -7,6 +7,7 @@ pragma solidity ^0.8.24;
 contract HederaEventAnchor {
     uint8 public constant CONTRACT_LOG = 1;
     uint8 public constant HCS_MESSAGE = 2;
+    uint8 public constant NATIVE_TRANSFER = 3;
 
     address public immutable relayer;
     mapping(bytes32 sourceEventId => bool anchored) public anchored;
@@ -47,7 +48,11 @@ contract HederaEventAnchor {
         if (msg.sender != relayer) revert UnauthorizedRelayer();
         if (
             sourceEventId == bytes32(0) ||
-            (sourceType != CONTRACT_LOG && sourceType != HCS_MESSAGE) ||
+            (
+                sourceType != CONTRACT_LOG &&
+                sourceType != HCS_MESSAGE &&
+                sourceType != NATIVE_TRANSFER
+            ) ||
             bytes(sourceId).length == 0 ||
             bytes(sourceId).length > 64 ||
             transactionHash == bytes32(0) ||

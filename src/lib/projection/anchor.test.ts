@@ -19,6 +19,16 @@ const anchor = {
 };
 
 describe("HederaEventAnchor", () => {
+  it("accepts a native HBAR transfer as a distinct source type", () => {
+    expect(
+      hederaEventAnchorSchema.parse({
+        ...anchor,
+        sourceType: "native_transfer",
+        sourceIndex: 0,
+      }),
+    ).toMatchObject({ sourceType: "native_transfer", sourceIndex: 0 });
+  });
+
   it("accepts the complete, public Hedera source evidence", () => {
     expect(hederaEventAnchorSchema.parse(anchor)).toEqual(anchor);
   });

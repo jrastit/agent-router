@@ -5,6 +5,7 @@ import {
   answerPreview,
   InstanceAnswer,
   runnableCatalogMessage,
+  shouldAutoRefresh,
 } from "./llm-job-panel";
 
 describe("runnable LLM catalog diagnostics", () => {
@@ -37,12 +38,25 @@ describe("LLM instance answer", () => {
     expect(answerPreview(output).length).toBeLessThan(output.length);
   });
 
-  it("states when a terminal job has no saved answer", () => {
+  it("keeps an ambiguous job pending while reconciliation runs", () => {
     const html = renderToStaticMarkup(
       <InstanceAnswer output={null} state="reconciliation_required" />,
     );
 
-    expect(html).toContain("No instance answer was saved");
+    expect(html).not.toContain("No instance answer was saved");
     expect(html).not.toContain("Instance answer · beginning");
+  });
+});
+
+describe("LLM job refresh policy", () => {
+  it.each(["accepted", "reserved", "executing", "validating", "settled"])(
+    "refreshes %s jobs",
+    (state) => expect(shouldAutoRefresh(state)).toBe(true),
+  );
+
+  it("keeps reconciliation live but stops on final outcomes", () => {
+    expect(shouldAutoRefresh("reconciliation_required")).toBe(true);
+    expect(shouldAutoRefresh("delivered")).toBe(false);
+    expect(shouldAutoRefresh("failed")).toBe(false);
   });
 });

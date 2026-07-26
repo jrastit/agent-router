@@ -14,6 +14,7 @@ import {
 import styles from "./llm-job-panel.module.css";
 
 const storedJobKey = "agent-router.last-llm-job.v1";
+const reconciliationRefreshMs = 3_000;
 
 export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
   const [instances, setInstances] = useState<RunnableLlmInstance[]>([]);
@@ -57,6 +58,18 @@ export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
     const savedJob = window.localStorage.getItem(storedJobKey);
     if (savedJob) void restore(savedJob, accessToken, setSnapshot, setError);
   }, [accessToken]);
+
+  useEffect(() => {
+    if (!accessToken || !snapshot || !shouldAutoRefresh(snapshot.state)) return;
+    const timer = window.setTimeout(
+      () =>
+        void restore(snapshot.id, accessToken, setSnapshot, setError, {
+          preserveSnapshotOnError: true,
+        }),
+      reconciliationRefreshMs,
+    );
+    return () => window.clearTimeout(timer);
+  }, [accessToken, snapshot]);
 
   const selected = instances.find((instance) => instance.id === instanceId);
   const maximumCharge = useMemo(() => {
@@ -233,6 +246,13 @@ export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
                 <strong>{snapshot.selectedInstance.name}</strong>
                 <small>{snapshot.selectedInstance.model}</small>
               </div>
+              {snapshot.state === "reconciliation_required" && (
+                <p className={styles.reconciliation}>
+                  Reconciliation is in progress. AgentRouter is refreshing this
+                  receipt automatically while the original attempt is checked;
+                  it will not run the model or charge you again.
+                </p>
+              )}
               <InstanceAnswer output={snapshot.output} state={snapshot.state} />
               <dl>
                 <div>
@@ -275,11 +295,11 @@ export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
   );
 }
 
-const terminalStates = new Set([
-  "delivered",
-  "failed",
-  "reconciliation_required",
-]);
+const terminalStates = new Set(["delivered", "failed"]);
+
+export function shouldAutoRefresh(state: string) {
+  return !terminalStates.has(state);
+}
 
 function missingValue(state: string) {
   return terminalStates.has(state) ? "Not recorded" : "Pending";
@@ -362,6 +382,7 @@ async function restore(
   accessToken: string,
   setSnapshot: (snapshot: LlmJobSnapshot) => void,
   setError: (message: string) => void,
+  options: { preserveSnapshotOnError?: boolean } = {},
 ) {
   try {
     const response = await fetch(`/api/llm-jobs/${encodeURIComponent(jobId)}`, {
@@ -371,6 +392,8 @@ async function restore(
     if (!response.ok) throw new Error("Saved LLM job is unavailable");
     setSnapshot(llmJobSnapshotSchema.parse(await response.json()));
   } catch (reason) {
-    setError(reason instanceof Error ? reason.message : "Restore failed");
+    if (!options.preserveSnapshotOnError) {
+      setError(reason instanceof Error ? reason.message : "Restore failed");
+    }
   }
 }

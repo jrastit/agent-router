@@ -65,7 +65,19 @@ const probe = spawnSync(
         'serverCreditFunction',
           to_regprocedure(
             'public.credit_verified_deposit_for_user(uuid,text,text,text,timestamptz,text,text,text)'
-          ) is not null
+          ) is not null,
+        'fundActivityFunction',
+          to_regprocedure('public.get_my_fund_activity()') is not null,
+        'realtimeFundTables', (
+          select count(*) = 4
+          from pg_publication_tables
+          where pubname = 'supabase_realtime'
+            and schemaname = 'public'
+            and tablename in (
+              'credit_accounts', 'credit_journal', 'deposits',
+              'credit_reservations'
+            )
+        )
       );
     `,
   ],

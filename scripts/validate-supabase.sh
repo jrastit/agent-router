@@ -37,11 +37,13 @@ node --env-file=.env -e '
     "-f", "supabase/migrations/20260725000900_persist_hedera_projection.sql",
     "-f", "supabase/migrations/20260725001000_harden_hedera_projection_recovery.sql",
     "-f", "supabase/migrations/20260725001100_add_server_deposit_credit.sql",
+    "-f", "supabase/migrations/20260726000100_add_realtime_fund_activity.sql",
     "-f", "supabase/tests/phase2.sql",
     "-f", "supabase/tests/phase4.sql",
     "-f", "supabase/tests/phase6.sql",
     "-f", "supabase/tests/phase6a.sql",
     "-f", "supabase/tests/phase6b.sql",
+    "-f", "supabase/tests/realtime_fund_activity.sql",
     "-f", "supabase/tests/phase8.sql", "-c", "rollback",
   ];
   const result = spawnSync(psql, args, { stdio: "inherit" });

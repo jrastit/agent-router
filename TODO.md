@@ -310,13 +310,13 @@ authority. The Ganache relay and Graph Subgraph remain asynchronous,
 privacy-safe audit evidence and must never gate, create, duplicate, reverse, or
 delay application credit.
 
-- [ ] Define a user-scoped, exact-integer fund activity read model derived from
+- [x] Define a user-scoped, exact-integer fund activity read model derived from
       the durable credit ledger, deposits, reservations, charges, refunds, and
       reconciliation records.
-- [ ] Add authenticated RLS policies and grants that expose only the signed-in
+- [x] Add authenticated RLS policies and grants that expose only the signed-in
       user's rows through the Supabase publishable key; never expose the
       service-role key or another user's pseudonym, balance, or history.
-- [ ] Add the required user-owned tables to the Supabase Realtime publication
+- [x] Add the required user-owned tables to the Supabase Realtime publication
       through a tracked, idempotent migration.
 - [ ] Load an authoritative initial fund snapshot after restoring the Supabase
       browser session, then subscribe to user-scoped Postgres changes and

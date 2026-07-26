@@ -393,6 +393,75 @@ schema-valid, provenance-rich results. Another project can install and use the
 MCP without importing the AgentRouter application, while payment authority
 remains with Hedera Mirror verification and atomic Postgres proof consumption.
 
+## Phase 6D — balance-backed LLM instance jobs
+
+The existing Scaleway integration is a server-side planner and the existing 0G
+adapter proves live private inference. This phase turns both providers into
+user-visible LLM job instances funded from authoritative application credit.
+Provider API keys remain server-only and are never stored in the instance
+catalog, job payload, browser session, result, receipt, or logs.
+
+- [ ] Define durable LLM job, attempt, usage, reservation, charge, refund,
+      result, and provider-evidence schemas with stable lifecycle and failure
+      codes.
+- [ ] Add an authenticated server API that accepts an instance ID, prompt,
+      capability, maximum input and output tokens, idempotency key, and
+      application-credit spend ceiling without accepting a provider API key.
+- [ ] Resolve enabled instance metadata from the authoritative catalog and map
+      the selected provider to its server-only credential:
+      `SCALEWAY_GENAI_API_KEY` for Scaleway or `G_API_KEY_PRIVATE` for 0G.
+- [ ] Reject unknown, disabled, capability-incompatible, privacy-incompatible,
+      stale-priced, or uncredentialed instances before reserving or executing.
+- [ ] Estimate the maximum exact charge from the selected price snapshot and
+      token limits, then atomically reserve sufficient user credit before the
+      provider request.
+- [ ] Implement Scaleway workload execution separately from the Scaleway
+      planner, using its OpenAI-compatible chat-completions API with a bounded
+      timeout, explicit token limit, typed response validation, and stable
+      provider evidence.
+- [ ] Connect the existing 0G Compute adapter to the durable job flow while
+      retaining the pinned provider address, private trust mode, disabled
+      fallbacks, bounded retries, timeout, and idempotency key.
+- [ ] Capture provider-reported prompt, completion, and total token usage;
+      preserve integer token counts and exact-decimal price snapshots and never
+      calculate charges with binary floating point.
+- [ ] Validate the returned result before delivery: require the expected
+      provider/model identity, non-empty schema-valid output, usage within the
+      requested limits, and provider-specific execution evidence.
+- [ ] Label 0G Router private trust-mode and TeeML catalog evidence precisely;
+      do not describe it as an independently verified TEE attestation unless an
+      independent attestation verifier is implemented.
+- [ ] Atomically convert the reservation into one actual charge, release unused
+      credit, and persist the output, usage, price snapshot, selected instance,
+      execution identifier, and redacted evidence. Ambiguous usage or charge
+      evidence must enter reconciliation instead of guessing or charging twice.
+- [ ] Keep prompts and raw outputs out of public receipts, 0G Storage, chain
+      events, Graph entities, analytics, and logs; expose them only through
+      authenticated user-scoped storage and APIs.
+- [ ] Add an LLM job UI that lets a signed-in user choose Scaleway or 0G, enter
+      a prompt and token/spend limits, review privacy and maximum charge, run
+      the job, and see output, actual token usage, exact spend, refund, remaining
+      balance, instance identity, and appropriately labeled evidence.
+- [ ] Stream persisted job states over SSE or Supabase Realtime and restore the
+      authoritative state after refresh without repeating inference or
+      charging again.
+- [ ] Test both provider adapters and the complete job state machine, including
+      duplicate submissions, insufficient credit, concurrent reservations,
+      provider authentication failure, timeout, invalid output, missing or
+      excessive usage, ambiguous completion, disabled instances, secret
+      leakage, retry recovery, exact charge, and unused-reservation refund.
+- [ ] Prove one deployed Scaleway job and one deployed 0G job from the same UI,
+      each consuming real provider tokens and exactly one application-credit
+      charge, with redacted receipts and no provider credential visible in the
+      browser or client bundle.
+
+Exit criterion: a signed-in user with credited funds can run one working
+Scaleway instance job and one working 0G private instance job. Each job reserves
+its maximum spend, executes once with a server-held provider key, validates and
+delivers the result, settles exact provider-reported token usage once, refunds
+unused credit, survives refresh, and exposes no secret or misleading
+verification claim.
+
 ## Phase 7 — product experience
 
 - [x] Build task, budget, and privacy-policy input.

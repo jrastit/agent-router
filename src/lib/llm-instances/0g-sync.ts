@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { deriveEurPerMillionTokens } from "./fx-pricing";
+
 const exactAmount = z.union([z.string(), z.number()]).transform(String);
 
 export const zgModelCatalogSchema = z.object({
@@ -20,6 +22,12 @@ export const zgModelCatalogSchema = z.object({
         })
         .optional(),
       pricing_usd: z
+        .object({
+          prompt: exactAmount.optional(),
+          completion: exactAmount.optional(),
+        })
+        .optional(),
+      pricing_eur: z
         .object({
           prompt: exactAmount.optional(),
           completion: exactAmount.optional(),
@@ -74,6 +82,11 @@ export function createZgInstanceRow(input: {
   providers: readonly ZgProvider[];
   baseUrl: string;
   syncedAt: string;
+  fxSnapshot?: {
+    usdPerEur: string;
+    observedOn: string;
+    source: "ECB";
+  };
 }) {
   const healthyProviders = input.providers.filter(
     (provider) => provider.is_healthy !== false,
@@ -89,6 +102,22 @@ export function createZgInstanceRow(input: {
     .filter(
       (latency): latency is number => latency !== null && latency !== undefined,
     );
+  const inputPriceEurPerMillionTokens = deriveEurPerMillionTokens({
+    eurPerToken: input.model.pricing_eur?.prompt,
+    usdPerToken: input.model.pricing_usd?.prompt,
+    usdPerEur: input.fxSnapshot?.usdPerEur,
+  });
+  const outputPriceEurPerMillionTokens = deriveEurPerMillionTokens({
+    eurPerToken: input.model.pricing_eur?.completion,
+    usdPerToken: input.model.pricing_usd?.completion,
+    usdPerEur: input.fxSnapshot?.usdPerEur,
+  });
+  const usedFxSnapshot =
+    input.fxSnapshot &&
+    ((input.model.pricing_eur?.prompt === undefined &&
+      input.model.pricing_usd?.prompt !== undefined) ||
+      (input.model.pricing_eur?.completion === undefined &&
+        input.model.pricing_usd?.completion !== undefined));
 
   return {
     provider: "0g",
@@ -99,6 +128,8 @@ export function createZgInstanceRow(input: {
     privacy: privateProviders.length > 0 ? "confidential" : "public",
     enabled: healthyProviders.length > 0,
     expected_latency_ms: latencies.length > 0 ? Math.min(...latencies) : 0,
+    input_price_eur_per_million_tokens: inputPriceEurPerMillionTokens ?? null,
+    output_price_eur_per_million_tokens: outputPriceEurPerMillionTokens ?? null,
     source_metadata: {
       type: input.model.type ?? null,
       description: input.model.description ?? null,
@@ -108,6 +139,17 @@ export function createZgInstanceRow(input: {
       supportedFormats: input.model.supported_formats ?? [],
       pricing: input.model.pricing ?? null,
       pricingUsd: input.model.pricing_usd ?? null,
+      pricingEur: input.model.pricing_eur ?? null,
+      pricingFxSnapshot:
+        !usedFxSnapshot
+          ? null
+          : {
+              source: input.fxSnapshot.source,
+              base: "EUR",
+              quote: "USD",
+              usdPerEur: input.fxSnapshot.usdPerEur,
+              observedOn: input.fxSnapshot.observedOn,
+            },
       catalogVerifiability: input.model.verifiability ?? null,
       catalogTeeAttested: input.model.tee_attested ?? false,
       catalogTeeType: input.model.tee_type ?? null,

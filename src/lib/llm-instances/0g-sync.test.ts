@@ -13,6 +13,7 @@ const model = zgModelCatalogSchema.parse({
       name: "Private model",
       type: "chatbot",
       pricing: { prompt: "1", completion: "2" },
+      pricing_usd: { prompt: "0.00000008", completion: "0.00000048" },
       provider_count: 2,
     },
   ],
@@ -43,6 +44,11 @@ describe("0G catalog synchronization", () => {
       providers,
       baseUrl: "https://router-api.0g.ai/v1",
       syncedAt: "2026-07-26T00:00:00.000Z",
+      fxSnapshot: {
+        usdPerEur: "1.1377",
+        observedOn: "2026-07-24",
+        source: "ECB",
+      },
     });
 
     expect(row).toMatchObject({
@@ -50,9 +56,16 @@ describe("0G catalog synchronization", () => {
       privacy: "confidential",
       enabled: true,
       expected_latency_ms: 42,
+      input_price_eur_per_million_tokens: "0.070317",
+      output_price_eur_per_million_tokens: "0.421904",
       source_metadata: {
         healthyProviderCount: 1,
         hasPrivateProvider: true,
+        pricingFxSnapshot: {
+          source: "ECB",
+          usdPerEur: "1.1377",
+          observedOn: "2026-07-24",
+        },
       },
     });
     expect(row.source_metadata.providers).toHaveLength(1);

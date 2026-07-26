@@ -22,6 +22,8 @@ function euroCents(amount: number) {
 
 export default function Home() {
   const [budgetMinor, setBudgetMinor] = useState(10);
+  const [inputTokens, setInputTokens] = useState(1_000_000);
+  const [outputTokens, setOutputTokens] = useState(10_000);
   const [privacy, setPrivacy] = useState<"public" | "confidential">("public");
   const [catalog, setCatalog] = useState<LlmInstanceCatalog>();
   const [catalogError, setCatalogError] = useState("");
@@ -56,8 +58,15 @@ export default function Home() {
   }, []);
 
   const evaluated = useMemo(
-    () => evaluateCatalogInstances(catalog, budgetMinor, privacy),
-    [budgetMinor, catalog, privacy],
+    () =>
+      evaluateCatalogInstances(
+        catalog,
+        budgetMinor,
+        privacy,
+        inputTokens,
+        outputTokens,
+      ),
+    [budgetMinor, catalog, inputTokens, outputTokens, privacy],
   );
   const selected = evaluated.find((provider) => provider.eligible);
 
@@ -163,7 +172,41 @@ export default function Home() {
                 />
                 <output>{euroCents(budgetMinor)}</output>
               </div>
-              <small>€0.01–€20.00 combined token-rate ceiling</small>
+              <small>€0.01–€20.00 estimated job-cost ceiling</small>
+            </label>
+            <label>
+              Estimated input tokens
+              <div className="range-row">
+                <input
+                  type="range"
+                  min="0"
+                  max="1000000"
+                  step="1000"
+                  value={inputTokens}
+                  onChange={(event) =>
+                    setInputTokens(Number(event.target.value))
+                  }
+                  aria-label="Estimated input tokens"
+                />
+                <output>{inputTokens.toLocaleString("en-US")}</output>
+              </div>
+            </label>
+            <label>
+              Estimated output tokens
+              <div className="range-row">
+                <input
+                  type="range"
+                  min="0"
+                  max="1000000"
+                  step="1000"
+                  value={outputTokens}
+                  onChange={(event) =>
+                    setOutputTokens(Number(event.target.value))
+                  }
+                  aria-label="Estimated output tokens"
+                />
+                <output>{outputTokens.toLocaleString("en-US")}</output>
+              </div>
             </label>
             <fieldset>
               <legend>Privacy policy</legend>
@@ -221,9 +264,15 @@ export default function Home() {
                     </div>
                     <div className="quote">
                       <strong>
-                        {formatMicroEur(provider.combinedRateMicroEur)}
+                        {formatMicroEur(provider.estimatedCostMicroEur)}
                       </strong>
-                      <small>input + output / 1M tokens</small>
+                      <small>
+                        input{" "}
+                        {formatRate(provider.inputPriceEurPerMillionTokens)} ·
+                        output{" "}
+                        {formatRate(provider.outputPriceEurPerMillionTokens)} /
+                        1M
+                      </small>
                       {isSelected && <span>Selected</span>}
                       {!provider.eligible && (
                         <span className="reason">
@@ -239,7 +288,7 @@ export default function Home() {
               <span>Decision</span>
               <strong>
                 {selected
-                  ? `${selected.name} wins at ${formatMicroEur(selected.combinedRateMicroEur)} / 1M`
+                  ? `${selected.name} wins at an estimated ${formatMicroEur(selected.estimatedCostMicroEur)}`
                   : "No provider satisfies this policy"}
               </strong>
               <p>
@@ -278,11 +327,17 @@ export function evaluateCatalogInstances(
   catalog: LlmInstanceCatalog | undefined,
   budgetMinor: number,
   privacy: "public" | "confidential",
+  inputTokens = 1_000_000,
+  outputTokens = 10_000,
 ) {
   return (catalog?.instances ?? [])
     .map((provider) => {
       const reasons: string[] = [];
-      const combinedRateMicroEur = combinedTokenRateMicroEur(provider);
+      const estimatedCostMicroEur = estimateCostMicroEur(
+        provider,
+        inputTokens,
+        outputTokens,
+      );
       if (!provider.enabled) reasons.push("Instance disabled");
       if (!provider.capabilities.includes("chat")) {
         reasons.push("Chat capability unavailable");
@@ -290,29 +345,40 @@ export function evaluateCatalogInstances(
       if (privacy === "confidential" && provider.privacy !== "confidential") {
         reasons.push("Private compute required");
       }
-      if (combinedRateMicroEur === null) {
+      if (estimatedCostMicroEur === null) {
         reasons.push("Exact EUR price unavailable");
-      } else if (combinedRateMicroEur > BigInt(budgetMinor) * BigInt("10000")) {
+      } else if (
+        estimatedCostMicroEur >
+        BigInt(budgetMinor) * BigInt("10000")
+      ) {
         reasons.push("Over budget");
       }
       return {
         ...provider,
-        combinedRateMicroEur,
+        estimatedCostMicroEur,
         reasons,
         eligible: reasons.length === 0,
       };
     })
     .sort((left, right) =>
-      compareExactRates(left.combinedRateMicroEur, right.combinedRateMicroEur),
+      compareExactRates(
+        left.estimatedCostMicroEur,
+        right.estimatedCostMicroEur,
+      ),
     );
 }
 
-function combinedTokenRateMicroEur(
+function estimateCostMicroEur(
   instance: LlmInstanceCatalog["instances"][number],
+  inputTokens: number,
+  outputTokens: number,
 ): bigint | null {
   const input = parseEurMicro(instance.inputPriceEurPerMillionTokens);
   const output = parseEurMicro(instance.outputPriceEurPerMillionTokens);
-  return input === null || output === null ? null : input + output;
+  if (input === null || output === null) return null;
+  const numerator = input * BigInt(inputTokens) + output * BigInt(outputTokens);
+  const denominator = BigInt("1000000");
+  return (numerator + denominator - BigInt(1)) / denominator;
 }
 
 function parseEurMicro(value?: string): bigint | null {
@@ -339,4 +405,8 @@ function formatMicroEur(value: bigint | null) {
     .padStart(6, "0")
     .replace(/0+$/, "");
   return `€${whole}${fraction ? `.${fraction}` : ""}`;
+}
+
+function formatRate(value?: string) {
+  return value === undefined ? "—" : `€${value}`;
 }

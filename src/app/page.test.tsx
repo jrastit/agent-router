@@ -11,7 +11,12 @@ describe("mid-hackathon demo", () => {
     expect(html).toContain("Live Supabase catalog");
     expect(html).toContain("Loading live instances");
     expect(html).toContain('max="2000"');
-    expect(html).toContain("€0.01–€20.00 combined token-rate ceiling");
+    expect(html).toContain("€0.01–€20.00 estimated job-cost ceiling");
+    expect(html).toContain("Estimated input tokens");
+    expect(html).toContain("1,000,000");
+    expect(html).toContain("Estimated output tokens");
+    expect(html).toContain("10,000");
+    expect(html.match(/max="1000000"/g)).toHaveLength(2);
     expect(html).toContain("LLM instances");
     expect(html).toContain("no new payment is submitted");
     expect(html).toContain("hashscan.io/testnet/transaction");
@@ -71,6 +76,8 @@ describe("mid-hackathon demo", () => {
       },
       10,
       "public",
+      1_000_000,
+      10_000,
     );
 
     expect(evaluated).toHaveLength(3);
@@ -83,5 +90,9 @@ describe("mid-hackathon demo", () => {
     expect(
       evaluated.find((instance) => instance.id === "model-c")?.reasons,
     ).toContain("Exact EUR price unavailable");
+    expect(
+      evaluated.find((instance) => instance.id === "model-a")
+        ?.estimatedCostMicroEur,
+    ).toBe(BigInt("10200"));
   });
 });

@@ -431,11 +431,11 @@ catalog, job payload, browser session, result, receipt, or logs.
 - [x] Label 0G Router private trust-mode and TeeML catalog evidence precisely;
       do not describe it as an independently verified TEE attestation unless an
       independent attestation verifier is implemented.
-- [ ] Atomically convert the reservation into one actual charge, release unused
+- [x] Atomically convert the reservation into one actual charge, release unused
       credit, and persist the output, usage, price snapshot, selected instance,
       execution identifier, and redacted evidence. Ambiguous usage or charge
       evidence must enter reconciliation instead of guessing or charging twice.
-- [ ] Keep prompts and raw outputs out of public receipts, 0G Storage, chain
+- [x] Keep prompts and raw outputs out of public receipts, 0G Storage, chain
       events, Graph entities, analytics, and logs; expose them only through
       authenticated user-scoped storage and APIs.
 - [ ] Add an LLM job UI that lets a signed-in user choose Scaleway or 0G, enter

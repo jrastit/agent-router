@@ -17,6 +17,8 @@ describe("mid-hackathon demo", () => {
     expect(html).toContain("Estimated output tokens");
     expect(html).toContain("10,000");
     expect(html.match(/max="1000000"/g)).toHaveLength(2);
+    expect(html).toContain("Minimum performance score");
+    expect(html).toContain("Estimated catalog readiness, not a benchmark");
     expect(html).toContain("LLM instances");
     expect(html).toContain("no new payment is submitted");
     expect(html).toContain("hashscan.io/testnet/transaction");

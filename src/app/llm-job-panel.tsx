@@ -148,6 +148,8 @@ export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
               {instances.map((instance) => (
                 <option key={instance.id} value={instance.id}>
                   {instance.provider} · {instance.model_id} · {instance.privacy}
+                  {" · "}
+                  {instance.performance_score}/100
                 </option>
               ))}
             </select>

@@ -24,6 +24,7 @@ export default function Home() {
   const [budgetMinor, setBudgetMinor] = useState(10);
   const [inputTokens, setInputTokens] = useState(1_000_000);
   const [outputTokens, setOutputTokens] = useState(10_000);
+  const [minimumScore, setMinimumScore] = useState(0);
   const [privacy, setPrivacy] = useState<"public" | "confidential">("public");
   const [catalog, setCatalog] = useState<LlmInstanceCatalog>();
   const [catalogError, setCatalogError] = useState("");
@@ -68,7 +69,10 @@ export default function Home() {
       ),
     [budgetMinor, catalog, inputTokens, outputTokens, privacy],
   );
-  const selected = evaluated.find((provider) => provider.eligible);
+  const visible = evaluated.filter(
+    (provider) => (provider.performanceScore ?? 0) >= minimumScore,
+  );
+  const selected = visible.find((provider) => provider.eligible);
 
   return (
     <main>
@@ -208,6 +212,24 @@ export default function Home() {
                 <output>{outputTokens.toLocaleString("en-US")}</output>
               </div>
             </label>
+            <label>
+              Minimum performance score
+              <div className="range-row">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value={minimumScore}
+                  onChange={(event) =>
+                    setMinimumScore(Number(event.target.value))
+                  }
+                  aria-label="Minimum performance score"
+                />
+                <output>{minimumScore}/100</output>
+              </div>
+              <small>Estimated catalog readiness, not a benchmark.</small>
+            </label>
             <fieldset>
               <legend>Privacy policy</legend>
               <div className="segmented">
@@ -231,16 +253,30 @@ export default function Home() {
           </form>
 
           <div className="results">
+            <div className={`decision ${selected ? "" : "no-match"}`}>
+              <span>Decision</span>
+              <strong>
+                {selected
+                  ? `${selected.name} wins at an estimated ${formatMicroEur(selected.estimatedCostMicroEur)}`
+                  : "No provider satisfies this policy"}
+              </strong>
+              <p>
+                {selected
+                  ? "Hard constraints and minimum score pass; lowest eligible exact quote wins."
+                  : "Increase the budget, lower the score, or relax the privacy requirement."}
+              </p>
+            </div>
             <div className="result-topline">
               <h3>Normalized quotes</h3>
               <span>
-                {evaluated.filter((item) => item.eligible).length} eligible
+                {visible.filter((item) => item.eligible).length} eligible ·{" "}
+                {visible.length} shown
               </span>
             </div>
             <div className="provider-list">
               {!catalog && !catalogError && <p>Loading live instances…</p>}
               {catalogError && <p>{catalogError}</p>}
-              {evaluated.map((provider) => {
+              {visible.map((provider) => {
                 const isSelected = selected?.id === provider.id;
                 return (
                   <article
@@ -259,6 +295,13 @@ export default function Home() {
                           {(provider.expectedLatencyMs / 1000).toFixed(1)}s
                           expected · {provider.privacy} · {provider.provider} ·{" "}
                           {provider.model}
+                        </p>
+                        <p>
+                          Estimated performance{" "}
+                          <strong>{provider.performanceScore ?? 0}/100</strong>{" "}
+                          ·{" "}
+                          {provider.performanceScoreBasis ??
+                            "unscored catalog entry"}
                         </p>
                       </div>
                     </div>
@@ -283,19 +326,6 @@ export default function Home() {
                   </article>
                 );
               })}
-            </div>
-            <div className={`decision ${selected ? "" : "no-match"}`}>
-              <span>Decision</span>
-              <strong>
-                {selected
-                  ? `${selected.name} wins at an estimated ${formatMicroEur(selected.estimatedCostMicroEur)}`
-                  : "No provider satisfies this policy"}
-              </strong>
-              <p>
-                {selected
-                  ? "Hard constraints pass; lowest eligible exact quote wins."
-                  : "Increase the budget or relax the privacy requirement."}
-              </p>
             </div>
           </div>
         </div>

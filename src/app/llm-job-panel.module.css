@@ -108,6 +108,58 @@
   background: var(--ink);
 }
 
+.answer,
+.answerUnavailable {
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--ink);
+}
+
+.answer > span {
+  color: var(--cyan);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.answer > p,
+.answerUnavailable p {
+  margin: 10px 0 0;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.answer details {
+  margin-top: 14px;
+}
+
+.answer summary {
+  color: var(--cyan);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.answer .output {
+  margin-bottom: 0;
+}
+
+.answerUnavailable {
+  border-color: color-mix(in srgb, #ff8f9b 55%, var(--line));
+}
+
+.answerUnavailable strong {
+  color: #ffb6bd;
+}
+
+.answerUnavailable p {
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .result dl {
   display: grid;
   gap: 12px;

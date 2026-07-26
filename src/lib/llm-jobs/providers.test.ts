@@ -123,6 +123,7 @@ describe("0G workload adapter", () => {
     }).execute({
       ...request,
       providerAddress: `0x${"11".repeat(20)}`,
+      providerTrustMode: "private",
     });
 
     const headers = fetcher.mock.calls[0]?.[1]?.headers;
@@ -152,6 +153,7 @@ describe("0G workload adapter", () => {
       adapter.execute({
         ...request,
         providerAddress: `0x${"11".repeat(20)}`,
+        providerTrustMode: "private",
       }),
     ).resolves.toMatchObject({ evidence: { executionId: "execution-1" } });
     expect(fetcher.mock.calls[0]?.[1]?.headers).toMatchObject({
@@ -170,5 +172,28 @@ describe("0G workload adapter", () => {
     await expect(adapter.execute(request)).rejects.toBeInstanceOf(
       LlmProviderError,
     );
+  });
+
+  it("uses and records a verified route for a public 0G instance", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(Response.json(completion()));
+    const result = await createZgWorkloadAdapter({
+      apiKey: "secret",
+      baseUrl: "https://router.example.com/v1",
+      fetcher,
+    }).execute({
+      ...request,
+      providerAddress: `0x${"22".repeat(20)}`,
+      providerTrustMode: "verified",
+    });
+
+    expect(fetcher.mock.calls[0]?.[1]?.headers).toMatchObject({
+      "x-0g-provider-trust-mode": "verified",
+    });
+    expect(result.evidence).toMatchObject({
+      trustMode: "verified",
+      providerAddress: `0x${"22".repeat(20)}`,
+    });
   });
 });

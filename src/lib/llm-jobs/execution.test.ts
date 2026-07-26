@@ -8,6 +8,7 @@ const baseJob: ExecutableLlmJob = {
   state: "accepted",
   provider: "scaleway",
   model: "model-1",
+  privacy: "public",
   prompt: "private prompt",
   maximumInputTokens: 100,
   maximumOutputTokens: 50,
@@ -178,6 +179,7 @@ describe("durable LLM job execution", () => {
       provider: "0g" as const,
       state: "reserved" as const,
       providerAddress: `0x${"11".repeat(20)}`,
+      providerTrustMode: "verified" as const,
     };
     const deps = dependencies([
       job,
@@ -189,7 +191,10 @@ describe("durable LLM job execution", () => {
     });
     await executeDurableLlmJob(deps, "job:1");
     expect(deps.zg.execute).toHaveBeenCalledWith(
-      expect.objectContaining({ providerAddress: job.providerAddress }),
+      expect.objectContaining({
+        providerAddress: job.providerAddress,
+        providerTrustMode: "verified",
+      }),
     );
     expect(deps.scaleway.execute).not.toHaveBeenCalled();
   });

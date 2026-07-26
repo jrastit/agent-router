@@ -8,6 +8,7 @@ const dependencies = {
     state: "delivered",
     provider: "scaleway",
     model: "model",
+    privacy: "public",
     prompt: "private",
     maximumInputTokens: 1,
     maximumOutputTokens: 1,

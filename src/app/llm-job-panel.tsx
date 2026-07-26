@@ -233,16 +233,14 @@ export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
                 <strong>{snapshot.selectedInstance.name}</strong>
                 <small>{snapshot.selectedInstance.model}</small>
               </div>
-              {snapshot.output && (
-                <pre className={styles.output}>{snapshot.output}</pre>
-              )}
+              <InstanceAnswer output={snapshot.output} state={snapshot.state} />
               <dl>
                 <div>
                   <dt>Token usage</dt>
                   <dd>
                     {snapshot.usage
                       ? `${snapshot.usage.promptTokens} + ${snapshot.usage.completionTokens} = ${snapshot.usage.totalTokens}`
-                      : "Pending"}
+                      : missingValue(snapshot.state)}
                   </dd>
                 </div>
                 <div>
@@ -250,7 +248,7 @@ export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
                   <dd>
                     {snapshot.accounting
                       ? `${snapshot.accounting.reservedTinybars} / ${snapshot.accounting.chargedTinybars} / ${snapshot.accounting.refundedTinybars} tinybar`
-                      : "Pending"}
+                      : missingValue(snapshot.state)}
                   </dd>
                 </div>
                 <div>
@@ -260,8 +258,12 @@ export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
                 <div>
                   <dt>Execution evidence</dt>
                   <dd>
-                    {snapshot.evidence?.executionId ?? "Pending"}
-                    <small>{snapshot.evidence?.verificationLabel ?? "—"}</small>
+                    {snapshot.evidence?.executionId ??
+                      missingValue(snapshot.state)}
+                    <small>
+                      {snapshot.evidence?.verificationLabel ??
+                        failureDescription(snapshot)}
+                    </small>
                   </dd>
                 </div>
               </dl>
@@ -269,6 +271,65 @@ export default function LlmJobPanel({ accessToken }: { accessToken?: string }) {
           )}
         </div>
       </div>
+    </section>
+  );
+}
+
+const terminalStates = new Set([
+  "delivered",
+  "failed",
+  "reconciliation_required",
+]);
+
+function missingValue(state: string) {
+  return terminalStates.has(state) ? "Not recorded" : "Pending";
+}
+
+function failureDescription(snapshot: LlmJobSnapshot) {
+  if (snapshot.failureCode) {
+    return `Execution ended without a saved answer · ${snapshot.failureCode}`;
+  }
+  return terminalStates.has(snapshot.state)
+    ? "No provider evidence saved"
+    : "—";
+}
+
+export function answerPreview(output: string, maximumLength = 420) {
+  const normalized = output.trim();
+  if (normalized.length <= maximumLength) return normalized;
+  return `${normalized.slice(0, maximumLength).trimEnd()}…`;
+}
+
+export function InstanceAnswer({
+  output,
+  state,
+}: {
+  output: string | null;
+  state: string;
+}) {
+  if (!output) {
+    return terminalStates.has(state) ? (
+      <div className={styles.answerUnavailable}>
+        <strong>No instance answer was saved</strong>
+        <p>
+          The execution did not reach verified delivery, so AgentRouter will not
+          invent or display a result.
+        </p>
+      </div>
+    ) : null;
+  }
+  const preview = answerPreview(output);
+  const hasMore = preview !== output.trim();
+  return (
+    <section className={styles.answer}>
+      <span>Instance answer · beginning</span>
+      <p>{preview}</p>
+      {hasMore && (
+        <details>
+          <summary>Show full answer</summary>
+          <pre className={styles.output}>{output}</pre>
+        </details>
+      )}
     </section>
   );
 }

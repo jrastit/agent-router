@@ -16,11 +16,13 @@ export type ExecutableLlmJob = Readonly<{
     | "failed";
   provider: "scaleway" | "0g";
   model: string;
+  privacy: "public" | "confidential";
   prompt: string;
   maximumInputTokens: number;
   maximumOutputTokens: number;
   attemptId?: string;
   providerAddress?: string;
+  providerTrustMode?: "private" | "verified";
 }>;
 
 export type LlmExecutionDependencies = Readonly<{
@@ -90,6 +92,7 @@ export async function executeDurableLlmJob(
       maximumOutputTokens: job.maximumOutputTokens,
       idempotencyKey: `llm-attempt:${job.attemptId}`,
       providerAddress: job.providerAddress,
+      providerTrustMode: job.providerTrustMode,
     });
     try {
       await dependencies.settle(job, result);

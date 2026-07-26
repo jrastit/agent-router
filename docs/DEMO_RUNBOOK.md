@@ -114,22 +114,31 @@ recording unless the full flow has already been rehearsed.
    verification.
 7. Show Hedera payment/HCS evidence and identify Mirror plus Postgres as the
    payment authority.
-8. Show the public Graph projection entity and its explicit monitoring-only
-   trust label.
-9. End with delivery, spend, remaining budget, and receipt.
+8. In the application, show the Supabase-backed available balance and deposit
+   journal updating after Mirror verification. Point out that the initial
+   `submitted` notification is not a credit and that the browser retries only
+   read-only verification while Mirror indexes the transaction.
+9. Open the Graph audit tab and show its live indexed block, source-event ID,
+   Hedera consensus timestamp, destination transaction, and explicit
+   relayer-mediated monitoring label. Explain that this recorded HCS anchor
+   proves the Graph projection mechanism but is not yet correlated to the new
+   user deposit.
+10. Briefly state the failure property: Supabase remains authoritative and the
+    balance is usable even if Graph is delayed or unavailable.
+11. End with delivery, spend, remaining budget, and receipt.
 
 ## Known live-proof gap
 
-Do not claim that the prepaid-credit Phase 6A/6B exit criterion is complete.
-The production database migrations and external user-wallet deposit
-orchestration are not deployed. The existing operator-funded Hedera settlement
-must not be relabeled as a user-funded deposit. A qualifying proof still needs:
+Do not claim that the combined prepaid-credit Phase 6A/6B exit criterion is
+complete. Production migrations, external user-wallet deposits, Mirror
+verification, atomic credit, and Supabase Realtime are deployed and have live
+evidence. The remaining qualifying proof still needs:
 
-1. a bound deposit intent;
-2. an external user-wallet signature;
-3. Mirror verification and exactly-once Postgres credit;
-4. one 0G operation charged against that credit; and
-5. a durable projection record correlated with the EVM anchor and Graph entity.
+1. one 0G operation charged against the user credit; and
+2. the credited deposit's durable projection record correlated by source-event
+   ID with its EVM anchor and Graph entity.
+
+Do not relabel the currently indexed HCS anchor as the latest user deposit.
 
 ## Pre-recording checklist
 

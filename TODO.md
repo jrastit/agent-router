@@ -342,6 +342,9 @@ pending or rejected proofs. The authenticated browser refreshed
 `get_my_fund_activity`, one private credit account reported a positive balance,
 and the public Realtime WebSocket completed an authenticated upgrade. The
 separately queried Graph projection remained healthy at indexed block 2.
+The browser verification path now retries the same Mirror-pending proof for a
+bounded 30-second window, without resubmitting payment, so a normal indexing
+delay does not require a manual page refresh.
 
 Exit criterion: an authenticated user sees only their authoritative Supabase
 fund balance and history immediately after session restoration and receives

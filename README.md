@@ -369,6 +369,23 @@ application ledger. The app's separately pre-funded 0G inventory pays the 0G
 network; no direct or automatic HBAR-to-0G conversion is claimed. Projection
 and Graph monitoring lag are visible but never control spendable credit.
 
+The live update path is:
+
+```text
+wallet transfer
+  → submitted transaction ID in Supabase
+  → repeated read-only Hedera Mirror verification
+  → atomic proof consumption, journal append, and balance credit in Postgres
+  → user-scoped Supabase Realtime notification
+  → authoritative fund-snapshot reload in the browser
+```
+
+`submitted` and `credited` are separate durable states. A notification for the
+first state does not increase the balance. While Mirror indexing is pending,
+the browser retries only verification for up to 30 seconds; it never resubmits
+the payment. Submitted proofs are also resumed after session restoration, and
+the guarded server reconciler can process them if the browser was closed.
+
 The state model, security boundaries, reconciliation procedure, and validation
 commands are documented in the
 [Phase 6A prepaid credit runbook](docs/PHASE6A_PREPAID_CREDIT.md).

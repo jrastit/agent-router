@@ -113,6 +113,64 @@ deposit and atomically consumes the unique proof, credits the integer-tinybar
 balance, appends its journal entry, and enqueues monitoring. Repeating the same
 verified request returns the existing balance without creating another credit.
 
+### Verification and live-update sequence
+
+The wallet transaction and application credit are deliberately asynchronous:
+
+1. The external wallet executes one native HBAR transfer and returns its
+   transaction ID.
+2. The proof endpoint stores that ID and commits the deposit as `submitted`.
+3. Supabase Realtime may notify the browser about this submitted-state change,
+   but the balance remains unchanged.
+4. The browser calls the verification endpoint. A `202 mirror_pending` response
+   causes another read-only verification attempt after 1.5 seconds, for at
+   most 20 attempts. These retries query the same proof and cannot submit
+   another Hedera payment.
+5. After Mirror returns a matching finalized transaction, the service-only
+   credit RPC consumes the proof exactly once and commits the `credited`
+   deposit, journal row, balance update, and monitoring outbox atomically.
+6. Realtime emits the committed user-owned row changes. The browser treats
+   them only as invalidation signals and reloads `get_my_fund_activity`; it
+   never calculates a balance from WebSocket payloads.
+
+If the browser closes or exhausts the short retry window before Mirror indexes
+the transaction, session restoration retries submitted deposits. Operators can
+also run `npm run reconcile:deposits`; the guarded reconciler verifies the same
+bound proof through Mirror and invokes the same idempotent credit boundary.
+
+For self-hosted Supabase, Kong must route Realtime through the tenant-bearing
+hostname `realtime-dev.supabase-realtime`. Declare that hostname as a persistent
+Docker network alias on the `realtime` service. Routing it as only `realtime`
+causes `TenantNotFound`; omitting the alias causes Kong DNS failures and public
+WebSocket 503 responses.
+
+### Role of The Graph
+
+The Graph is the queryable public monitoring plane, not a payment processor or
+balance database. After Mirror verification and atomic Supabase credit, the
+application creates a privacy-minimal `DepositObserved` outbox record. The
+allowlisted relay can turn that record into an EVM `HederaEventAnchored` event,
+and Graph Node indexes the event as a `HederaEventAnchor` entity.
+
+This ordering is intentional:
+
+```text
+Hedera settlement → Mirror verification → Supabase credit
+                                      ↘ asynchronous relay → EVM event → Graph
+```
+
+Graph unavailability or indexing lag cannot block, create, duplicate, or
+reverse credit. The entity exposes correlation and replay evidence—source event
+ID, Hedera identity digest and consensus timestamp, payload digest, destination
+transaction and block, contract, and relayer—without exposing the application
+user, balance, wallet address, or private journal.
+
+The currently deployed Graph proof indexes the recorded HCS monitoring event at
+Ganache block 2. It proves the relay, replay protection, and Graph indexing
+mechanism, but it is not yet the entity for the latest live user deposit. Do
+not claim one-to-one deposit correlation until the corresponding durable outbox
+record, destination event, and indexed entity share the same source-event ID.
+
 ## Browser session continuity
 
 The browser stores the Supabase user access token, rotating refresh token,

@@ -412,7 +412,7 @@ catalog, job payload, browser session, result, receipt, or logs.
       `SCALEWAY_GENAI_API_KEY` for Scaleway or `G_API_KEY_PRIVATE` for 0G.
 - [x] Reject unknown, disabled, capability-incompatible, privacy-incompatible,
       stale-priced, or uncredentialed instances before reserving or executing.
-- [ ] Estimate the maximum exact charge from the selected price snapshot and
+- [x] Estimate the maximum exact charge from the selected price snapshot and
       token limits, then atomically reserve sufficient user credit before the
       provider request.
 - [ ] Implement Scaleway workload execution separately from the Scaleway

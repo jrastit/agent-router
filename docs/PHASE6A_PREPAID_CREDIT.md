@@ -113,6 +113,44 @@ deposit and atomically consumes the unique proof, credits the integer-tinybar
 balance, appends its journal entry, and enqueues monitoring. Repeating the same
 verified request returns the existing balance without creating another credit.
 
+### What “validated deposit proof” means
+
+A deposit is validated only when the server independently proves that the
+finalized Hedera transaction matches every bound field of the stored intent.
+The transaction ID returned by the wallet is evidence to verify, not sufficient
+proof by itself.
+
+The Mirror response must establish all of the following:
+
+- the submitted transaction ID resolves to a finalized transaction;
+- the result is `SUCCESS` and the transaction type is `CRYPTOTRANSFER`;
+- the payer and treasury recipient match the intent;
+- the recipient credit is exactly the intent's integer tinybar amount;
+- the payer debit covers at least that amount;
+- the memo exactly matches the unique intent memo;
+- the transaction belongs to Hedera Testnet; and
+- consensus occurred no later than the intent expiry.
+
+After those checks, the service-only database function locks the deposit and
+atomically:
+
+- consumes the unique transaction proof;
+- records Mirror consensus and verification evidence;
+- credits the user's exact integer-tinybar balance;
+- appends one immutable deposit journal entry;
+- marks the deposit `credited`; and
+- creates the privacy-safe Graph projection outbox record.
+
+Unique proof and journal constraints make retries idempotent. A repeated
+verification returns the existing balance; it cannot credit twice. Mirror
+pending responses retry only the read-only proof query and never authorize
+another wallet transfer.
+
+The HashScan link is public transaction evidence. The authoritative validation
+is the combination of exact intent matching through Mirror, unique proof
+consumption, and atomic Postgres credit. The later EVM/Graph anchor proves the
+monitoring projection and cannot create or modify the balance.
+
 ### Verification and live-update sequence
 
 The wallet transaction and application credit are deliberately asynchronous:
@@ -165,11 +203,11 @@ ID, Hedera identity digest and consensus timestamp, payload digest, destination
 transaction and block, contract, and relayer—without exposing the application
 user, balance, wallet address, or private journal.
 
-The currently deployed Graph proof indexes the recorded HCS monitoring event at
-Ganache block 2. It proves the relay, replay protection, and Graph indexing
-mechanism, but it is not yet the entity for the latest live user deposit. Do
-not claim one-to-one deposit correlation until the corresponding durable outbox
-record, destination event, and indexed entity share the same source-event ID.
+The deployed Graph proof includes native-transfer anchors for credited user
+deposits. Each stable source-event ID correlates the durable Supabase relay
+record, exactly-once EVM event, and indexed Graph entity. The original HCS
+anchor remains historical projection evidence and must not be relabeled as a
+user deposit.
 
 ## Browser session continuity
 

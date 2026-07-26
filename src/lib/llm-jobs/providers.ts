@@ -29,6 +29,7 @@ export type LlmProviderExecutionRequest = Readonly<{
   maximumOutputTokens: number;
   idempotencyKey: string;
   providerAddress?: string;
+  providerTrustMode?: "private" | "verified";
 }>;
 
 export type LlmProviderExecutionResult = Readonly<{
@@ -44,7 +45,7 @@ export type LlmProviderExecutionResult = Readonly<{
     executionId: string;
     verificationLabel: string;
     providerAddress: string | null;
-    trustMode: "standard" | "private" | null;
+    trustMode: "standard" | "private" | "verified" | null;
   }>;
 }>;
 
@@ -106,6 +107,12 @@ class OpenAiCompatibleWorkloadAdapter implements LlmProviderAdapter {
         "0G execution requires a pinned provider address",
       );
     }
+    if (this.options.provider === "0g" && !request.providerTrustMode) {
+      throw new LlmProviderError(
+        "OUTPUT_INVALID",
+        "0G execution requires a pinned provider trust mode",
+      );
+    }
 
     const timeoutMs = this.options.timeoutMs ?? 30_000;
     const maximumAttempts = this.options.maximumAttempts ?? 1;
@@ -133,7 +140,7 @@ class OpenAiCompatibleWorkloadAdapter implements LlmProviderAdapter {
                   ? {
                       "x-0g-provider-address": request.providerAddress!,
                       "x-0g-provider-allow-fallbacks": "false",
-                      "x-0g-provider-trust-mode": "private",
+                      "x-0g-provider-trust-mode": request.providerTrustMode!,
                     }
                   : {}),
               },
@@ -241,10 +248,13 @@ class OpenAiCompatibleWorkloadAdapter implements LlmProviderAdapter {
             executionId: parsed.data.id,
             verificationLabel:
               this.options.provider === "0g"
-                ? "0G Router private trust-mode response; TeeML catalog claim not independently attested"
+                ? `0G Router ${request.providerTrustMode} trust-mode response; TeeML catalog claim not independently attested`
                 : "provider-reported Scaleway chat completion",
             providerAddress: request.providerAddress ?? null,
-            trustMode: this.options.provider === "0g" ? "private" : "standard",
+            trustMode:
+              this.options.provider === "0g"
+                ? request.providerTrustMode!
+                : "standard",
           },
         };
       }

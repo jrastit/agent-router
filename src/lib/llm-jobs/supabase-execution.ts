@@ -27,6 +27,7 @@ const jobRowSchema = z.object({
   instance_id: z.union([z.string(), z.number()]).transform(String),
   provider: z.enum(["scaleway", "0g"]),
   model: z.string(),
+  privacy: z.enum(["public", "confidential"]),
   maximum_input_tokens: z.number().int().positive(),
   maximum_output_tokens: z.number().int().positive(),
 });
@@ -46,6 +47,30 @@ const instanceRowSchema = z.object({
     })
     .passthrough(),
 });
+
+type ZgProvider = Readonly<{
+  address: string;
+  trustMode?: string | null;
+}>;
+
+export function selectZgProvider(
+  privacy: "public" | "confidential",
+  providers: ZgProvider[] | undefined,
+) {
+  const supported = providers?.filter(
+    (
+      provider,
+    ): provider is ZgProvider & { trustMode: "private" | "verified" } =>
+      provider.trustMode === "private" || provider.trustMode === "verified",
+  );
+  if (privacy === "confidential") {
+    return supported?.find((provider) => provider.trustMode === "private");
+  }
+  return (
+    supported?.find((provider) => provider.trustMode === "private") ??
+    supported?.find((provider) => provider.trustMode === "verified")
+  );
+}
 
 type SupabaseConfig = Readonly<{
   supabaseUrl: string;
@@ -107,7 +132,7 @@ export function createSupabaseLlmExecutionDependencies(
     async load(jobId) {
       const job = jobRowSchema.parse(
         await selectOne(
-          `llm_jobs?id=eq.${encodeURIComponent(jobId)}&user_id=eq.${encodeURIComponent(config.userId)}&select=id,state,instance_id,provider,model,maximum_input_tokens,maximum_output_tokens`,
+          `llm_jobs?id=eq.${encodeURIComponent(jobId)}&user_id=eq.${encodeURIComponent(config.userId)}&select=id,state,instance_id,provider,model,privacy,maximum_input_tokens,maximum_output_tokens`,
           jobRowSchema,
         ),
       );
@@ -133,22 +158,22 @@ export function createSupabaseLlmExecutionDependencies(
         );
         attemptId = attempt.id;
       }
-      const providerAddress =
+      const zgProvider =
         job.provider === "0g"
-          ? instance.source_metadata.providers?.find(
-              (provider) => provider.trustMode === "private",
-            )?.address
+          ? selectZgProvider(job.privacy, instance.source_metadata.providers)
           : undefined;
       return {
         id: job.id,
         state: job.state,
         provider: job.provider,
         model: job.model,
+        privacy: job.privacy,
         prompt: input.prompt,
         maximumInputTokens: job.maximum_input_tokens,
         maximumOutputTokens: job.maximum_output_tokens,
         attemptId,
-        providerAddress,
+        providerAddress: zgProvider?.address,
+        providerTrustMode: zgProvider?.trustMode,
       };
     },
     async reserve(jobId) {

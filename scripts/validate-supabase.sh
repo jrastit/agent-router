@@ -40,12 +40,14 @@ node --env-file=.env -e '
     "-f", "supabase/migrations/20260726000100_add_realtime_fund_activity.sql",
     "-f", "supabase/migrations/20260726000200_expose_deposit_verification_planes.sql",
     "-f", "supabase/migrations/20260726000300_complete_deposit_graph_projection.sql",
+    "-f", "supabase/migrations/20260726000400_add_llm_instance_catalog.sql",
     "-f", "supabase/tests/phase2.sql",
     "-f", "supabase/tests/phase4.sql",
     "-f", "supabase/tests/phase6.sql",
     "-f", "supabase/tests/phase6a.sql",
     "-f", "supabase/tests/phase6b.sql",
     "-f", "supabase/tests/realtime_fund_activity.sql",
+    "-f", "supabase/tests/llm_instances.sql",
     "-f", "supabase/tests/phase8.sql", "-c", "rollback",
   ];
   const result = spawnSync(psql, args, { stdio: "inherit" });

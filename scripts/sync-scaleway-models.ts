@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 import { parseExactTinybarRate } from "../src/lib/llm-instances/credit-pricing";
+import {
+  SCALEWAY_PRICING_REVIEWED_ON,
+  SCALEWAY_PRICING_SOURCE,
+  scalewayPricingForModel,
+} from "../src/lib/llm-instances/scaleway-pricing";
 
 const confirmation = "--confirm-production-sync";
 if (!process.argv.includes(confirmation)) {
@@ -60,27 +65,54 @@ async function main() {
     throw new Error(`Scaleway models request failed (${modelResponse.status})`);
   }
   const models = catalogSchema.parse(await modelResponse.json()).data;
+  const unpricedModels = models.filter(
+    (model) => scalewayPricingForModel(model.id) === undefined,
+  );
+  if (unpricedModels.length > 0) {
+    throw new Error(
+      `Scaleway pricing is missing for: ${unpricedModels
+        .map((model) => model.id)
+        .join(", ")}`,
+    );
+  }
   const syncedAt = new Date().toISOString();
-  const rows = models.map((model) => ({
-    provider: "scaleway",
-    model_id: model.id,
-    name: model.id,
-    base_url: config.scalewayBase,
-    capabilities: capabilities(model.id),
-    privacy: "public",
-    enabled: true,
-    expected_latency_ms: 1800,
-    input_price_tinybar_per_million: inputPrice,
-    output_price_tinybar_per_million: outputPrice,
-    price_synced_at: syncedAt,
-    source_metadata: {
-      object: "model",
-      ...(model.created !== undefined ? { created: model.created } : {}),
-      ...(model.owned_by ? { ownedBy: model.owned_by } : {}),
-    },
-    synced_at: syncedAt,
-    updated_at: syncedAt,
-  }));
+  const rows = models.map((model) => {
+    const pricing = scalewayPricingForModel(model.id);
+    if (!pricing) throw new Error(`Missing pricing for ${model.id}`);
+
+    return {
+      provider: "scaleway",
+      model_id: model.id,
+      name: model.id,
+      base_url: config.scalewayBase,
+      capabilities: capabilities(model.id),
+      privacy: "public",
+      enabled: true,
+      expected_latency_ms: 1800,
+      input_price_eur_per_million_tokens: pricing.inputPriceEurPerMillionTokens,
+      output_price_eur_per_million_tokens:
+        pricing.outputPriceEurPerMillionTokens,
+      input_price_tinybar_per_million: inputPrice,
+      output_price_tinybar_per_million: outputPrice,
+      price_synced_at: syncedAt,
+      source_metadata: {
+        object: "model",
+        ...(model.created !== undefined ? { created: model.created } : {}),
+        ...(model.owned_by ? { ownedBy: model.owned_by } : {}),
+        pricing: {
+          sourceUrl: SCALEWAY_PRICING_SOURCE,
+          reviewedOn: SCALEWAY_PRICING_REVIEWED_ON,
+          currency: "EUR",
+          tokenUnit: "million_tokens",
+          ...(pricing.alternateUnit
+            ? { alternateUnit: pricing.alternateUnit }
+            : {}),
+        },
+      },
+      synced_at: syncedAt,
+      updated_at: syncedAt,
+    };
+  });
 
   const upsertResponse = await fetch(
     `${config.supabaseUrl.replace(/\/$/, "")}/rest/v1/llm_instances?on_conflict=provider,model_id`,

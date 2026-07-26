@@ -20,6 +20,44 @@ begin
 end
 $$;
 
+set local role service_role;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'llm_instances'
+      and column_name = 'input_price_eur_per_million_tokens'
+      and data_type = 'numeric'
+      and numeric_scale = 6
+  ) or not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'llm_instances'
+      and column_name = 'output_price_eur_per_million_tokens'
+      and data_type = 'numeric'
+      and numeric_scale = 6
+  ) then
+    raise exception 'exact LLM token price columns are missing';
+  end if;
+
+  begin
+    insert into public.llm_instances (
+      provider, model_id, name, base_url, capabilities, privacy,
+      input_price_eur_per_million_tokens
+    ) values (
+      'test', 'negative-price', 'Negative price',
+      'https://example.com/v1', array['chat'], 'public', -0.000001
+    );
+    raise exception 'negative token price was accepted';
+  exception when check_violation then null;
+  end;
+end
+$$;
+
 reset role;
 
 do $$

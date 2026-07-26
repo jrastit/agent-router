@@ -32,6 +32,8 @@ describe("Graph evidence MCP stdio transport", () => {
         "find_payment",
         "list_agent_transactions",
         "verify_receipt_history",
+        "list_llm_instances",
+        "create_llm_job",
       ]);
       expect(tools.tools.every((tool) => tool.inputSchema)).toBe(true);
     } finally {

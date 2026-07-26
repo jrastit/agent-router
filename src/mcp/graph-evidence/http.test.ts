@@ -42,6 +42,39 @@ describe("Graph evidence Streamable HTTP transport", () => {
     });
   });
 
+  it("advertises LLM tools through the frontend MCP endpoint", async () => {
+    const response = await handleGraphEvidenceMcpHttp(
+      new Request("https://app.example.com/api/mcp/graph-evidence", {
+        method: "POST",
+        headers: {
+          accept: "application/json, text/event-stream",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 2,
+          method: "tools/list",
+          params: {},
+        }),
+      }),
+      {} as never,
+      {
+        listInstances: async () => ({
+          tool: "list_llm_instances",
+          instances: [],
+        }),
+        createJob: async () => ({
+          tool: "create_llm_job",
+          job: { id: "job:1", state: "accepted", instanceId: "42" },
+        }),
+      },
+    );
+    const body = await response.json();
+    expect(
+      body.result.tools.map((tool: { name: string }) => tool.name),
+    ).toEqual(expect.arrayContaining(["list_llm_instances", "create_llm_job"]));
+  });
+
   it("rejects cross-origin browser requests", async () => {
     const response = await handleGraphEvidenceMcpHttp(
       initialize("https://malicious.example.com"),

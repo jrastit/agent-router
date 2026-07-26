@@ -1,15 +1,15 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import Home from "./page";
+import Home, { evaluateCatalogInstances } from "./page";
 
 describe("mid-hackathon demo", () => {
   it("renders interactive routing and verified Hedera evidence", () => {
     const html = renderToStaticMarkup(<Home />);
 
     expect(html).toContain("Route a summarization task");
-    expect(html).toContain("Scaleway Generative APIs");
-    expect(html).toContain("Private Compute Provider");
+    expect(html).toContain("Live Supabase catalog");
+    expect(html).toContain("Loading live instances");
     expect(html).toContain("LLM instances");
     expect(html).toContain("no new payment is submitted");
     expect(html).toContain("hashscan.io/testnet/transaction");
@@ -23,5 +23,63 @@ describe("mid-hackathon demo", () => {
     expect(html).toContain("You stay in control");
     expect(html).toContain("NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID");
     expect(html).toContain("Connect your AgentRouter account");
+  });
+
+  it("evaluates every Supabase instance and fails closed", () => {
+    const base = {
+      baseUrl: "https://api.example.com/v1",
+      capabilities: ["chat"],
+      expectedLatencyMs: 1000,
+      inputPriceEurPerMillionTokens: "0.01",
+      outputPriceEurPerMillionTokens: "0.02",
+    };
+    const evaluated = evaluateCatalogInstances(
+      {
+        version: 1,
+        instances: [
+          {
+            ...base,
+            id: "model-a",
+            name: "Model A",
+            provider: "provider-a",
+            model: "model-a",
+            privacy: "public",
+            enabled: true,
+          },
+          {
+            ...base,
+            id: "model-b",
+            name: "Model B",
+            provider: "provider-b",
+            model: "model-b",
+            privacy: "confidential",
+            enabled: false,
+          },
+          {
+            ...base,
+            id: "model-c",
+            name: "Model C",
+            provider: "provider-c",
+            model: "model-c",
+            privacy: "confidential",
+            enabled: true,
+            outputPriceEurPerMillionTokens: undefined,
+          },
+        ],
+      },
+      10,
+      "public",
+    );
+
+    expect(evaluated).toHaveLength(3);
+    expect(
+      evaluated.find((instance) => instance.id === "model-a")?.eligible,
+    ).toBe(true);
+    expect(
+      evaluated.find((instance) => instance.id === "model-b")?.reasons,
+    ).toContain("Instance disabled");
+    expect(
+      evaluated.find((instance) => instance.id === "model-c")?.reasons,
+    ).toContain("Exact EUR price unavailable");
   });
 });

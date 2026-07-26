@@ -33,7 +33,7 @@ export function createRunnableLlmCatalogHandler(input: {
     }
     try {
       const response = await (input.fetcher ?? fetch)(
-        `${input.supabaseUrl.replace(/\/$/, "")}/rest/v1/llm_instances?enabled=eq.true&input_price_tinybar_per_million=not.is.null&output_price_tinybar_per_million=not.is.null&price_synced_at=not.is.null&order=provider.asc,model_id.asc&select=id,name,provider,model_id,capabilities,privacy,input_price_tinybar_per_million,output_price_tinybar_per_million,price_synced_at`,
+        `${input.supabaseUrl.replace(/\/$/, "")}/rest/v1/llm_instances?enabled=eq.true&capabilities=cs.%7Bchat%7D&input_price_tinybar_per_million=not.is.null&output_price_tinybar_per_million=not.is.null&price_synced_at=not.is.null&order=provider.asc,model_id.asc&select=id,name,provider,model_id,capabilities,privacy,input_price_tinybar_per_million,output_price_tinybar_per_million,price_synced_at`,
         {
           headers: {
             apikey: input.serviceRoleKey,

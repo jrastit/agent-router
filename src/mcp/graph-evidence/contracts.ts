@@ -21,6 +21,52 @@ export const verifyReceiptHistoryInputSchema = z.strictObject({
   references: z.array(bytes32Schema).min(1).max(20),
 });
 
+const exactPositiveIntegerSchema = z.string().regex(/^[1-9]\d*$/);
+
+export const listLlmInstancesInputSchema = z.strictObject({});
+
+export const createLlmJobInputSchema = z.strictObject({
+  instanceId: exactPositiveIntegerSchema.describe(
+    "Exact instance ID returned by list_llm_instances",
+  ),
+  prompt: z.string().trim().min(1).max(100_000),
+  capability: z
+    .string()
+    .regex(/^[a-z0-9][a-z0-9._-]*$/)
+    .default("chat"),
+  privacy: z.enum(["public", "confidential"]),
+  maximumInputTokens: z.number().int().positive().max(1_000_000),
+  maximumOutputTokens: z.number().int().positive().max(1_000_000),
+  spendCeilingTinybars: exactPositiveIntegerSchema,
+  idempotencyKey: z.string().min(8).max(200),
+});
+
+export const mcpLlmInstanceSchema = z.strictObject({
+  id: exactPositiveIntegerSchema,
+  name: z.string(),
+  provider: z.enum(["scaleway", "0g"]),
+  model: z.string(),
+  capabilities: z.array(z.string()),
+  privacy: z.enum(["public", "confidential"]),
+  inputPriceTinybarsPerMillionTokens: exactPositiveIntegerSchema,
+  outputPriceTinybarsPerMillionTokens: exactPositiveIntegerSchema,
+  priceSyncedAt: z.string(),
+});
+
+export const listLlmInstancesOutputSchema = z.strictObject({
+  tool: z.literal("list_llm_instances"),
+  instances: z.array(mcpLlmInstanceSchema),
+});
+
+export const createLlmJobOutputSchema = z.strictObject({
+  tool: z.literal("create_llm_job"),
+  job: z.strictObject({
+    id: z.string(),
+    state: z.string(),
+    instanceId: exactPositiveIntegerSchema,
+  }),
+});
+
 export const graphProvenanceSchema = z.strictObject({
   endpoint: z.string().url(),
   subgraph: z.string(),
@@ -106,3 +152,7 @@ export type ListAgentTransactionsOutput = z.infer<
 export type VerifyReceiptHistoryOutput = z.infer<
   typeof verifyReceiptHistoryOutputSchema
 >;
+export type ListLlmInstancesOutput = z.infer<
+  typeof listLlmInstancesOutputSchema
+>;
+export type CreateLlmJobOutput = z.infer<typeof createLlmJobOutputSchema>;

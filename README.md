@@ -315,13 +315,23 @@ Model scores never override hard policy or integer budget checks.
 
 ### LLM instance catalog
 
-Non-secret routing metadata is stored in `data/llm-instances.json` so developers
-and coding agents can review or modify it directly. The LLM instances tab
-exports the current server catalog as JSON and imports a replacement through
-`PUT /api/llm-instances`. Imports are schema-validated, reject unknown fields
-such as embedded credentials, and are written atomically. Configure
-`LLM_INSTANCE_ADMIN_TOKEN` on the server and enter the matching value in the tab
-to authorize an import. The token is held only in component memory.
+Supabase `llm_instances` is the live catalog authority. `GET
+/api/llm-instances` returns a strict safe projection with every model,
+capability, privacy label, enabled state, expected latency, and exact EUR input
+and output rate; it never returns source metadata or credentials. The LLM
+instances tab can export that projection as JSON.
+
+The interactive decision replay loads every projected Supabase instance rather
+than a two-provider fixture. Disabled, non-chat, unpriced, over-budget, and
+privacy-incompatible instances remain visible with exclusion reasons. Exact
+decimal rates are converted to integer micro-EUR before comparison.
+
+The remote and stdio MCP transports add `list_llm_instances` and
+`create_llm_job` to the Graph evidence tools. The first returns the runnable
+exact-tinybar catalog; the second accepts an explicit instance ID and reuses the
+authenticated, idempotent server submission checks. See
+[the MCP guide](docs/GRAPH_EVIDENCE_MCP.md) for schemas, authentication, and
+frontend usage.
 
 Implementation progress and acceptance criteria live in [TODO.md](TODO.md).
 

@@ -1,41 +1,30 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
+import {
+  llmInstanceCatalogSchema,
+  type LlmInstanceCatalog,
+} from "../lib/llm-instances/schema";
 import DepositWalletPanel from "./deposit-wallet-panel";
 import EconomicActivityPanel from "./economic-activity-panel";
 import EvidenceTabs from "./evidence-tabs";
 import GraphEvidencePanel from "./graph-evidence-panel";
 import LlmJobPanel from "./llm-job-panel";
 
-const providers = [
-  {
-    name: "Scaleway Generative APIs",
-    priceMinor: 3,
-    latency: "1.8s",
-    privacy: "public",
-    account: "0.0.6101001",
-  },
-  {
-    name: "Private Compute Provider",
-    priceMinor: 7,
-    latency: "2.6s",
-    privacy: "confidential",
-    account: "0.0.6101002",
-  },
-] as const;
-
 const transactionUrl =
   "https://hashscan.io/testnet/transaction/0.0.9651299@1784940981.712442947";
 const topicUrl = "https://hashscan.io/testnet/topic/0.0.9676520";
-function cents(amount: number) {
-  return `$${(amount / 100).toFixed(2)}`;
+function euroCents(amount: number) {
+  return `€${(amount / 100).toFixed(2)}`;
 }
 
 export default function Home() {
   const [budgetMinor, setBudgetMinor] = useState(10);
   const [privacy, setPrivacy] = useState<"public" | "confidential">("public");
+  const [catalog, setCatalog] = useState<LlmInstanceCatalog>();
+  const [catalogError, setCatalogError] = useState("");
   const [fundingStatus, setFundingStatus] = useState<{
     accountConnected: boolean;
     accessToken?: string;
@@ -47,19 +36,28 @@ export default function Home() {
     [],
   );
 
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/llm-instances", {
+      cache: "no-store",
+      signal: controller.signal,
+    })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("catalog unavailable");
+        return llmInstanceCatalogSchema.parse(await response.json());
+      })
+      .then(setCatalog)
+      .catch((reason: unknown) => {
+        if (!(reason instanceof DOMException && reason.name === "AbortError")) {
+          setCatalogError("Live Supabase instance catalog is unavailable.");
+        }
+      });
+    return () => controller.abort();
+  }, []);
+
   const evaluated = useMemo(
-    () =>
-      providers.map((provider) => {
-        const reasons: string[] = [];
-        if (privacy === "confidential" && provider.privacy !== "confidential") {
-          reasons.push("Private compute required");
-        }
-        if (provider.priceMinor > budgetMinor) {
-          reasons.push("Over budget");
-        }
-        return { ...provider, reasons, eligible: reasons.length === 0 };
-      }),
-    [budgetMinor, privacy],
+    () => evaluateCatalogInstances(catalog, budgetMinor, privacy),
+    [budgetMinor, catalog, privacy],
   );
   const selected = evaluated.find((provider) => provider.eligible);
 
@@ -133,7 +131,7 @@ export default function Home() {
             <h2 id="demo-title">Route a summarization task</h2>
           </div>
           <p className="fixture-note">
-            Deterministic providers · no new payment is submitted
+            Live Supabase catalog · no new payment is submitted
           </p>
         </div>
 
@@ -162,7 +160,7 @@ export default function Home() {
                   }
                   aria-label="Maximum budget"
                 />
-                <output>{cents(budgetMinor)}</output>
+                <output>{euroCents(budgetMinor)}</output>
               </div>
             </label>
             <fieldset>
@@ -182,8 +180,8 @@ export default function Home() {
             </fieldset>
             <div className="policy">
               <span>Policy v1</span>
-              <span>Exact USD cents</span>
-              <span>Summarize capability</span>
+              <span>Exact EUR decimal rates</span>
+              <span>Chat capability</span>
             </div>
           </form>
 
@@ -195,14 +193,16 @@ export default function Home() {
               </span>
             </div>
             <div className="provider-list">
+              {!catalog && !catalogError && <p>Loading live instances…</p>}
+              {catalogError && <p>{catalogError}</p>}
               {evaluated.map((provider) => {
-                const isSelected = selected?.name === provider.name;
+                const isSelected = selected?.id === provider.id;
                 return (
                   <article
                     className={`provider ${isSelected ? "selected" : ""} ${
                       !provider.eligible ? "excluded" : ""
                     }`}
-                    key={provider.name}
+                    key={provider.id}
                   >
                     <div className="provider-main">
                       <span className="provider-icon">
@@ -211,13 +211,17 @@ export default function Home() {
                       <div>
                         <h4>{provider.name}</h4>
                         <p>
-                          {provider.latency} expected · {provider.privacy} ·{" "}
-                          {provider.account}
+                          {(provider.expectedLatencyMs / 1000).toFixed(1)}s
+                          expected · {provider.privacy} · {provider.provider} ·{" "}
+                          {provider.model}
                         </p>
                       </div>
                     </div>
                     <div className="quote">
-                      <strong>{cents(provider.priceMinor)}</strong>
+                      <strong>
+                        {formatMicroEur(provider.combinedRateMicroEur)}
+                      </strong>
+                      <small>input + output / 1M tokens</small>
                       {isSelected && <span>Selected</span>}
                       {!provider.eligible && (
                         <span className="reason">
@@ -233,7 +237,7 @@ export default function Home() {
               <span>Decision</span>
               <strong>
                 {selected
-                  ? `${selected.name} wins at ${cents(selected.priceMinor)}`
+                  ? `${selected.name} wins at ${formatMicroEur(selected.combinedRateMicroEur)} / 1M`
                   : "No provider satisfies this policy"}
               </strong>
               <p>
@@ -247,7 +251,7 @@ export default function Home() {
         <EconomicActivityPanel accessToken={fundingStatus.accessToken} />
         <DepositWalletPanel onConnectionChange={updateFundingStatus} />
         <LlmJobPanel accessToken={fundingStatus.accessToken} />
-        <GraphEvidencePanel />
+        <GraphEvidencePanel accessToken={fundingStatus.accessToken} />
       </section>
 
       <section className="evidence">
@@ -266,4 +270,71 @@ export default function Home() {
       </section>
     </main>
   );
+}
+
+export function evaluateCatalogInstances(
+  catalog: LlmInstanceCatalog | undefined,
+  budgetMinor: number,
+  privacy: "public" | "confidential",
+) {
+  return (catalog?.instances ?? [])
+    .map((provider) => {
+      const reasons: string[] = [];
+      const combinedRateMicroEur = combinedTokenRateMicroEur(provider);
+      if (!provider.enabled) reasons.push("Instance disabled");
+      if (!provider.capabilities.includes("chat")) {
+        reasons.push("Chat capability unavailable");
+      }
+      if (privacy === "confidential" && provider.privacy !== "confidential") {
+        reasons.push("Private compute required");
+      }
+      if (combinedRateMicroEur === null) {
+        reasons.push("Exact EUR price unavailable");
+      } else if (combinedRateMicroEur > BigInt(budgetMinor) * BigInt("10000")) {
+        reasons.push("Over budget");
+      }
+      return {
+        ...provider,
+        combinedRateMicroEur,
+        reasons,
+        eligible: reasons.length === 0,
+      };
+    })
+    .sort((left, right) =>
+      compareExactRates(left.combinedRateMicroEur, right.combinedRateMicroEur),
+    );
+}
+
+function combinedTokenRateMicroEur(
+  instance: LlmInstanceCatalog["instances"][number],
+): bigint | null {
+  const input = parseEurMicro(instance.inputPriceEurPerMillionTokens);
+  const output = parseEurMicro(instance.outputPriceEurPerMillionTokens);
+  return input === null || output === null ? null : input + output;
+}
+
+function parseEurMicro(value?: string): bigint | null {
+  const match = value?.match(/^(0|[1-9]\d*)(?:\.(\d{1,6}))?$/);
+  if (!match) return null;
+  return (
+    BigInt(match[1]) * BigInt("1000000") +
+    BigInt((match[2] ?? "").padEnd(6, "0"))
+  );
+}
+
+function compareExactRates(left: bigint | null, right: bigint | null) {
+  if (left === right) return 0;
+  if (left === null) return 1;
+  if (right === null) return -1;
+  return left < right ? -1 : 1;
+}
+
+function formatMicroEur(value: bigint | null) {
+  if (value === null) return "Price unavailable";
+  const whole = value / BigInt("1000000");
+  const fraction = (value % BigInt("1000000"))
+    .toString()
+    .padStart(6, "0")
+    .replace(/0+$/, "");
+  return `€${whole}${fraction ? `.${fraction}` : ""}`;
 }

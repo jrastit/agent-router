@@ -13,6 +13,8 @@ export const llmInstanceSchema = z.strictObject({
   privacy: z.enum(["public", "confidential"]),
   enabled: z.boolean(),
   expectedLatencyMs: z.number().int().nonnegative(),
+  inputPriceEurPerMillionTokens: z.string().optional(),
+  outputPriceEurPerMillionTokens: z.string().optional(),
   notes: z.string().trim().max(500).optional(),
 });
 

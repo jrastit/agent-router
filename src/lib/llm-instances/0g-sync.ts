@@ -118,6 +118,16 @@ export function createZgInstanceRow(input: {
       input.model.pricing_usd?.prompt !== undefined) ||
       (input.model.pricing_eur?.completion === undefined &&
         input.model.pricing_usd?.completion !== undefined));
+  const pricingFxSnapshot =
+    usedFxSnapshot && input.fxSnapshot
+      ? {
+          source: input.fxSnapshot.source,
+          base: "EUR",
+          quote: "USD",
+          usdPerEur: input.fxSnapshot.usdPerEur,
+          observedOn: input.fxSnapshot.observedOn,
+        }
+      : null;
 
   return {
     provider: "0g",
@@ -140,16 +150,7 @@ export function createZgInstanceRow(input: {
       pricing: input.model.pricing ?? null,
       pricingUsd: input.model.pricing_usd ?? null,
       pricingEur: input.model.pricing_eur ?? null,
-      pricingFxSnapshot:
-        !usedFxSnapshot
-          ? null
-          : {
-              source: input.fxSnapshot.source,
-              base: "EUR",
-              quote: "USD",
-              usdPerEur: input.fxSnapshot.usdPerEur,
-              observedOn: input.fxSnapshot.observedOn,
-            },
+      pricingFxSnapshot,
       catalogVerifiability: input.model.verifiability ?? null,
       catalogTeeAttested: input.model.tee_attested ?? false,
       catalogTeeType: input.model.tee_type ?? null,

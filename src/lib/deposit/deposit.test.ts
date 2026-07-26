@@ -33,14 +33,7 @@ const proof: VerifiedMirrorProof = {
 
 describe("user deposit contracts", () => {
   it("binds a successful proof to every authoritative intent field", () => {
-    expect(
-      verifyDepositProof(
-        intent,
-        proof,
-        transactionId,
-        new Date("2026-07-25T12:00:00Z"),
-      ),
-    ).toEqual(intent);
+    expect(verifyDepositProof(intent, proof, transactionId)).toEqual(intent);
   });
 
   it.each([
@@ -51,30 +44,20 @@ describe("user deposit contracts", () => {
     ["transaction", { transactionId: "0.0.1001@1.000000001" }],
   ])("rejects a mismatched %s", (_name, patch) => {
     expect(() =>
-      verifyDepositProof(
-        intent,
-        { ...proof, ...patch },
-        transactionId,
-        new Date("2026-07-25T12:00:00Z"),
-      ),
+      verifyDepositProof(intent, { ...proof, ...patch }, transactionId),
     ).toThrow(/mismatch/);
   });
 
-  it("rejects verification after expiry and consensus outside the window", () => {
-    expect(() =>
-      verifyDepositProof(
-        intent,
-        proof,
-        transactionId,
-        new Date("2026-07-25T13:00:00Z"),
-      ),
-    ).toThrow(/expired/);
+  it("accepts delayed verification when consensus was inside the intent window", () => {
+    expect(verifyDepositProof(intent, proof, transactionId)).toEqual(intent);
+  });
+
+  it("rejects consensus outside the intent window", () => {
     expect(() =>
       verifyDepositProof(
         intent,
         { ...proof, consensusTimestamp: "1784984401.000000001" },
         transactionId,
-        new Date("2026-07-25T12:00:00Z"),
       ),
     ).toThrow(/after the intent expired/);
   });

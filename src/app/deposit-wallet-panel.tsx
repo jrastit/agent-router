@@ -12,6 +12,10 @@ import {
 import { formatTinybarsAsHbar } from "../lib/deposit/balance";
 import type { UserSigningRequest } from "../lib/deposit/workflow";
 import {
+  resumeSubmittedDeposits,
+  verifySubmittedDeposit,
+} from "../lib/deposit/verification-client";
+import {
   createDepositWalletReview,
   type DepositWalletReview,
 } from "../lib/deposit/wallet";
@@ -162,6 +166,29 @@ export default function DepositWalletPanel({
       window.clearTimeout(timer);
     };
   }, [accessToken, sessionExpiresAt]);
+
+  useEffect(() => {
+    if (!accessToken || !supabaseUrl || !supabasePublishableKey) return;
+    let active = true;
+    void resumeSubmittedDeposits(
+      { url: supabaseUrl, publishableKey: supabasePublishableKey },
+      accessToken,
+    )
+      .then(({ credited, pending }) => {
+        if (!active || (credited === 0 && pending === 0)) return;
+        setMessage(
+          credited > 0
+            ? `${credited} submitted deposit${credited === 1 ? "" : "s"} credited after Mirror verification.`
+            : `${pending} deposit${pending === 1 ? "" : "s"} awaiting Mirror indexing.`,
+        );
+      })
+      .catch(() => {
+        // The user can retry safely; proof verification and credit are idempotent.
+      });
+    return () => {
+      active = false;
+    };
+  }, [accessToken]);
 
   useEffect(() => {
     onConnectionChange?.({
@@ -329,8 +356,12 @@ export default function DepositWalletPanel({
         throw new Error(`Proof submission failed (${response.status})`);
       }
       setTransactionId(id);
+      setMessage("Transaction submitted. Verifying it with Hedera Mirror…");
+      const state = await verifySubmittedDeposit(depositId, accessToken);
       setMessage(
-        "Transaction submitted. Mirror verification remains authoritative and runs separately.",
+        state === "credited"
+          ? "Deposit verified and credited. Your live balance is updating."
+          : "Deposit submitted and awaiting Hedera Mirror indexing.",
       );
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Deposit failed");

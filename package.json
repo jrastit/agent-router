@@ -27,6 +27,7 @@
     "verify:client-secrets": "node --env-file-if-exists=.env scripts/verify-client-bundle-secrets.mjs",
     "validate:supabase": "bash scripts/validate-supabase.sh",
     "deploy:supabase": "node --env-file=.env scripts/deploy-supabase-migrations.mjs",
+    "reconcile:deposits": "tsx --env-file=.env scripts/reconcile-submitted-deposits.ts --confirm-production-reconciliation",
     "validate:hedera-subgraph": "node --env-file=.env scripts/validate-hedera-subgraph.mjs",
     "deploy:hedera-app-events": "node --env-file=.env scripts/deploy-hedera-app-events.mjs --confirm-live-testnet",
     "deploy:hedera-app-events:sdk": "node --env-file=.env scripts/deploy-hedera-app-events-sdk.mjs --confirm-live-testnet",
@@ -78,6 +79,7 @@
     "solc": "^0.8.36",
     "supabase": "2.109.1",
     "tailwindcss": "4.3.3",
+    "tsx": "^4.23.1",
     "typescript": "5.9.3",
     "vitest": "4.1.10",
     "yaml": "^2.9.0"

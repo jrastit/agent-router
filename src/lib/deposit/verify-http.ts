@@ -81,7 +81,7 @@ export function createDepositVerificationHandler(input: {
         input.fetcher,
       );
       const verifiedAt = input.now?.() ?? new Date();
-      verifyDepositProof(intent, proof, transactionId, verifiedAt);
+      verifyDepositProof(intent, proof, transactionId);
       const observed = createDepositObserved({
         intent,
         transactionHash: transactionId,

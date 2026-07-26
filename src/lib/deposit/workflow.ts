@@ -107,7 +107,7 @@ export async function verifyAndCreditUserDeposit(input: {
     input.fetcher,
   );
   const verifiedAt = input.now ?? new Date();
-  verifyDepositProof(input.intent, proof, input.transactionId, verifiedAt);
+  verifyDepositProof(input.intent, proof, input.transactionId);
   return input.store.creditVerified({
     intent: input.intent,
     proof,

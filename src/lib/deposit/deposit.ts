@@ -89,16 +89,9 @@ export function verifyDepositProof(
   rawIntent: unknown,
   proof: VerifiedMirrorProof,
   transactionId: string,
-  now = new Date(),
 ): DepositIntent {
   const intent = depositIntentSchema.parse(rawIntent);
   const expiresAt = new Date(intent.expiresAt);
-  if (expiresAt.getTime() <= now.getTime()) {
-    throw new DepositVerificationError(
-      "DEPOSIT_INTENT_EXPIRED",
-      "deposit intent has expired",
-    );
-  }
 
   const mismatches: string[] = [];
   if (proof.transactionId !== transactionId) mismatches.push("transactionId");

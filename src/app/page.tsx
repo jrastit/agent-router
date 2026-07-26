@@ -22,6 +22,9 @@ function euroCents(amount: number) {
 
 export default function Home() {
   const [budgetMinor, setBudgetMinor] = useState(10);
+  const [inputTokens, setInputTokens] = useState(1_000_000);
+  const [outputTokens, setOutputTokens] = useState(10_000);
+  const [minimumScore, setMinimumScore] = useState(0);
   const [privacy, setPrivacy] = useState<"public" | "confidential">("public");
   const [catalog, setCatalog] = useState<LlmInstanceCatalog>();
   const [catalogError, setCatalogError] = useState("");
@@ -56,10 +59,20 @@ export default function Home() {
   }, []);
 
   const evaluated = useMemo(
-    () => evaluateCatalogInstances(catalog, budgetMinor, privacy),
-    [budgetMinor, catalog, privacy],
+    () =>
+      evaluateCatalogInstances(
+        catalog,
+        budgetMinor,
+        privacy,
+        inputTokens,
+        outputTokens,
+      ),
+    [budgetMinor, catalog, inputTokens, outputTokens, privacy],
   );
-  const selected = evaluated.find((provider) => provider.eligible);
+  const visible = evaluated.filter(
+    (provider) => (provider.performanceScore ?? 0) >= minimumScore,
+  );
+  const selected = visible.find((provider) => provider.eligible);
 
   return (
     <main>
@@ -153,7 +166,8 @@ export default function Home() {
                 <input
                   type="range"
                   min="1"
-                  max="10"
+                  max="2000"
+                  step="1"
                   value={budgetMinor}
                   onChange={(event) =>
                     setBudgetMinor(Number(event.target.value))
@@ -162,6 +176,59 @@ export default function Home() {
                 />
                 <output>{euroCents(budgetMinor)}</output>
               </div>
+              <small>€0.01–€20.00 estimated job-cost ceiling</small>
+            </label>
+            <label>
+              Estimated input tokens
+              <div className="range-row">
+                <input
+                  type="range"
+                  min="0"
+                  max="1000000"
+                  step="1000"
+                  value={inputTokens}
+                  onChange={(event) =>
+                    setInputTokens(Number(event.target.value))
+                  }
+                  aria-label="Estimated input tokens"
+                />
+                <output>{inputTokens.toLocaleString("en-US")}</output>
+              </div>
+            </label>
+            <label>
+              Estimated output tokens
+              <div className="range-row">
+                <input
+                  type="range"
+                  min="0"
+                  max="1000000"
+                  step="1000"
+                  value={outputTokens}
+                  onChange={(event) =>
+                    setOutputTokens(Number(event.target.value))
+                  }
+                  aria-label="Estimated output tokens"
+                />
+                <output>{outputTokens.toLocaleString("en-US")}</output>
+              </div>
+            </label>
+            <label>
+              Minimum performance score
+              <div className="range-row">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value={minimumScore}
+                  onChange={(event) =>
+                    setMinimumScore(Number(event.target.value))
+                  }
+                  aria-label="Minimum performance score"
+                />
+                <output>{minimumScore}/100</output>
+              </div>
+              <small>Estimated catalog readiness, not a benchmark.</small>
             </label>
             <fieldset>
               <legend>Privacy policy</legend>
@@ -186,16 +253,30 @@ export default function Home() {
           </form>
 
           <div className="results">
+            <div className={`decision ${selected ? "" : "no-match"}`}>
+              <span>Decision</span>
+              <strong>
+                {selected
+                  ? `${selected.name} wins at an estimated ${formatMicroEur(selected.estimatedCostMicroEur)}`
+                  : "No provider satisfies this policy"}
+              </strong>
+              <p>
+                {selected
+                  ? "Hard constraints and minimum score pass; lowest eligible exact quote wins."
+                  : "Increase the budget, lower the score, or relax the privacy requirement."}
+              </p>
+            </div>
             <div className="result-topline">
               <h3>Normalized quotes</h3>
               <span>
-                {evaluated.filter((item) => item.eligible).length} eligible
+                {visible.filter((item) => item.eligible).length} eligible ·{" "}
+                {visible.length} shown
               </span>
             </div>
             <div className="provider-list">
               {!catalog && !catalogError && <p>Loading live instances…</p>}
               {catalogError && <p>{catalogError}</p>}
-              {evaluated.map((provider) => {
+              {visible.map((provider) => {
                 const isSelected = selected?.id === provider.id;
                 return (
                   <article
@@ -215,13 +296,26 @@ export default function Home() {
                           expected · {provider.privacy} · {provider.provider} ·{" "}
                           {provider.model}
                         </p>
+                        <p>
+                          Estimated performance{" "}
+                          <strong>{provider.performanceScore ?? 0}/100</strong>{" "}
+                          ·{" "}
+                          {provider.performanceScoreBasis ??
+                            "unscored catalog entry"}
+                        </p>
                       </div>
                     </div>
                     <div className="quote">
                       <strong>
-                        {formatMicroEur(provider.combinedRateMicroEur)}
+                        {formatMicroEur(provider.estimatedCostMicroEur)}
                       </strong>
-                      <small>input + output / 1M tokens</small>
+                      <small>
+                        input{" "}
+                        {formatRate(provider.inputPriceEurPerMillionTokens)} ·
+                        output{" "}
+                        {formatRate(provider.outputPriceEurPerMillionTokens)} /
+                        1M
+                      </small>
                       {isSelected && <span>Selected</span>}
                       {!provider.eligible && (
                         <span className="reason">
@@ -232,19 +326,6 @@ export default function Home() {
                   </article>
                 );
               })}
-            </div>
-            <div className={`decision ${selected ? "" : "no-match"}`}>
-              <span>Decision</span>
-              <strong>
-                {selected
-                  ? `${selected.name} wins at ${formatMicroEur(selected.combinedRateMicroEur)} / 1M`
-                  : "No provider satisfies this policy"}
-              </strong>
-              <p>
-                {selected
-                  ? "Hard constraints pass; lowest eligible exact quote wins."
-                  : "Increase the budget or relax the privacy requirement."}
-              </p>
             </div>
           </div>
         </div>
@@ -261,9 +342,15 @@ export default function Home() {
               <p className="eyebrow">Verified run · 25 July 2026</p>
               <h2>From decision to public proof</h2>
             </div>
-            <a href={topicUrl} target="_blank" rel="noreferrer">
-              Inspect HCS topic on HashScan ↗
-            </a>
+            <div className="evidence-actions">
+              <a href={topicUrl} target="_blank" rel="noreferrer">
+                Inspect HCS topic on HashScan ↗
+              </a>
+              <a className="presentation-button" href="/presentation">
+                Open presentation
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
           </div>
           <EvidenceTabs />
         </div>
@@ -276,11 +363,17 @@ export function evaluateCatalogInstances(
   catalog: LlmInstanceCatalog | undefined,
   budgetMinor: number,
   privacy: "public" | "confidential",
+  inputTokens = 1_000_000,
+  outputTokens = 10_000,
 ) {
   return (catalog?.instances ?? [])
     .map((provider) => {
       const reasons: string[] = [];
-      const combinedRateMicroEur = combinedTokenRateMicroEur(provider);
+      const estimatedCostMicroEur = estimateCostMicroEur(
+        provider,
+        inputTokens,
+        outputTokens,
+      );
       if (!provider.enabled) reasons.push("Instance disabled");
       if (!provider.capabilities.includes("chat")) {
         reasons.push("Chat capability unavailable");
@@ -288,29 +381,40 @@ export function evaluateCatalogInstances(
       if (privacy === "confidential" && provider.privacy !== "confidential") {
         reasons.push("Private compute required");
       }
-      if (combinedRateMicroEur === null) {
+      if (estimatedCostMicroEur === null) {
         reasons.push("Exact EUR price unavailable");
-      } else if (combinedRateMicroEur > BigInt(budgetMinor) * BigInt("10000")) {
+      } else if (
+        estimatedCostMicroEur >
+        BigInt(budgetMinor) * BigInt("10000")
+      ) {
         reasons.push("Over budget");
       }
       return {
         ...provider,
-        combinedRateMicroEur,
+        estimatedCostMicroEur,
         reasons,
         eligible: reasons.length === 0,
       };
     })
     .sort((left, right) =>
-      compareExactRates(left.combinedRateMicroEur, right.combinedRateMicroEur),
+      compareExactRates(
+        left.estimatedCostMicroEur,
+        right.estimatedCostMicroEur,
+      ),
     );
 }
 
-function combinedTokenRateMicroEur(
+function estimateCostMicroEur(
   instance: LlmInstanceCatalog["instances"][number],
+  inputTokens: number,
+  outputTokens: number,
 ): bigint | null {
   const input = parseEurMicro(instance.inputPriceEurPerMillionTokens);
   const output = parseEurMicro(instance.outputPriceEurPerMillionTokens);
-  return input === null || output === null ? null : input + output;
+  if (input === null || output === null) return null;
+  const numerator = input * BigInt(inputTokens) + output * BigInt(outputTokens);
+  const denominator = BigInt("1000000");
+  return (numerator + denominator - BigInt(1)) / denominator;
 }
 
 function parseEurMicro(value?: string): bigint | null {
@@ -337,4 +441,8 @@ function formatMicroEur(value: bigint | null) {
     .padStart(6, "0")
     .replace(/0+$/, "");
   return `€${whole}${fraction ? `.${fraction}` : ""}`;
+}
+
+function formatRate(value?: string) {
+  return value === undefined ? "—" : `€${value}`;
 }

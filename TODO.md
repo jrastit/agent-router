@@ -533,6 +533,8 @@ state without duplicate payment or secret exposure.
       immediately before submission.
 - [x] Verify public repository access and third-party attribution.
 - [ ] Test screen recording, microphone, readable font size, and backup capture.
+- [x] Prepare the timed 4–5 minute web-presentation narrative, sponsor slides,
+      technical-stack slide, coherent demo sequence, and claim boundaries.
 - [ ] Record a demo within the event time limit.
 - [x] Add the final project name and infrastructure-focused short description.
 - [ ] Add all 0G contract addresses, deployment transactions, and explorer

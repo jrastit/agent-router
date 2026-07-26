@@ -14,6 +14,8 @@ export const runnableLlmInstanceSchema = z.object({
     .union([z.string(), z.number()])
     .transform(String),
   price_synced_at: z.string(),
+  performance_score: z.number().int().min(0).max(100),
+  performance_score_basis: z.literal("catalog-readiness-v1"),
 });
 
 export const runnableLlmInstancesSchema = z.array(runnableLlmInstanceSchema);
@@ -27,13 +29,16 @@ export function createRunnableLlmCatalogHandler(input: {
   return async function GET() {
     if (!input.supabaseUrl || !input.serviceRoleKey) {
       return Response.json(
-        { error: "Runnable LLM catalog unavailable" },
+        {
+          error: "Runnable LLM catalog is not configured",
+          code: "configuration_error",
+        },
         { status: 503 },
       );
     }
     try {
       const response = await (input.fetcher ?? fetch)(
-        `${input.supabaseUrl.replace(/\/$/, "")}/rest/v1/llm_instances?enabled=eq.true&capabilities=cs.%7Bchat%7D&input_price_tinybar_per_million=not.is.null&output_price_tinybar_per_million=not.is.null&price_synced_at=not.is.null&order=provider.asc,model_id.asc&select=id,name,provider,model_id,capabilities,privacy,input_price_tinybar_per_million,output_price_tinybar_per_million,price_synced_at`,
+        `${input.supabaseUrl.replace(/\/$/, "")}/rest/v1/llm_instances?enabled=eq.true&capabilities=cs.%7Bchat%7D&input_price_tinybar_per_million=not.is.null&output_price_tinybar_per_million=not.is.null&price_synced_at=not.is.null&performance_score=not.is.null&order=provider.asc,model_id.asc&select=id,name,provider,model_id,capabilities,privacy,input_price_tinybar_per_million,output_price_tinybar_per_million,price_synced_at,performance_score,performance_score_basis`,
         {
           headers: {
             apikey: input.serviceRoleKey,
@@ -42,14 +47,30 @@ export function createRunnableLlmCatalogHandler(input: {
           signal: AbortSignal.timeout(10_000),
         },
       );
-      if (!response.ok) throw new Error("catalog query failed");
+      if (!response.ok) {
+        return Response.json(
+          response.status === 401 || response.status === 403
+            ? {
+                error: "Runnable LLM catalog authorization failed",
+                code: "catalog_unauthorized",
+              }
+            : {
+                error: "Runnable LLM catalog query failed",
+                code: "catalog_query_failed",
+              },
+          { status: 502 },
+        );
+      }
       return Response.json(
         runnableLlmInstancesSchema.parse(await response.json()),
         { headers: { "cache-control": "no-store" } },
       );
     } catch {
       return Response.json(
-        { error: "Runnable LLM catalog unavailable" },
+        {
+          error: "Runnable LLM catalog response is invalid",
+          code: "catalog_response_invalid",
+        },
         { status: 502 },
       );
     }

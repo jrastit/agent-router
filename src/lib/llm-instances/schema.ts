@@ -15,6 +15,8 @@ export const llmInstanceSchema = z.strictObject({
   expectedLatencyMs: z.number().int().nonnegative(),
   inputPriceEurPerMillionTokens: z.string().optional(),
   outputPriceEurPerMillionTokens: z.string().optional(),
+  performanceScore: z.number().int().min(0).max(100).optional(),
+  performanceScoreBasis: z.literal("catalog-readiness-v1").optional(),
   notes: z.string().trim().max(500).optional(),
 });
 

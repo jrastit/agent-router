@@ -19,6 +19,8 @@ const databaseRowSchema = z.object({
     .union([z.string(), z.number()])
     .transform(String)
     .nullable(),
+  performance_score: z.number().int().min(0).max(100).nullable(),
+  performance_score_basis: z.literal("catalog-readiness-v1").nullable(),
 });
 
 const databaseRowsSchema = z.array(databaseRowSchema).max(200);
@@ -38,7 +40,7 @@ export function createSupabaseLlmCatalogHandler(input: {
 
     try {
       const response = await (input.fetcher ?? fetch)(
-        `${input.supabaseUrl.replace(/\/$/, "")}/rest/v1/llm_instances?order=provider.asc,model_id.asc&select=provider,model_id,name,base_url,capabilities,privacy,enabled,expected_latency_ms,input_price_eur_per_million_tokens,output_price_eur_per_million_tokens`,
+        `${input.supabaseUrl.replace(/\/$/, "")}/rest/v1/llm_instances?order=provider.asc,model_id.asc&select=provider,model_id,name,base_url,capabilities,privacy,enabled,expected_latency_ms,input_price_eur_per_million_tokens,output_price_eur_per_million_tokens,performance_score,performance_score_basis`,
         {
           headers: {
             apikey: input.serviceRoleKey,
@@ -65,6 +67,8 @@ export function createSupabaseLlmCatalogHandler(input: {
             row.input_price_eur_per_million_tokens ?? undefined,
           outputPriceEurPerMillionTokens:
             row.output_price_eur_per_million_tokens ?? undefined,
+          performanceScore: row.performance_score ?? undefined,
+          performanceScoreBasis: row.performance_score_basis ?? undefined,
         }));
       const catalog: LlmInstanceCatalog = llmInstanceCatalogSchema.parse({
         version: 1,

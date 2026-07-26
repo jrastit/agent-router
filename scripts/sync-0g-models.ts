@@ -1,13 +1,17 @@
 import pg from "pg";
+import { z } from "zod";
 
 import {
   createZgInstanceRow,
+  updateMissingZgEurPrices,
   zgModelCatalogSchema,
   zgProviderCatalogSchema,
 } from "../src/lib/llm-instances/0g-sync";
 import { parseExactTinybarRate } from "../src/lib/llm-instances/credit-pricing";
+import { parseEcbUsdReferenceRate } from "../src/lib/llm-instances/fx-pricing";
 
 const confirmation = "--confirm-production-sync";
+const eurPricesOnly = process.argv.includes("--eur-prices-only");
 if (!process.argv.includes(confirmation)) {
   throw new Error(`Pass ${confirmation} to synchronize the 0G catalog`);
 }
@@ -19,15 +23,24 @@ const baseUrl = (
 const supabaseUrl = process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const databaseUrl = process.env.SUPABASE_DB_URL;
-const inputPrice = parseExactTinybarRate(
-  "ZG_INPUT_PRICE_TINYBAR_PER_MILLION",
-  process.env.ZG_INPUT_PRICE_TINYBAR_PER_MILLION,
-);
-const outputPrice = parseExactTinybarRate(
-  "ZG_OUTPUT_PRICE_TINYBAR_PER_MILLION",
-  process.env.ZG_OUTPUT_PRICE_TINYBAR_PER_MILLION,
-);
-if (!apiKey || (!databaseUrl && (!supabaseUrl || !serviceRoleKey))) {
+const inputPrice = eurPricesOnly
+  ? undefined
+  : parseExactTinybarRate(
+      "ZG_INPUT_PRICE_TINYBAR_PER_MILLION",
+      process.env.ZG_INPUT_PRICE_TINYBAR_PER_MILLION,
+    );
+const outputPrice = eurPricesOnly
+  ? undefined
+  : parseExactTinybarRate(
+      "ZG_OUTPUT_PRICE_TINYBAR_PER_MILLION",
+      process.env.ZG_OUTPUT_PRICE_TINYBAR_PER_MILLION,
+    );
+if (
+  !apiKey ||
+  (eurPricesOnly
+    ? !supabaseUrl || !serviceRoleKey
+    : !databaseUrl && (!supabaseUrl || !serviceRoleKey))
+) {
   throw new Error("0G or Supabase server configuration is missing");
 }
 const config = {
@@ -53,6 +66,25 @@ async function main() {
   }
   const models = zgModelCatalogSchema.parse(await modelResponse.json()).data;
   const syncedAt = new Date().toISOString();
+  const fxSnapshot = await fetchEcbFxSnapshot(models);
+  if (eurPricesOnly) {
+    const updated = await updateMissingZgEurPrices({
+      models,
+      fxSnapshot,
+      supabaseUrl: config.supabaseUrl!,
+      serviceRoleKey: config.serviceRoleKey!,
+    });
+    process.stdout.write(
+      `${JSON.stringify({
+        provider: "0g",
+        mode: "eur-prices-only",
+        discovered: models.length,
+        updated,
+        fxSnapshot,
+      })}\n`,
+    );
+    return;
+  }
   const rows = await Promise.all(
     models.map(async (model) => {
       const providerResponse = await fetch(
@@ -76,9 +108,10 @@ async function main() {
           providers,
           baseUrl: config.baseUrl,
           syncedAt,
+          fxSnapshot,
         }),
-        input_price_tinybar_per_million: inputPrice,
-        output_price_tinybar_per_million: outputPrice,
+        input_price_tinybar_per_million: inputPrice!,
+        output_price_tinybar_per_million: outputPrice!,
         price_synced_at: syncedAt,
       };
     }),
@@ -114,6 +147,12 @@ async function main() {
       discovered: models.length,
       enabled: rows.filter((row) => row.enabled).length,
       confidential: rows.filter((row) => row.privacy === "confidential").length,
+      eurPricesDerived: rows.filter(
+        (row) =>
+          row.input_price_eur_per_million_tokens !== null ||
+          row.output_price_eur_per_million_tokens !== null,
+      ).length,
+      fxSnapshot,
       upserted: rows.length,
       models: rows.map((row) => ({
         id: row.model_id,
@@ -124,6 +163,30 @@ async function main() {
       })),
     })}\n`,
   );
+}
+
+async function fetchEcbFxSnapshot(
+  models: z.infer<typeof zgModelCatalogSchema>["data"],
+) {
+  const needsUsdConversion = models.some(
+    (model) =>
+      (model.pricing_eur?.prompt === undefined &&
+        model.pricing_usd?.prompt !== undefined) ||
+      (model.pricing_eur?.completion === undefined &&
+        model.pricing_usd?.completion !== undefined),
+  );
+  if (!needsUsdConversion) return undefined;
+  const response = await fetch(
+    "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml",
+    { signal: AbortSignal.timeout(15_000) },
+  );
+  if (!response.ok) {
+    throw new Error(`ECB reference-rate request failed (${response.status})`);
+  }
+  return {
+    ...parseEcbUsdReferenceRate(await response.text()),
+    source: "ECB" as const,
+  };
 }
 
 async function upsertThroughDatabase(
@@ -154,6 +217,10 @@ async function upsertThroughDatabase(
         privacy text,
         enabled boolean,
         expected_latency_ms integer,
+        input_price_eur_per_million_tokens numeric,
+        output_price_eur_per_million_tokens numeric,
+        performance_score smallint,
+        performance_score_basis text,
         input_price_tinybar_per_million bigint,
         output_price_tinybar_per_million bigint,
         price_synced_at timestamptz,
@@ -165,14 +232,20 @@ async function upsertThroughDatabase(
     insert into public.llm_instances (
       provider, model_id, name, base_url, capabilities, privacy, enabled,
       expected_latency_ms, input_price_tinybar_per_million,
-      output_price_tinybar_per_million, price_synced_at, source_metadata,
-      synced_at, updated_at
+      output_price_tinybar_per_million,
+      input_price_eur_per_million_tokens,
+      output_price_eur_per_million_tokens, performance_score,
+      performance_score_basis, price_synced_at,
+      source_metadata, synced_at, updated_at
     )
     select
       provider, model_id, name, base_url, capabilities, privacy, enabled,
       expected_latency_ms, input_price_tinybar_per_million,
-      output_price_tinybar_per_million, price_synced_at, source_metadata,
-      synced_at, updated_at
+      output_price_tinybar_per_million,
+      input_price_eur_per_million_tokens,
+      output_price_eur_per_million_tokens, performance_score,
+      performance_score_basis, price_synced_at,
+      source_metadata, synced_at, updated_at
     from incoming
     on conflict (provider, model_id) do update set
       name = excluded.name,
@@ -185,6 +258,12 @@ async function upsertThroughDatabase(
         excluded.input_price_tinybar_per_million,
       output_price_tinybar_per_million =
         excluded.output_price_tinybar_per_million,
+      input_price_eur_per_million_tokens =
+        excluded.input_price_eur_per_million_tokens,
+      output_price_eur_per_million_tokens =
+        excluded.output_price_eur_per_million_tokens,
+      performance_score = excluded.performance_score,
+      performance_score_basis = excluded.performance_score_basis,
       price_synced_at = excluded.price_synced_at,
       source_metadata = excluded.source_metadata,
       synced_at = excluded.synced_at,

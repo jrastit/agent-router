@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import type { GraphActivity } from "../lib/projection/activity";
 import styles from "./evidence-tabs.module.css";
 import LlmInstancesPanel from "./llm-instances-panel";
-import WorkflowTimeline from "./workflow-timeline";
 
 function shortHash(hash: string) {
   return `${hash.slice(0, 10)}…${hash.slice(-6)}`;
@@ -24,9 +23,7 @@ function indexedIsoTime(timestamp: string) {
 }
 
 export default function EvidenceTabs() {
-  const [activeTab, setActiveTab] = useState<"run" | "graph" | "instances">(
-    "graph",
-  );
+  const [activeTab, setActiveTab] = useState<"graph" | "instances">("graph");
   const [activity, setActivity] = useState<GraphActivity>();
   const [error, setError] = useState("");
 
@@ -54,15 +51,6 @@ export default function EvidenceTabs() {
           className={styles.tab}
           type="button"
           role="tab"
-          aria-selected={activeTab === "run"}
-          onClick={() => setActiveTab("run")}
-        >
-          Run timeline
-        </button>
-        <button
-          className={styles.tab}
-          type="button"
-          role="tab"
           aria-selected={activeTab === "graph"}
           onClick={() => setActiveTab("graph")}
         >
@@ -79,9 +67,7 @@ export default function EvidenceTabs() {
         </button>
       </div>
 
-      {activeTab === "run" ? (
-        <WorkflowTimeline />
-      ) : activeTab === "graph" ? (
+      {activeTab === "graph" ? (
         <section className={styles.graphPanel} aria-live="polite">
           <div className={styles.graphHeader}>
             <div>

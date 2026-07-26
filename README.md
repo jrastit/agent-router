@@ -324,7 +324,25 @@ instances tab can export that projection as JSON.
 The interactive decision replay loads every projected Supabase instance rather
 than a two-provider fixture. Disabled, non-chat, unpriced, over-budget, and
 privacy-incompatible instances remain visible with exclusion reasons. Exact
-decimal rates are converted to integer micro-EUR before comparison.
+decimal rates are converted to integer micro-EUR before comparison. The replay
+defaults to 1,000,000 input and 10,000 output tokens, exposes independent
+0–1,000,000 token sliders, shows both per-million rates, and conservatively
+rounds the estimated job cost up to the next micro-EUR.
+
+Each synchronized model also receives a `0–100` estimated agent
+performance/readiness score with basis `catalog-readiness-v1`. It combines
+enabled state, chat capability, complete exact pricing, healthy-route
+redundancy, and expected latency. This is an operational routing estimate, not
+a model-quality benchmark. The replay places the decision above the quotes,
+filters on a user-controlled minimum score, and orders visible candidates by
+increasing estimated price.
+
+The 0G synchronizer uses upstream `pricing_eur` values when present. If either
+EUR field is missing and `pricing_usd` is available, it fetches the dated
+[ECB USD reference rate](https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml)
+and calculates `USD per token × 1,000,000 ÷ USD per EUR`. Conversion uses
+integer rational arithmetic, rounds half-up to the database's six-decimal EUR
+scale, and stores the ECB date and rate in non-secret source metadata.
 
 The remote and stdio MCP transports add `list_llm_instances` and
 `create_llm_job` to the Graph evidence tools. The first returns the runnable

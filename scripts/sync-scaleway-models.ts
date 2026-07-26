@@ -3,6 +3,10 @@ import { z } from "zod";
 
 import { parseExactTinybarRate } from "../src/lib/llm-instances/credit-pricing";
 import {
+  estimateAgentPerformanceScore,
+  PERFORMANCE_SCORE_BASIS,
+} from "../src/lib/llm-instances/performance-score";
+import {
   SCALEWAY_PRICING_REVIEWED_ON,
   SCALEWAY_PRICING_SOURCE,
   scalewayPricingForModel,
@@ -88,12 +92,13 @@ async function main() {
     const pricing = scalewayPricingForModel(model.id);
     if (!pricing) throw new Error(`Missing pricing for ${model.id}`);
 
+    const modelCapabilities = capabilities(model.id);
     return {
       provider: "scaleway",
       model_id: model.id,
       name: model.id,
       base_url: config.scalewayBase,
-      capabilities: capabilities(model.id),
+      capabilities: modelCapabilities,
       privacy: "public",
       enabled: true,
       expected_latency_ms: 1800,
@@ -103,6 +108,14 @@ async function main() {
       input_price_tinybar_per_million: inputPrice,
       output_price_tinybar_per_million: outputPrice,
       price_synced_at: syncedAt,
+      performance_score: estimateAgentPerformanceScore({
+        enabled: true,
+        capabilities: modelCapabilities,
+        hasExactPrices: true,
+        healthyProviderCount: 1,
+        expectedLatencyMs: 1800,
+      }),
+      performance_score_basis: PERFORMANCE_SCORE_BASIS,
       source_metadata: {
         object: "model",
         ...(model.created !== undefined ? { created: model.created } : {}),

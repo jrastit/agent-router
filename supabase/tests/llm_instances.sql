@@ -43,6 +43,16 @@ begin
   ) then
     raise exception 'exact LLM token price columns are missing';
   end if;
+  if not exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'llm_instances'
+      and column_name = 'performance_score'
+      and data_type = 'smallint'
+  ) then
+    raise exception 'LLM performance score column is missing';
+  end if;
 
   begin
     insert into public.llm_instances (

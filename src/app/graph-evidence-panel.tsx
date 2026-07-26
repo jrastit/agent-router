@@ -11,7 +11,7 @@ import {
 import styles from "./graph-evidence-panel.module.css";
 
 const recordedSourceEventId =
-  "0x511f1c5563ef498dcdc857ee09d596a593af48838d3de3cbc2fe11194b6c92b8";
+  "0xdb3a831451eedd88f68ff90d2d2a6343283b6164282cd600540babb673183a65";
 
 const toolNames = [
   "find_payment",

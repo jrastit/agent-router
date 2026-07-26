@@ -76,7 +76,7 @@ or convert Graph Node administration ports into public MCP configuration.
 
 1. Start the application or open the deployed UI.
 2. Paste the recorded source-event ID from
-   `docs/PHASE6B_HEDERA_PROJECTION.md`.
+   `docs/GRAPH_EVIDENCE_MCP_EVIDENCE.md`.
 3. Select `find_payment` and submit once.
 4. Show the structured tool call, indexed block, chain identities, transaction
    references, and monitoring-only authority label.
@@ -85,3 +85,7 @@ or convert Graph Node administration ports into public MCP configuration.
 
 The demonstration should take two to four minutes and must not present fixtures
 as live Graph evidence.
+
+x402 is not implemented in this MCP. The existing custom Hedera HTTP `402`
+challenge is not described as x402-compatible. A future paid MCP adapter must
+use the actual x402 protocol and remain separate from evidence authority.

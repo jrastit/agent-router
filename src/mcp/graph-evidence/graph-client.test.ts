@@ -137,7 +137,7 @@ describe("Graph payment evidence client", () => {
     expect(result.missingReferences).toEqual([missing]);
   });
 
-  it("rejects malformed references, insecure endpoints, and Graph errors", async () => {
+  it("fails closed on malformed input and unavailable or invalid Graph responses", async () => {
     expect(
       () =>
         new GraphPaymentEvidenceClient({
@@ -162,5 +162,19 @@ describe("Graph payment evidence client", () => {
         ),
       ).findPayment(sourceId),
     ).rejects.toThrow("unavailable or malformed");
+    await expect(
+      client(
+        vi
+          .fn<typeof fetch>()
+          .mockResolvedValue(new Response("maintenance", { status: 503 })),
+      ).findPayment(sourceId),
+    ).rejects.toThrow("Graph endpoint returned HTTP 503");
+    await expect(
+      client(
+        vi
+          .fn<typeof fetch>()
+          .mockResolvedValue(Response.json({ data: { unexpected: true } })),
+      ).findPayment(sourceId),
+    ).rejects.toThrow();
   });
 });

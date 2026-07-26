@@ -38,6 +38,7 @@
     "demo:llm:0g": "tsx --env-file=.env scripts/run-llm-job-demo.ts --mode=live --provider=0g",
     "demo:llm:0g:complete": "vitest run src/toolkit/0g-phase5.integration.test.ts",
     "mcp:graph-evidence": "tsx --env-file=.env scripts/graph-evidence-mcp.ts",
+    "test:mcp:graph-live": "GRAPH_EVIDENCE_LIVE_TEST=true vitest run src/mcp/graph-evidence/live.integration.test.ts",
     "validate:hedera-subgraph": "node --env-file=.env scripts/validate-hedera-subgraph.mjs",
     "deploy:hedera-app-events": "node --env-file=.env scripts/deploy-hedera-app-events.mjs --confirm-live-testnet",
     "deploy:hedera-app-events:sdk": "node --env-file=.env scripts/deploy-hedera-app-events-sdk.mjs --confirm-live-testnet",

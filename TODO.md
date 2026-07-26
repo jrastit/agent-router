@@ -353,39 +353,47 @@ only the separately labeled public audit status.
 
 ## Phase 6C — reusable Graph payment-evidence MCP
 
-- [ ] Define a reusable MCP server, independent of the AgentRouter UI, for
+- [x] Define a reusable MCP server, independent of the AgentRouter UI, for
       querying agent-payment and settlement evidence indexed by The Graph.
-- [ ] Expose a small, stable tool surface such as `find_payment`,
+- [x] Expose a small, stable tool surface such as `find_payment`,
       `list_agent_transactions`, and `verify_receipt_history`, with
       schema-validated inputs and outputs.
-- [ ] Query a deployed Subgraph containing live blockchain data; fixtures may
+- [x] Query a deployed Subgraph containing live blockchain data; fixtures may
       support tests and offline demos but must never be presented as qualifying
       live evidence.
-- [ ] Return Graph endpoint and indexing provenance, chain identity, block and
+- [x] Return Graph endpoint and indexing provenance, chain identity, block and
       transaction references, and explicit completeness or lag state with every
       result.
-- [ ] Keep Hedera Mirror verification and Postgres proof consumption
+- [x] Keep Hedera Mirror verification and Postgres proof consumption
       authoritative; MCP and Subgraph responses are discovery and monitoring
       evidence and cannot unlock credit or execution.
-- [ ] Support an MCP transport usable from external AI environments and publish
+- [x] Support an MCP transport usable from external AI environments and publish
       one-click or minimal client configurations for Claude, Cursor, ChatGPT,
       and a generic MCP client where each environment permits it.
-- [ ] Add a server-side web adapter that invokes the same MCP tools over their
+- [x] Add a server-side web adapter that invokes the same MCP tools over their
       supported transport rather than duplicating query or verification logic.
-- [ ] Add a simple UI demo in which a user enters a transaction ID, account, or
+- [x] Add a simple UI demo in which a user enters a transaction ID, account, or
       receipt reference, selects an MCP tool, submits one request, and sees the
       structured tool call, live Graph result, provenance links, and indexing
       status.
-- [ ] Ensure the browser receives no Graph API key, database credential,
+- [x] Ensure the browser receives no Graph API key, database credential,
       Hedera key, facilitator secret, or unrestricted internal endpoint.
-- [ ] Add contract, transport, live-integration, malformed-input, Graph-lag,
+- [x] Add contract, transport, live-integration, malformed-input, Graph-lag,
       unavailable-endpoint, and secret-boundary tests.
-- [ ] Open-source the MCP implementation with a clear README, tool schemas,
+- [x] Open-source the MCP implementation with a clear README, tool schemas,
       installation instructions, example prompts, client configuration, and a
       two-to-four-minute demo runbook.
-- [ ] Treat x402 as an optional adapter for paid Graph or MCP requests; if
+- [x] Treat x402 as an optional adapter for paid Graph or MCP requests; if
       implemented, use the actual x402 protocol and do not describe the existing
       custom Hedera `402` challenge as x402-compatible.
+
+Completed on 2026-07-26. The external stdio client and the server-side web
+adapter both invoked `find_payment` against the deployed Hedera projection
+Subgraph and returned the same schema-valid block-10 evidence. The browser E2E
+demo covers the structured request, provenance, explicit unknown-lag state,
+monitoring-only authority, and secret boundary. Reproduction commands and the
+captured live identifiers are recorded in
+`docs/GRAPH_EVIDENCE_MCP_EVIDENCE.md`.
 
 Exit criterion: an external MCP client and the AgentRouter UI invoke the same
 documented payment-evidence tool against live Subgraph data and receive

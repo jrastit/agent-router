@@ -151,3 +151,92 @@ test("runs once, displays exact settlement, and restores after refresh", async (
     providerSecret,
   );
 });
+
+test("runs the Graph evidence MCP demo and shows monitoring provenance", async ({
+  page,
+}) => {
+  const sourceEventId =
+    "0xdb3a831451eedd88f68ff90d2d2a6343283b6164282cd600540babb673183a65";
+  let requests = 0;
+
+  await page.route("**/api/llm-job-instances", async (route) => {
+    await route.fulfill({ json: [] });
+  });
+  await page.route("**/api/graph-evidence", async (route) => {
+    requests += 1;
+    expect(route.request().postDataJSON()).toEqual({
+      tool: "find_payment",
+      input: { reference: sourceEventId },
+    });
+    expect(JSON.stringify(route.request().postDataJSON())).not.toContain(
+      providerSecret,
+    );
+    await route.fulfill({
+      json: {
+        protocol: "mcp",
+        toolCall: {
+          name: "find_payment",
+          arguments: { reference: sourceEventId },
+        },
+        result: {
+          tool: "find_payment",
+          reference: sourceEventId,
+          matches: [
+            {
+              sourceEventId,
+              sourceType: 1,
+              sourceId: "0.0.9676520",
+              hederaTransactionHash: `0x${"22".repeat(32)}`,
+              consensusTimestamp: "1785032494.963654104",
+              sourceIndex: "10",
+              eventKind: "deposit.credited",
+              payloadDigest: `0x${"33".repeat(32)}`,
+              schemaVersion: 1,
+              relayer: `0x${"44".repeat(20)}`,
+              destinationContract: `0x${"55".repeat(20)}`,
+              destinationTransactionHash: `0x${"66".repeat(32)}`,
+              destinationBlockNumber: "10",
+              destinationBlockTimestamp: "1785032496",
+              links: {
+                hashScanTransaction:
+                  "https://hashscan.io/testnet/transaction/0xproof",
+                destinationExplorer: null,
+              },
+            },
+          ],
+          provenance: {
+            endpoint:
+              "https://graph.router.fexhu.com/subgraphs/name/agent-router/hedera-projection",
+            subgraph: "agent-router/hedera-projection",
+            indexedBlock: 10,
+            hasIndexingErrors: false,
+            completeness: "indexed",
+            chainHeadBlock: null,
+            lagBlocks: null,
+            chain: {
+              source: "hedera-testnet",
+              destination: "ganache-local",
+              destinationChainId: "1337",
+            },
+            authority:
+              "monitoring-only; Hedera Mirror and Postgres remain authoritative",
+          },
+        },
+      },
+    });
+  });
+
+  await page.goto("/e2e/llm-job");
+  await expect(
+    page.getByRole("heading", { name: "Inspect public agent transactions" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Run MCP tool" }).click();
+
+  await expect(page.getByText("Structured MCP tool call")).toBeVisible();
+  await expect(page.getByText("indexed · block 10")).toBeVisible();
+  await expect(page.getByText("deposit.credited")).toBeVisible();
+  await expect(page.getByText("Destination block 10")).toBeVisible();
+  await expect(page.getByText(/monitoring-only/)).toBeVisible();
+  await expect(page.getByText(/Chain-head lag unknown/)).toBeVisible();
+  expect(requests).toBe(1);
+});

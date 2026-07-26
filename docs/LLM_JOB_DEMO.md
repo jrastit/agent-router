@@ -35,6 +35,14 @@ optional. The 0G runner disables provider fallback and requests Router private
 trust mode. Its label is deliberately not an independent TEE-attestation
 claim.
 
+Catalog synchronization also requires operator-defined exact application
+credit rates in `SCALEWAY_INPUT_PRICE_TINYBAR_PER_MILLION`,
+`SCALEWAY_OUTPUT_PRICE_TINYBAR_PER_MILLION`,
+`ZG_INPUT_PRICE_TINYBAR_PER_MILLION`, and
+`ZG_OUTPUT_PRICE_TINYBAR_PER_MILLION`. Each value is a non-negative integer
+tinybar rate per million tokens. Synchronization stores the rates and their
+timestamp with each model; accepted jobs snapshot them before reserving credit.
+
 ## Complete 0G path
 
 The optional integration test composes live 0G Compute, Storage, Chain

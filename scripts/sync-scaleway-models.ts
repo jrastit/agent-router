@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { parseExactTinybarRate } from "../src/lib/llm-instances/credit-pricing";
+
 const confirmation = "--confirm-production-sync";
 if (!process.argv.includes(confirmation)) {
   throw new Error(`Pass ${confirmation} to synchronize the Scaleway catalog`);
@@ -11,6 +13,14 @@ const scalewayBase =
   process.env.SCALEWAY_GENAI_BASE_URL ?? "https://api.scaleway.ai/v1";
 const supabaseUrl = process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const inputPrice = parseExactTinybarRate(
+  "SCALEWAY_INPUT_PRICE_TINYBAR_PER_MILLION",
+  process.env.SCALEWAY_INPUT_PRICE_TINYBAR_PER_MILLION,
+);
+const outputPrice = parseExactTinybarRate(
+  "SCALEWAY_OUTPUT_PRICE_TINYBAR_PER_MILLION",
+  process.env.SCALEWAY_OUTPUT_PRICE_TINYBAR_PER_MILLION,
+);
 if (!scalewayKey || !supabaseUrl || !serviceRoleKey) {
   throw new Error("Scaleway or Supabase server configuration is missing");
 }
@@ -58,6 +68,9 @@ async function main() {
     privacy: "public",
     enabled: true,
     expected_latency_ms: 1800,
+    input_price_tinybar_per_million: inputPrice,
+    output_price_tinybar_per_million: outputPrice,
+    price_synced_at: syncedAt,
     source_metadata: {
       object: "model",
       ...(model.created !== undefined ? { created: model.created } : {}),

@@ -2,7 +2,8 @@
 
 ## Status
 
-The local foundation is implemented and validated:
+The local foundation and persistent deposit relay are implemented and
+validated:
 
 - a strict version 1 public `HederaEventAnchor` payload;
 - a stable bytes32 source-event ID and relayer idempotency key;
@@ -15,8 +16,26 @@ repository includes a loopback-only deployment command, durable relay
 persistence, a bounded transaction state machine, and a deployable local
 `HederaEventAnchored` Subgraph. The contract deployment path, correlating Graph
 ingestion, reconciliation, three-plane UI state, recovery semantics, and
-operations contract are implemented. A verified Graph deployment is recorded
-below; the complete durably credited deposit proof remains open in `TODO.md`.
+operations contract are implemented. A verified Graph deployment and
+durably-correlated deposit proof are recorded below.
+
+## Persistent deposit relay
+
+`agent-router-deposit-projection` runs alongside the Next.js app under PM2. It
+polls undelivered `monitoring_projection_outbox` records every five seconds,
+derives a privacy-safe native-transfer anchor, persists its stable source-event
+ID, submits through the allowlisted Ganache relayer, records confirmation, and
+waits for the matching Graph entity before marking the outbox delivered and the
+deposit `graph_state = indexed`.
+
+The worker uses durable transaction hashes and the contract's
+`anchored(sourceEventId)` replay guard during recovery. A timeout leaves the
+record pending; the next cycle resumes the same source-event ID and never
+creates another application credit or Hedera payment.
+
+Production verification on 26 July 2026 drained five previously queued
+credited deposits. All five received confirmed relay records, EVM anchors, and
+matching Graph entities; the outbox finished with zero undelivered records.
 
 ## Authority and trust boundary
 
@@ -394,11 +413,10 @@ The indexed entity returned the same source-event ID, source ID, Hedera
 identity digest, consensus timestamp, source index, payload digest, relayer,
 destination contract, destination transaction, and destination block.
 
-This proves the implemented and deployed Mirror-to-EVM-to-Graph monitoring
-path. It does not close the Phase 6B exit criterion: the proof used the existing
-HCS receipt event and an in-process proof cursor, not a new Phase 6A deposit
-atomically linked to a durable Postgres relay record. Application credit was
-neither created nor changed by this run.
+This historical run proved the original Mirror-to-EVM-to-Graph monitoring
+path using an HCS receipt event. The later persistent-worker proof documented
+above supplements it with five Phase 6A deposits atomically linked to durable
+Postgres relay records. Application credit remains independent of both runs.
 
 ### Stop and restart
 

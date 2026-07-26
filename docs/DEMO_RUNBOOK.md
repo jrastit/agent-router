@@ -120,25 +120,20 @@ recording unless the full flow has already been rehearsed.
    read-only verification while Mirror indexes the transaction.
 9. Open the Graph audit tab and show its live indexed block, source-event ID,
    Hedera consensus timestamp, destination transaction, and explicit
-   relayer-mediated monitoring label. Explain that this recorded HCS anchor
-   proves the Graph projection mechanism but is not yet correlated to the new
-   user deposit.
+   relayer-mediated monitoring label. Show a native-transfer anchor and explain
+   that its stable source-event ID correlates the credited deposit's durable
+   relay record, EVM event, and Graph entity without exposing the user.
 10. Briefly state the failure property: Supabase remains authoritative and the
     balance is usable even if Graph is delayed or unavailable.
 11. End with delivery, spend, remaining budget, and receipt.
 
 ## Known live-proof gap
 
-Do not claim that the combined prepaid-credit Phase 6A/6B exit criterion is
-complete. Production migrations, external user-wallet deposits, Mirror
-verification, atomic credit, and Supabase Realtime are deployed and have live
-evidence. The remaining qualifying proof still needs:
+Production migrations, external user-wallet deposits, Mirror verification,
+atomic credit, Supabase Realtime, and correlated Graph projection are deployed
+and have live evidence. The remaining combined-loop proof needs:
 
-1. one 0G operation charged against the user credit; and
-2. the credited deposit's durable projection record correlated by source-event
-   ID with its EVM anchor and Graph entity.
-
-Do not relabel the currently indexed HCS anchor as the latest user deposit.
+1. one 0G operation charged against the user credit.
 
 ## Pre-recording checklist
 

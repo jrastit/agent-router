@@ -386,6 +386,11 @@ the browser retries only verification for up to 30 seconds; it never resubmits
 the payment. Submitted proofs are also resumed after session restoration, and
 the guarded server reconciler can process them if the browser was closed.
 
+The PM2-managed `agent-router-deposit-projection` worker asynchronously drains
+credited deposit monitoring records into the local Ganache anchor contract and
+waits for their Graph entities. Its retries reuse the same source-event ID and
+cannot change the authoritative Supabase balance.
+
 The state model, security boundaries, reconciliation procedure, and validation
 commands are documented in the
 [Phase 6A prepaid credit runbook](docs/PHASE6A_PREPAID_CREDIT.md).

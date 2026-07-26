@@ -187,7 +187,7 @@ milestone.
   - [ ] Mirror-verify and atomically credit the signed deposit exactly once,
         then reserve and settle one policy-approved 0G operation against that
         credit while the separately funded 0G treasury pays the network.
-  - [ ] Persist the credited deposit's relay record and correlate its
+  - [x] Persist the credited deposit's relay record and correlate its
         exactly-once EVM anchor with the indexed Graph entity, including replay
         rejection and independent authority labels.
 

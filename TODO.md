@@ -404,13 +404,13 @@ catalog, job payload, browser session, result, receipt, or logs.
 - [x] Define durable LLM job, attempt, usage, reservation, charge, refund,
       result, and provider-evidence schemas with stable lifecycle and failure
       codes.
-- [ ] Add an authenticated server API that accepts an instance ID, prompt,
+- [x] Add an authenticated server API that accepts an instance ID, prompt,
       capability, maximum input and output tokens, idempotency key, and
       application-credit spend ceiling without accepting a provider API key.
-- [ ] Resolve enabled instance metadata from the authoritative catalog and map
+- [x] Resolve enabled instance metadata from the authoritative catalog and map
       the selected provider to its server-only credential:
       `SCALEWAY_GENAI_API_KEY` for Scaleway or `G_API_KEY_PRIVATE` for 0G.
-- [ ] Reject unknown, disabled, capability-incompatible, privacy-incompatible,
+- [x] Reject unknown, disabled, capability-incompatible, privacy-incompatible,
       stale-priced, or uncredentialed instances before reserving or executing.
 - [ ] Estimate the maximum exact charge from the selected price snapshot and
       token limits, then atomically reserve sufficient user credit before the

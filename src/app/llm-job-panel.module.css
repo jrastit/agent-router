@@ -1,0 +1,136 @@
+.panel {
+  margin-top: 48px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+}
+
+.heading,
+.state {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.heading h2 {
+  margin: 0;
+}
+
+.heading > span,
+.result > p,
+.state small {
+  color: var(--muted);
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.form,
+.form label,
+.state {
+  display: grid;
+  gap: 8px;
+}
+
+.form textarea,
+.form input,
+.form select {
+  width: 100%;
+  padding: 11px;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--ink);
+}
+
+.form textarea {
+  min-height: 116px;
+  resize: vertical;
+}
+
+.limits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.review,
+.result {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+}
+
+.review {
+  display: grid;
+  gap: 5px;
+}
+
+.review small,
+.result small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+}
+
+.form button {
+  padding: 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--cyan);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.error {
+  color: #ff8f9b;
+}
+
+.output {
+  min-height: 100px;
+  margin: 18px 0;
+  padding: 16px;
+  overflow: auto;
+  white-space: pre-wrap;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--ink);
+}
+
+.result dl {
+  display: grid;
+  gap: 12px;
+}
+
+.result dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.result dt {
+  color: var(--muted);
+}
+
+.result dd {
+  margin: 0;
+  text-align: right;
+}
+
+@media (max-width: 760px) {
+  .workspace,
+  .limits {
+    grid-template-columns: 1fr;
+  }
+}

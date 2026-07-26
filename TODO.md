@@ -353,45 +353,138 @@ only the separately labeled public audit status.
 
 ## Phase 6C — reusable Graph payment-evidence MCP
 
-- [ ] Define a reusable MCP server, independent of the AgentRouter UI, for
+- [x] Define a reusable MCP server, independent of the AgentRouter UI, for
       querying agent-payment and settlement evidence indexed by The Graph.
-- [ ] Expose a small, stable tool surface such as `find_payment`,
+- [x] Expose a small, stable tool surface such as `find_payment`,
       `list_agent_transactions`, and `verify_receipt_history`, with
       schema-validated inputs and outputs.
-- [ ] Query a deployed Subgraph containing live blockchain data; fixtures may
+- [x] Query a deployed Subgraph containing live blockchain data; fixtures may
       support tests and offline demos but must never be presented as qualifying
       live evidence.
-- [ ] Return Graph endpoint and indexing provenance, chain identity, block and
+- [x] Return Graph endpoint and indexing provenance, chain identity, block and
       transaction references, and explicit completeness or lag state with every
       result.
-- [ ] Keep Hedera Mirror verification and Postgres proof consumption
+- [x] Keep Hedera Mirror verification and Postgres proof consumption
       authoritative; MCP and Subgraph responses are discovery and monitoring
       evidence and cannot unlock credit or execution.
-- [ ] Support an MCP transport usable from external AI environments and publish
+- [x] Support an MCP transport usable from external AI environments and publish
       one-click or minimal client configurations for Claude, Cursor, ChatGPT,
       and a generic MCP client where each environment permits it.
-- [ ] Add a server-side web adapter that invokes the same MCP tools over their
+- [x] Add a server-side web adapter that invokes the same MCP tools over their
       supported transport rather than duplicating query or verification logic.
-- [ ] Add a simple UI demo in which a user enters a transaction ID, account, or
+- [x] Add a simple UI demo in which a user enters a transaction ID, account, or
       receipt reference, selects an MCP tool, submits one request, and sees the
       structured tool call, live Graph result, provenance links, and indexing
       status.
-- [ ] Ensure the browser receives no Graph API key, database credential,
+- [x] Ensure the browser receives no Graph API key, database credential,
       Hedera key, facilitator secret, or unrestricted internal endpoint.
-- [ ] Add contract, transport, live-integration, malformed-input, Graph-lag,
+- [x] Add contract, transport, live-integration, malformed-input, Graph-lag,
       unavailable-endpoint, and secret-boundary tests.
-- [ ] Open-source the MCP implementation with a clear README, tool schemas,
+- [x] Open-source the MCP implementation with a clear README, tool schemas,
       installation instructions, example prompts, client configuration, and a
       two-to-four-minute demo runbook.
-- [ ] Treat x402 as an optional adapter for paid Graph or MCP requests; if
+- [x] Treat x402 as an optional adapter for paid Graph or MCP requests; if
       implemented, use the actual x402 protocol and do not describe the existing
       custom Hedera `402` challenge as x402-compatible.
+
+Completed on 2026-07-26. The external stdio client and the server-side web
+adapter both invoked `find_payment` against the deployed Hedera projection
+Subgraph and returned the same schema-valid block-10 evidence. The browser E2E
+demo covers the structured request, provenance, explicit unknown-lag state,
+monitoring-only authority, and secret boundary. Reproduction commands and the
+captured live identifiers are recorded in
+`docs/GRAPH_EVIDENCE_MCP_EVIDENCE.md`.
 
 Exit criterion: an external MCP client and the AgentRouter UI invoke the same
 documented payment-evidence tool against live Subgraph data and receive
 schema-valid, provenance-rich results. Another project can install and use the
 MCP without importing the AgentRouter application, while payment authority
 remains with Hedera Mirror verification and atomic Postgres proof consumption.
+
+## Phase 6D — balance-backed LLM instance jobs
+
+The existing Scaleway integration is a server-side planner and the existing 0G
+adapter proves live private inference. This phase turns both providers into
+user-visible LLM job instances funded from authoritative application credit.
+Provider API keys remain server-only and are never stored in the instance
+catalog, job payload, browser session, result, receipt, or logs.
+
+- [x] Define durable LLM job, attempt, usage, reservation, charge, refund,
+      result, and provider-evidence schemas with stable lifecycle and failure
+      codes.
+- [x] Add an authenticated server API that accepts an instance ID, prompt,
+      capability, maximum input and output tokens, idempotency key, and
+      application-credit spend ceiling without accepting a provider API key.
+- [x] Resolve enabled instance metadata from the authoritative catalog and map
+      the selected provider to its server-only credential:
+      `SCALEWAY_GENAI_API_KEY` for Scaleway or `G_API_KEY_PRIVATE` for 0G.
+- [x] Reject unknown, disabled, capability-incompatible, privacy-incompatible,
+      stale-priced, or uncredentialed instances before reserving or executing.
+- [x] Estimate the maximum exact charge from the selected price snapshot and
+      token limits, then atomically reserve sufficient user credit before the
+      provider request.
+- [x] Implement Scaleway workload execution separately from the Scaleway
+      planner, using its OpenAI-compatible chat-completions API with a bounded
+      timeout, explicit token limit, typed response validation, and stable
+      provider evidence.
+- [x] Connect the existing 0G Compute adapter to the durable job flow while
+      retaining the pinned provider address, private trust mode, disabled
+      fallbacks, bounded retries, timeout, and idempotency key.
+- [x] Capture provider-reported prompt, completion, and total token usage;
+      preserve integer token counts and exact-decimal price snapshots and never
+      calculate charges with binary floating point.
+- [x] Validate the returned result before delivery: require the expected
+      provider/model identity, non-empty schema-valid output, usage within the
+      requested limits, and provider-specific execution evidence.
+- [x] Label 0G Router private trust-mode and TeeML catalog evidence precisely;
+      do not describe it as an independently verified TEE attestation unless an
+      independent attestation verifier is implemented.
+- [x] Atomically convert the reservation into one actual charge, release unused
+      credit, and persist the output, usage, price snapshot, selected instance,
+      execution identifier, and redacted evidence. Ambiguous usage or charge
+      evidence must enter reconciliation instead of guessing or charging twice.
+- [x] Keep prompts and raw outputs out of public receipts, 0G Storage, chain
+      events, Graph entities, analytics, and logs; expose them only through
+      authenticated user-scoped storage and APIs.
+- [x] Add an LLM job UI that lets a signed-in user choose Scaleway or 0G, enter
+      a prompt and token/spend limits, review privacy and maximum charge, run
+      the job, and see output, actual token usage, exact spend, refund, remaining
+      balance, instance identity, and appropriately labeled evidence.
+- [x] Stream persisted job states over SSE or Supabase Realtime and restore the
+      authoritative state after refresh without repeating inference or
+      charging again.
+- [x] Extend the existing `examples/0g-agent.ts` composition into a standalone
+      local LLM-job demo runner that can select either the Scaleway or 0G
+      instance through one documented command and shared job contract.
+- [x] Give the local runner a deterministic offline mode with fixture adapters
+      for CI and rehearsal, plus an explicitly guarded live mode that requires
+      the matching server-only provider credential and warns before consuming
+      real provider or network resources.
+- [x] Print a concise, redacted demo result containing the selected instance,
+      model, lifecycle states, provider-reported integer token usage, exact
+      reserved/charged/refunded amounts, execution identifier, and verification
+      label without printing credentials, private prompts, or raw public
+      receipts.
+- [x] Add package scripts and a short runbook for the offline demonstration,
+      live Scaleway execution, live 0G Compute-only execution, and the optional
+      complete 0G Compute/Storage/Chain path. Clearly identify which commands
+      spend provider tokens or native 0G.
+- [x] Test both provider adapters and the complete job state machine, including
+      duplicate submissions, insufficient credit, concurrent reservations,
+      provider authentication failure, timeout, invalid output, missing or
+      excessive usage, ambiguous completion, disabled instances, secret
+      leakage, retry recovery, exact charge, and unused-reservation refund.
+- [ ] Prove one deployed Scaleway job and one deployed 0G job from the same UI,
+      each consuming real provider tokens and exactly one application-credit
+      charge, with redacted receipts and no provider credential visible in the
+      browser or client bundle.
+
+Exit criterion: a signed-in user with credited funds can run one working
+Scaleway instance job and one working 0G private instance job. Each job reserves
+its maximum spend, executes once with a server-held provider key, validates and
+delivers the result, settles exact provider-reported token usage once, refunds
+unused credit, survives refresh, and exposes no secret or misleading
+verification claim.
 
 ## Phase 7 — product experience
 

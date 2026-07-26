@@ -176,9 +176,19 @@ export default function EconomicActivityPanel({
       {accessToken && userId && activity && (
         <>
           <dl className="fund-summary">
-            <div>
-              <dt>Available</dt>
-              <dd>{hbar(activity.availableTinybars)}</dd>
+            <div className="fund-balance-stack">
+              <dt>Deposit verification planes</dt>
+              <dd>
+                <span>{hbar(activity.availableTinybars)}</span>
+                <small title="Submitted on Hedera; not spendable until Mirror verification">
+                  ({hbar(activity.pendingVerificationTinybars)} Mirror pending)
+                </small>
+                <small title="Credited in Supabase; Graph is monitoring only">
+                  ({hbar(activity.graphPendingTinybars)} Graph pending ·{" "}
+                  {hbar(activity.graphIndexedTinybars)} indexed)
+                </small>
+              </dd>
+              <p>Spendable · awaiting verification · public monitoring</p>
             </div>
             <div>
               <dt>Reserved</dt>

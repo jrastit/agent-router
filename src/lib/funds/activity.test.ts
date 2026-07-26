@@ -9,6 +9,9 @@ import {
 
 const row = {
   available_tinybars: "9007199254740993",
+  pending_verification_tinybars: "100000000",
+  graph_pending_tinybars: "50000000",
+  graph_indexed_tinybars: "25000000",
   reserved_tinybars: "20",
   spent_tinybars: "30",
   refunded_tinybars: "40",
@@ -26,6 +29,9 @@ describe("Supabase fund activity", () => {
   it("preserves exact integer strings and authenticated evidence", () => {
     expect(parseFundActivity([row])).toEqual({
       availableTinybars: "9007199254740993",
+      pendingVerificationTinybars: "100000000",
+      graphPendingTinybars: "50000000",
+      graphIndexedTinybars: "25000000",
       reservedTinybars: "20",
       spentTinybars: "30",
       refundedTinybars: "40",
@@ -47,6 +53,9 @@ describe("Supabase fund activity", () => {
   it("represents a new account without fund rows as exact zeroes", () => {
     expect(parseFundActivity([])).toMatchObject({
       availableTinybars: "0",
+      pendingVerificationTinybars: "0",
+      graphPendingTinybars: "0",
+      graphIndexedTinybars: "0",
       reservedTinybars: "0",
       spentTinybars: "0",
       entries: [],

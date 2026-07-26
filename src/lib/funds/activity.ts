@@ -11,11 +11,14 @@ const entryKindSchema = z.enum([
 ]);
 const fundActivityRowSchema = z.strictObject({
   available_tinybars: exactIntegerSchema,
+  pending_verification_tinybars: exactIntegerSchema,
+  graph_pending_tinybars: exactIntegerSchema,
+  graph_indexed_tinybars: exactIntegerSchema,
   reserved_tinybars: exactIntegerSchema,
   spent_tinybars: exactIntegerSchema,
   refunded_tinybars: exactIntegerSchema,
   reconciliation_tinybars: exactIntegerSchema,
-  account_updated_at: z.string().datetime({ offset: true }),
+  account_updated_at: z.string().datetime({ offset: true }).nullable(),
   journal_id: z
     .string()
     .regex(/^[1-9][0-9]*$/)
@@ -38,6 +41,9 @@ export type FundActivityEntry = {
 
 export type FundActivity = {
   availableTinybars: string;
+  pendingVerificationTinybars: string;
+  graphPendingTinybars: string;
+  graphIndexedTinybars: string;
   reservedTinybars: string;
   spentTinybars: string;
   refundedTinybars: string;
@@ -74,6 +80,9 @@ export type FundRealtimeClient = {
 
 const emptyActivity: FundActivity = {
   availableTinybars: "0",
+  pendingVerificationTinybars: "0",
+  graphPendingTinybars: "0",
+  graphIndexedTinybars: "0",
   reservedTinybars: "0",
   spentTinybars: "0",
   refundedTinybars: "0",
@@ -88,11 +97,16 @@ export function parseFundActivity(payload: unknown): FundActivity {
 
   return {
     availableTinybars: account.available_tinybars,
+    pendingVerificationTinybars: account.pending_verification_tinybars,
+    graphPendingTinybars: account.graph_pending_tinybars,
+    graphIndexedTinybars: account.graph_indexed_tinybars,
     reservedTinybars: account.reserved_tinybars,
     spentTinybars: account.spent_tinybars,
     refundedTinybars: account.refunded_tinybars,
     reconciliationTinybars: account.reconciliation_tinybars,
-    updatedAt: account.account_updated_at,
+    ...(account.account_updated_at
+      ? { updatedAt: account.account_updated_at }
+      : {}),
     entries: rows.flatMap((row) =>
       row.journal_id &&
       row.entry_kind &&

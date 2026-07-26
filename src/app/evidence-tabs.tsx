@@ -130,6 +130,7 @@ export default function EvidenceTabs() {
                     <code title={anchor.destinationTransactionHash}>
                       EVM {shortHash(anchor.destinationTransactionHash)}
                     </code>
+                    <CopyReference reference={anchor.id} />
                     <time
                       dateTime={indexedIsoTime(
                         anchor.consensusTimestamp.split(".")[0],
@@ -147,5 +148,33 @@ export default function EvidenceTabs() {
         <LlmInstancesPanel />
       )}
     </>
+  );
+}
+
+export function CopyReference({ reference }: { reference: string }) {
+  const [copied, setCopied] = useState(false);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(reference);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  return (
+    <div className={styles.reference}>
+      <span>Record reference</span>
+      <code title={reference}>{shortHash(reference)}</code>
+      <button
+        type="button"
+        onClick={() => void copy()}
+        aria-label={`Copy Graph record reference ${reference}`}
+      >
+        {copied ? "Copied" : "Copy for MCP"}
+      </button>
+    </div>
   );
 }

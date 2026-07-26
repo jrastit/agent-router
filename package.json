@@ -28,6 +28,7 @@
     "validate:supabase": "bash scripts/validate-supabase.sh",
     "deploy:supabase": "node --env-file=.env scripts/deploy-supabase-migrations.mjs",
     "reconcile:deposits": "tsx --env-file=.env scripts/reconcile-submitted-deposits.ts --confirm-production-reconciliation",
+    "worker:deposit-projection": "tsx --env-file=.env scripts/run-deposit-projection-worker.ts",
     "validate:hedera-subgraph": "node --env-file=.env scripts/validate-hedera-subgraph.mjs",
     "deploy:hedera-app-events": "node --env-file=.env scripts/deploy-hedera-app-events.mjs --confirm-live-testnet",
     "deploy:hedera-app-events:sdk": "node --env-file=.env scripts/deploy-hedera-app-events-sdk.mjs --confirm-live-testnet",

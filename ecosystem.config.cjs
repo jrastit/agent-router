@@ -23,5 +23,22 @@ module.exports = {
         PORT: "29000",
       },
     },
+    {
+      name: "agent-router-deposit-projection",
+      cwd: __dirname,
+      script: "scripts/run-deposit-projection-worker.ts",
+      interpreter: "node_modules/.bin/tsx",
+      node_args: ["--env-file=.env"],
+      instances: 1,
+      exec_mode: "fork",
+      autorestart: true,
+      watch: false,
+      max_memory_restart: "256M",
+      kill_timeout: 10_000,
+      time: true,
+      env: {
+        NODE_ENV: "production",
+      },
+    },
   ],
 };

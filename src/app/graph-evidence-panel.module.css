@@ -1,0 +1,164 @@
+.panel {
+  margin-top: 48px;
+  padding: 28px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+}
+
+.heading,
+.card > div,
+.provenance > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.heading h2,
+.economic h3 {
+  margin: 0;
+}
+
+.heading > span,
+.intro,
+.result > p,
+.form small,
+.provenance span,
+.provenance small,
+.card span,
+.card dt {
+  color: var(--muted);
+}
+
+.intro {
+  max-width: 780px;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.form,
+.form label,
+.toolCall,
+.provenance,
+.cards,
+.economic {
+  display: grid;
+  gap: 10px;
+}
+
+.form textarea,
+.form select {
+  width: 100%;
+  padding: 11px;
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--ink);
+}
+
+.form textarea {
+  min-height: 128px;
+  resize: vertical;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+}
+
+.form button {
+  padding: 12px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--cyan);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.form button:disabled {
+  opacity: 0.45;
+}
+
+.result,
+.toolCall,
+.provenance,
+.card,
+.economic {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+}
+
+.result {
+  min-width: 0;
+}
+
+.toolCall pre,
+.card code,
+.economic code {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.toolCall pre {
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--ink);
+}
+
+.provenance {
+  margin-top: 14px;
+}
+
+.cards {
+  margin-top: 14px;
+}
+
+.card dl {
+  display: grid;
+  gap: 8px;
+}
+
+.card dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.card dd {
+  margin: 0;
+  text-align: right;
+}
+
+.card a {
+  color: var(--cyan);
+}
+
+.economic {
+  margin-top: 14px;
+}
+
+.economic > div {
+  display: grid;
+  gap: 4px;
+}
+
+.empty {
+  padding: 16px;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+}
+
+.error {
+  color: #ff8f9b;
+}
+
+@media (max-width: 760px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}

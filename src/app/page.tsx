@@ -6,6 +6,7 @@ import { useCallback, useMemo, useState } from "react";
 import DepositWalletPanel from "./deposit-wallet-panel";
 import EconomicActivityPanel from "./economic-activity-panel";
 import EvidenceTabs from "./evidence-tabs";
+import GraphEvidencePanel from "./graph-evidence-panel";
 import LlmJobPanel from "./llm-job-panel";
 
 const providers = [
@@ -246,6 +247,7 @@ export default function Home() {
         <EconomicActivityPanel accessToken={fundingStatus.accessToken} />
         <DepositWalletPanel onConnectionChange={updateFundingStatus} />
         <LlmJobPanel accessToken={fundingStatus.accessToken} />
+        <GraphEvidencePanel />
       </section>
 
       <section className="evidence">

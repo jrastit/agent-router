@@ -1,14 +1,8 @@
 import { z } from "zod";
 
-export const bytes32Schema = z
-  .string()
-  .regex(/^0x[0-9a-fA-F]{64}$/)
-  .transform((value) => value.toLowerCase());
+export const bytes32Schema = z.string().regex(/^0x[0-9a-fA-F]{64}$/);
 
-export const accountReferenceSchema = z
-  .string()
-  .regex(/^0x[0-9a-fA-F]{40}$/)
-  .transform((value) => value.toLowerCase());
+export const accountReferenceSchema = z.string().regex(/^0x[0-9a-fA-F]{40}$/);
 
 export const findPaymentInputSchema = z.strictObject({
   reference: bytes32Schema.describe(

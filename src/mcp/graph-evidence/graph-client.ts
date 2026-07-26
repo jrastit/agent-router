@@ -198,7 +198,7 @@ export class GraphPaymentEvidenceClient {
   }
 
   async findPayment(referenceInput: string): Promise<FindPaymentOutput> {
-    const reference = bytes32Schema.parse(referenceInput);
+    const reference = bytes32Schema.parse(referenceInput).toLowerCase();
     const data = await this.query(
       this.projectionEndpoint,
       findAnchorQuery,
@@ -229,7 +229,7 @@ export class GraphPaymentEvidenceClient {
     accountInput: string,
     limitInput = 10,
   ): Promise<ListAgentTransactionsOutput> {
-    const account = accountReferenceSchema.parse(accountInput);
+    const account = accountReferenceSchema.parse(accountInput).toLowerCase();
     const limit = z.number().int().min(1).max(50).parse(limitInput);
     const [projection, economic] = await Promise.all([
       this.query(
@@ -272,7 +272,8 @@ export class GraphPaymentEvidenceClient {
       .array(bytes32Schema)
       .min(1)
       .max(20)
-      .parse(referenceInputs);
+      .parse(referenceInputs)
+      .map((reference) => reference.toLowerCase());
     const results = await Promise.all(
       references.map((reference) => this.findPayment(reference)),
     );

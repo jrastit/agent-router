@@ -10,6 +10,8 @@ describe("mid-hackathon demo", () => {
     expect(html).toContain("Route a summarization task");
     expect(html).toContain("Live Supabase catalog");
     expect(html).toContain("Loading live instances");
+    expect(html).toContain('max="2000"');
+    expect(html).toContain("€0.01–€20.00 combined token-rate ceiling");
     expect(html).toContain("LLM instances");
     expect(html).toContain("no new payment is submitted");
     expect(html).toContain("hashscan.io/testnet/transaction");

@@ -153,7 +153,8 @@ export default function Home() {
                 <input
                   type="range"
                   min="1"
-                  max="10"
+                  max="2000"
+                  step="1"
                   value={budgetMinor}
                   onChange={(event) =>
                     setBudgetMinor(Number(event.target.value))
@@ -162,6 +163,7 @@ export default function Home() {
                 />
                 <output>{euroCents(budgetMinor)}</output>
               </div>
+              <small>€0.01–€20.00 combined token-rate ceiling</small>
             </label>
             <fieldset>
               <legend>Privacy policy</legend>

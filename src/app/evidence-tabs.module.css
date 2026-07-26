@@ -1,27 +1,42 @@
 .tabs {
   display: flex;
-  gap: 8px;
+  gap: 24px;
+  overflow-x: auto;
   margin: 28px 0 22px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--paper-line);
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .tab {
-  padding: 11px 15px;
-  color: var(--muted);
+  flex: none;
+  padding: 11px 0;
+  color: #7785a3;
   border: 0;
   border-bottom: 3px solid transparent;
   background: transparent;
   cursor: pointer;
+  font-weight: 700;
 }
 
 .tab[aria-selected="true"] {
-  color: var(--text);
+  color: var(--ink);
   border-bottom-color: var(--cyan);
+}
+
+.tab:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid #315fe9;
+  outline-offset: 3px;
 }
 
 .graphPanel {
   min-height: 310px;
   padding: 24px;
+  color: var(--text);
   border: 1px solid var(--line);
   border-radius: 16px;
   background: var(--panel);
@@ -107,6 +122,10 @@
 }
 
 @media (max-width: 700px) {
+  .tabs {
+    gap: 20px;
+  }
+
   .graphHeader,
   .event {
     display: grid;

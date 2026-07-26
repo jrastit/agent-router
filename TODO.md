@@ -442,7 +442,7 @@ catalog, job payload, browser session, result, receipt, or logs.
       a prompt and token/spend limits, review privacy and maximum charge, run
       the job, and see output, actual token usage, exact spend, refund, remaining
       balance, instance identity, and appropriately labeled evidence.
-- [ ] Stream persisted job states over SSE or Supabase Realtime and restore the
+- [x] Stream persisted job states over SSE or Supabase Realtime and restore the
       authoritative state after refresh without repeating inference or
       charging again.
 - [x] Extend the existing `examples/0g-agent.ts` composition into a standalone

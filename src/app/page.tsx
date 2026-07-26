@@ -342,9 +342,15 @@ export default function Home() {
               <p className="eyebrow">Verified run · 25 July 2026</p>
               <h2>From decision to public proof</h2>
             </div>
-            <a href={topicUrl} target="_blank" rel="noreferrer">
-              Inspect HCS topic on HashScan ↗
-            </a>
+            <div className="evidence-actions">
+              <a href={topicUrl} target="_blank" rel="noreferrer">
+                Inspect HCS topic on HashScan ↗
+              </a>
+              <a className="presentation-button" href="/presentation">
+                Open presentation
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
           </div>
           <EvidenceTabs />
         </div>

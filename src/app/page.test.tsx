@@ -22,8 +22,10 @@ describe("mid-hackathon demo", () => {
     expect(html).toContain("LLM instances");
     expect(html).toContain("no new payment is submitted");
     expect(html).toContain("hashscan.io/testnet/transaction");
-    expect(html).toContain("Run timeline");
+    expect(html).not.toContain("Run timeline");
     expect(html).toContain("Latest Graph activity");
+    expect(html).toContain('href="/presentation"');
+    expect(html).toContain("Open presentation");
     expect(html).toContain("User deposits and spending");
     expect(html).toContain("Authoritative application ledger");
     expect(html).toContain("Live Graph audit projection");

@@ -1188,6 +1188,29 @@ h4 {
   color: #53617d;
 }
 
+.evidence-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.evidence .section-heading .presentation-button {
+  display: inline-flex;
+  gap: 18px;
+  align-items: center;
+  padding: 12px 16px;
+  color: var(--text);
+  border-radius: 9px;
+  background: var(--ink);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.presentation-button span {
+  color: var(--cyan);
+  font-size: 18px;
+}
+
 .timeline {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1400,6 +1423,10 @@ h4 {
     align-items: flex-start;
     flex-direction: column;
     gap: 18px;
+  }
+
+  .evidence-actions {
+    flex-wrap: wrap;
   }
 
   .timeline {

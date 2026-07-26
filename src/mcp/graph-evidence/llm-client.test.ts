@@ -12,6 +12,8 @@ const instance = {
   input_price_tinybar_per_million: "100",
   output_price_tinybar_per_million: "300",
   price_synced_at: "2026-07-26T02:00:00.000Z",
+  performance_score: 95,
+  performance_score_basis: "catalog-readiness-v1",
 };
 
 const jobInput = {
@@ -45,6 +47,8 @@ describe("LLM MCP client", () => {
           inputPriceTinybarsPerMillionTokens: "100",
           outputPriceTinybarsPerMillionTokens: "300",
           priceSyncedAt: "2026-07-26T02:00:00.000Z",
+          performanceScore: 95,
+          performanceScoreBasis: "catalog-readiness-v1",
         },
       ],
     });

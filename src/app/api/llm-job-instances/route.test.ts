@@ -16,6 +16,8 @@ describe("GET /api/llm-job-instances", () => {
           input_price_tinybar_per_million: 100,
           output_price_tinybar_per_million: 300,
           price_synced_at: "2026-07-26T03:00:00Z",
+          performance_score: 92,
+          performance_score_basis: "catalog-readiness-v1",
         },
       ]),
     );

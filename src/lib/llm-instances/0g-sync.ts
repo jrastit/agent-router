@@ -1,6 +1,10 @@
 import { z } from "zod";
 
 import { deriveEurPerMillionTokens } from "./fx-pricing";
+import {
+  estimateAgentPerformanceScore,
+  PERFORMANCE_SCORE_BASIS,
+} from "./performance-score";
 
 const exactAmount = z.union([z.string(), z.number()]).transform(String);
 
@@ -142,18 +146,30 @@ export function createZgInstanceRow(input: {
           observedOn: input.fxSnapshot.observedOn,
         }
       : null;
+  const capabilities = zgCapabilities(input.model);
+  const enabled = healthyProviders.length > 0;
 
   return {
     provider: "0g",
     model_id: input.model.id,
     name: input.model.name ?? input.model.id,
     base_url: input.baseUrl,
-    capabilities: zgCapabilities(input.model),
+    capabilities,
     privacy: privateProviders.length > 0 ? "confidential" : "public",
-    enabled: healthyProviders.length > 0,
+    enabled,
     expected_latency_ms: latencies.length > 0 ? Math.min(...latencies) : 0,
     input_price_eur_per_million_tokens: inputPriceEurPerMillionTokens ?? null,
     output_price_eur_per_million_tokens: outputPriceEurPerMillionTokens ?? null,
+    performance_score: estimateAgentPerformanceScore({
+      enabled,
+      capabilities,
+      hasExactPrices:
+        inputPriceEurPerMillionTokens !== undefined &&
+        outputPriceEurPerMillionTokens !== undefined,
+      healthyProviderCount: healthyProviders.length,
+      expectedLatencyMs: latencies.length > 0 ? Math.min(...latencies) : 0,
+    }),
+    performance_score_basis: PERFORMANCE_SCORE_BASIS,
     source_metadata: {
       type: input.model.type ?? null,
       description: input.model.description ?? null,

@@ -59,6 +59,8 @@ describe("0G catalog synchronization", () => {
       expected_latency_ms: 42,
       input_price_eur_per_million_tokens: "0.070317",
       output_price_eur_per_million_tokens: "0.421904",
+      performance_score: 95,
+      performance_score_basis: "catalog-readiness-v1",
       source_metadata: {
         healthyProviderCount: 1,
         hasPrivateProvider: true,

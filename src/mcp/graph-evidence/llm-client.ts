@@ -98,5 +98,7 @@ function publicInstance(instance: RunnableLlmInstance) {
     outputPriceTinybarsPerMillionTokens:
       instance.output_price_tinybar_per_million,
     priceSyncedAt: instance.price_synced_at,
+    performanceScore: instance.performance_score,
+    performanceScoreBasis: instance.performance_score_basis,
   };
 }

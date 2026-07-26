@@ -17,6 +17,8 @@ describe("Supabase LLM catalog", () => {
           expected_latency_ms: 1800,
           input_price_eur_per_million_tokens: "0.25",
           output_price_eur_per_million_tokens: "0.50",
+          performance_score: 92,
+          performance_score_basis: "catalog-readiness-v1",
           source_metadata: { apiKey: "must-not-be-returned" },
         },
         {
@@ -30,6 +32,8 @@ describe("Supabase LLM catalog", () => {
           expected_latency_ms: 2600,
           input_price_eur_per_million_tokens: null,
           output_price_eur_per_million_tokens: null,
+          performance_score: null,
+          performance_score_basis: null,
         },
       ]),
     );
@@ -44,6 +48,7 @@ describe("Supabase LLM catalog", () => {
     expect(response.status).toBe(200);
     expect(JSON.parse(body).instances).toHaveLength(2);
     expect(body).toContain('"inputPriceEurPerMillionTokens":"0.25"');
+    expect(body).toContain('"performanceScore":92');
     expect(body).not.toMatch(/service-secret|apiKey|source_metadata/);
     expect(fetcher.mock.calls[0]?.[0]).not.toContain("enabled=eq.true");
   });

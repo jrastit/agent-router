@@ -219,6 +219,8 @@ async function upsertThroughDatabase(
         expected_latency_ms integer,
         input_price_eur_per_million_tokens numeric,
         output_price_eur_per_million_tokens numeric,
+        performance_score smallint,
+        performance_score_basis text,
         input_price_tinybar_per_million bigint,
         output_price_tinybar_per_million bigint,
         price_synced_at timestamptz,
@@ -232,7 +234,8 @@ async function upsertThroughDatabase(
       expected_latency_ms, input_price_tinybar_per_million,
       output_price_tinybar_per_million,
       input_price_eur_per_million_tokens,
-      output_price_eur_per_million_tokens, price_synced_at,
+      output_price_eur_per_million_tokens, performance_score,
+      performance_score_basis, price_synced_at,
       source_metadata, synced_at, updated_at
     )
     select
@@ -240,7 +243,8 @@ async function upsertThroughDatabase(
       expected_latency_ms, input_price_tinybar_per_million,
       output_price_tinybar_per_million,
       input_price_eur_per_million_tokens,
-      output_price_eur_per_million_tokens, price_synced_at,
+      output_price_eur_per_million_tokens, performance_score,
+      performance_score_basis, price_synced_at,
       source_metadata, synced_at, updated_at
     from incoming
     on conflict (provider, model_id) do update set
@@ -258,6 +262,8 @@ async function upsertThroughDatabase(
         excluded.input_price_eur_per_million_tokens,
       output_price_eur_per_million_tokens =
         excluded.output_price_eur_per_million_tokens,
+      performance_score = excluded.performance_score,
+      performance_score_basis = excluded.performance_score_basis,
       price_synced_at = excluded.price_synced_at,
       source_metadata = excluded.source_metadata,
       synced_at = excluded.synced_at,

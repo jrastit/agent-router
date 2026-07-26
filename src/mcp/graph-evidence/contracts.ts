@@ -51,6 +51,8 @@ export const mcpLlmInstanceSchema = z.strictObject({
   inputPriceTinybarsPerMillionTokens: exactPositiveIntegerSchema,
   outputPriceTinybarsPerMillionTokens: exactPositiveIntegerSchema,
   priceSyncedAt: z.string(),
+  performanceScore: z.number().int().min(0).max(100),
+  performanceScoreBasis: z.literal("catalog-readiness-v1"),
 });
 
 export const listLlmInstancesOutputSchema = z.strictObject({

@@ -53,6 +53,7 @@ export const serverEnvSchema = z
       .default(300_000),
     GRAPH_ACCESS_TOKEN: optionalSecret,
     SCALEWAY_GENAI_API_KEY: optionalSecret,
+    SCALEWAY_GENAI_API_BASE: z.string().url().optional(),
     SCALEWAY_GENAI_BASE_URL: z
       .string()
       .url()
@@ -105,6 +106,7 @@ export const serverOnlyEnvKeys = [
   "GRAPH_MAX_STALENESS_MS",
   "GRAPH_ACCESS_TOKEN",
   "SCALEWAY_GENAI_API_KEY",
+  "SCALEWAY_GENAI_API_BASE",
   "SCALEWAY_GENAI_BASE_URL",
   "SCALEWAY_GENAI_MODEL",
   "LLM_INSTANCE_ADMIN_TOKEN",

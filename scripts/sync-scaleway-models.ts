@@ -10,7 +10,9 @@ if (!process.argv.includes(confirmation)) {
 const scalewayKey =
   process.env.SCALEWAY_GENAI_API_KEY ?? process.env.OPENAI_API_KEY;
 const scalewayBase =
-  process.env.SCALEWAY_GENAI_BASE_URL ?? "https://api.scaleway.ai/v1";
+  process.env.SCALEWAY_GENAI_BASE_URL ??
+  process.env.SCALEWAY_GENAI_API_BASE ??
+  "https://api.scaleway.ai/v1";
 const supabaseUrl = process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const inputPrice = parseExactTinybarRate(

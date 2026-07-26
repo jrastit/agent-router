@@ -188,7 +188,9 @@ export function createLiveAdapter(
     : (environment.ZG_DEMO_MODEL ?? "llama-3.3-70b-instruct");
   const baseUrl = (
     scaleway
-      ? (environment.SCALEWAY_GENAI_BASE_URL ?? "https://api.scaleway.ai/v1")
+      ? (environment.SCALEWAY_GENAI_BASE_URL ??
+        environment.SCALEWAY_GENAI_API_BASE ??
+        "https://api.scaleway.ai/v1")
       : (environment.ZG_ROUTER_BASE_URL ?? "https://router-api.0g.ai/v1")
   ).replace(/\/$/, "");
 
@@ -216,6 +218,7 @@ export function createLiveAdapter(
           messages: [{ role: "user", content: request.prompt }],
           max_tokens: request.maximumOutputTokens,
           stream: false,
+          ...(scaleway ? {} : { reasoning_effort: "low" }),
         }),
         signal: AbortSignal.timeout(30_000),
       });

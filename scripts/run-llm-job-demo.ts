@@ -13,6 +13,16 @@ function option(name: string) {
     ?.slice(prefix.length);
 }
 
+function positiveIntegerEnvironment(name: string, fallback: number) {
+  const raw = process.env[name];
+  if (raw === undefined) return fallback;
+  const parsed = Number(raw);
+  if (!Number.isSafeInteger(parsed) || parsed <= 0) {
+    throw new Error(`${name} must be a positive integer`);
+  }
+  return parsed;
+}
+
 const provider = (option("provider") ?? "scaleway") as DemoProvider;
 if (!demoProviders.includes(provider)) {
   throw new Error("--provider must be scaleway or 0g");
@@ -38,8 +48,14 @@ async function main() {
       prompt:
         process.env.LLM_DEMO_PROMPT ??
         "Return a one-sentence private capability summary.",
-      maximumInputTokens: 256,
-      maximumOutputTokens: 128,
+      maximumInputTokens: positiveIntegerEnvironment(
+        "LLM_DEMO_MAXIMUM_INPUT_TOKENS",
+        256,
+      ),
+      maximumOutputTokens: positiveIntegerEnvironment(
+        "LLM_DEMO_MAXIMUM_OUTPUT_TOKENS",
+        128,
+      ),
       spendCeilingMicrousd: "1000000",
       idempotencyKey: process.env.LLM_DEMO_IDEMPOTENCY_KEY ?? "local-demo-001",
     },

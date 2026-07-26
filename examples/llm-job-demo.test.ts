@@ -85,8 +85,46 @@ describe("local LLM job demonstration", () => {
     const result = await runLlmJobDemo(adapter, request);
 
     expect(result.executionId).toBe("live-1");
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "https://api.scaleway.ai/v1/chat/completions",
+      expect.any(Object),
+    );
     expect(JSON.stringify(result)).not.toMatch(
       /private prompt|private live output|server-secret/,
+    );
+  });
+
+  it("accepts Scaleway's API_BASE deployment endpoint name", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          id: "deployment-live-1",
+          model: "qwen",
+          choices: [{ message: { content: "private live output" } }],
+          usage: {
+            prompt_tokens: 10,
+            completion_tokens: 20,
+            total_tokens: 30,
+          },
+        }),
+      ),
+    );
+    const adapter = createLiveAdapter(
+      "scaleway",
+      {
+        SCALEWAY_GENAI_API_KEY: "server-secret",
+        SCALEWAY_GENAI_API_BASE:
+          "https://api.scaleway.ai/example-deployment/v1",
+        CONFIRM_LIVE_LLM_DEMO: "yes",
+      },
+      fetchImpl,
+    );
+
+    await runLlmJobDemo(adapter, request);
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "https://api.scaleway.ai/example-deployment/v1/chat/completions",
+      expect.any(Object),
     );
   });
 

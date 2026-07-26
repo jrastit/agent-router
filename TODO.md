@@ -438,7 +438,7 @@ catalog, job payload, browser session, result, receipt, or logs.
 - [x] Keep prompts and raw outputs out of public receipts, 0G Storage, chain
       events, Graph entities, analytics, and logs; expose them only through
       authenticated user-scoped storage and APIs.
-- [ ] Add an LLM job UI that lets a signed-in user choose Scaleway or 0G, enter
+- [x] Add an LLM job UI that lets a signed-in user choose Scaleway or 0G, enter
       a prompt and token/spend limits, review privacy and maximum charge, run
       the job, and see output, actual token usage, exact spend, refund, remaining
       balance, instance identity, and appropriately labeled evidence.

@@ -22,3 +22,10 @@ a charge or repeating inference.
 
 The canonical proof command is `npm run validate`. Database migrations are
 additionally checked with `supabase db lint` against the local Phase 6D schema.
+
+The deterministic browser flow is covered by `npm run validate:e2e`. It starts
+a production-disabled test page, intercepts only the external HTTP boundaries,
+and verifies catalog selection, private prompt submission, one execution,
+exact settlement rendering, redacted evidence, and refresh recovery without a
+second submission, provider call, or charge. Install its Chromium runtime once
+with `npx playwright install chromium`.

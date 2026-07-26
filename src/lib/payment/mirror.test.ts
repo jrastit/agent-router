@@ -35,6 +35,12 @@ const transaction = {
 };
 
 describe("Mirror Node proof verification", () => {
+  it("normalizes WalletConnect transaction IDs for Mirror REST", () => {
+    expect(normalizeTransactionId("0.0.1001@1753444800-000000001")).toBe(
+      "0.0.1001-1753444800-000000001",
+    );
+  });
+
   it("verifies success, type, accounts, exact recipient amount, and memo", () => {
     expect(
       verifyMirrorResponse(

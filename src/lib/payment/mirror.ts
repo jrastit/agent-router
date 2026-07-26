@@ -52,7 +52,9 @@ export class MirrorVerificationError extends Error {
 export function normalizeTransactionId(transactionId: string): string {
   const [account, validStart] = transactionId.split("@");
   if (!account || !validStart) return transactionId;
-  const [seconds, nanos] = validStart.split(".");
+  const [seconds, nanos] = validStart.includes(".")
+    ? validStart.split(".")
+    : validStart.split("-");
   return seconds && nanos ? `${account}-${seconds}-${nanos}` : transactionId;
 }
 
@@ -120,7 +122,7 @@ export async function fetchAndVerifyMirrorProof(
   try {
     response = await fetcher(
       `${mirrorNodeUrl.replace(/\/$/, "")}/api/v1/transactions/${encodeURIComponent(
-        transactionId,
+        normalizeTransactionId(transactionId),
       )}`,
       {
         headers: { accept: "application/json" },

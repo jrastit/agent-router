@@ -1,0 +1,51 @@
+# Local LLM job demonstration
+
+The local runner exercises one shared, balance-style LLM job contract with
+either a Scaleway or 0G adapter. Its JSON summary intentionally excludes the
+prompt, raw output, credentials, and public receipts.
+
+## Deterministic offline rehearsal
+
+These commands use fixtures. They do not contact a provider, spend tokens, or
+spend native 0G:
+
+```sh
+npm run demo:llm:offline -- --provider=scaleway
+npm run demo:llm:offline -- --provider=0g
+```
+
+The output records the selected instance and model, lifecycle states,
+provider-style integer usage, exact integer micro-USD reservation, charge and
+refund amounts, execution ID, and a verification label.
+
+## Live provider execution
+
+Live commands consume real provider tokens. They fail closed unless both the
+matching server-only credential and `CONFIRM_LIVE_LLM_DEMO=yes` are present in
+the ignored `.env` file.
+
+```sh
+CONFIRM_LIVE_LLM_DEMO=yes npm run demo:llm:scaleway
+CONFIRM_LIVE_LLM_DEMO=yes npm run demo:llm:0g
+```
+
+Scaleway requires `SCALEWAY_GENAI_API_KEY`; 0G requires
+`G_API_KEY_PRIVATE`. `LLM_DEMO_PROMPT` and `LLM_DEMO_IDEMPOTENCY_KEY` are
+optional. The 0G runner disables provider fallback and requests Router private
+trust mode. Its label is deliberately not an independent TEE-attestation
+claim.
+
+## Complete 0G path
+
+The optional integration test composes live 0G Compute, Storage, Chain
+anchoring, and independent receipt verification:
+
+```sh
+npm run demo:llm:0g:complete
+```
+
+That test is skipped unless its live integration environment is fully
+configured. When enabled, it consumes 0G provider resources and may spend
+native 0G for Storage and Chain transactions. Follow
+[the Phase 5 evidence guide](0G_PHASE5.md) for the required variables and
+network safeguards.

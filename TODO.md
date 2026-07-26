@@ -445,19 +445,19 @@ catalog, job payload, browser session, result, receipt, or logs.
 - [ ] Stream persisted job states over SSE or Supabase Realtime and restore the
       authoritative state after refresh without repeating inference or
       charging again.
-- [ ] Extend the existing `examples/0g-agent.ts` composition into a standalone
+- [x] Extend the existing `examples/0g-agent.ts` composition into a standalone
       local LLM-job demo runner that can select either the Scaleway or 0G
       instance through one documented command and shared job contract.
-- [ ] Give the local runner a deterministic offline mode with fixture adapters
+- [x] Give the local runner a deterministic offline mode with fixture adapters
       for CI and rehearsal, plus an explicitly guarded live mode that requires
       the matching server-only provider credential and warns before consuming
       real provider or network resources.
-- [ ] Print a concise, redacted demo result containing the selected instance,
+- [x] Print a concise, redacted demo result containing the selected instance,
       model, lifecycle states, provider-reported integer token usage, exact
       reserved/charged/refunded amounts, execution identifier, and verification
       label without printing credentials, private prompts, or raw public
       receipts.
-- [ ] Add package scripts and a short runbook for the offline demonstration,
+- [x] Add package scripts and a short runbook for the offline demonstration,
       live Scaleway execution, live 0G Compute-only execution, and the optional
       complete 0G Compute/Storage/Chain path. Clearly identify which commands
       spend provider tokens or native 0G.

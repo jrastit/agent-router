@@ -12,6 +12,9 @@ declare
 begin
   select * into activity from public.get_my_fund_activity() limit 1;
   if activity.available_tinybars <> '7000000'
+    or activity.pending_verification_tinybars::bigint < 0
+    or activity.graph_pending_tinybars::bigint < 0
+    or activity.graph_indexed_tinybars::bigint < 0
     or activity.reserved_tinybars <> '0'
     or activity.spent_tinybars <> '4000000'
     or activity.refunded_tinybars <> '2000000'

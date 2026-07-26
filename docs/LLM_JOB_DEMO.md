@@ -49,6 +49,26 @@ credit rates in `SCALEWAY_INPUT_PRICE_TINYBAR_PER_MILLION`,
 tinybar rate per million tokens. Synchronization stores the rates and their
 timestamp with each model; accepted jobs snapshot them before reserving credit.
 
+The same synchronization stores display-only EUR token prices. Scaleway prices
+come from its EUR catalog. For 0G, an upstream EUR-per-token price wins when
+present; otherwise the synchronizer converts `pricing_usd` with the latest
+dated ECB USD-per-EUR reference rate:
+
+```text
+EUR per 1M tokens = USD per token × 1,000,000 ÷ USD per EUR
+```
+
+Money conversion uses exact integer ratios and half-up rounding to six decimal
+places. The source, observation date, and USD-per-EUR rate are retained in
+`source_metadata.pricingFxSnapshot`. If neither EUR nor convertible USD pricing
+exists, the EUR field remains null and the interactive replay excludes that
+instance rather than estimating a price.
+
+The interactive replay displays input and output EUR rates separately. Its
+default estimate is 1,000,000 input tokens plus 10,000 output tokens; both
+volumes can be adjusted independently from zero to one million. The budget
+check uses the calculated total rounded up to an integer micro-EUR.
+
 ## Complete 0G path
 
 The optional integration test composes live 0G Compute, Storage, Chain

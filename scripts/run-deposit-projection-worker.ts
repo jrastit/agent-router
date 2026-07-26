@@ -37,5 +37,11 @@ async function run() {
   }
 }
 
-await run();
-setInterval(() => void run(), 5_000);
+async function main() {
+  while (true) {
+    await run();
+    await new Promise((resolve) => setTimeout(resolve, 5_000));
+  }
+}
+
+void main();

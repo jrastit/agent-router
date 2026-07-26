@@ -461,7 +461,7 @@ catalog, job payload, browser session, result, receipt, or logs.
       live Scaleway execution, live 0G Compute-only execution, and the optional
       complete 0G Compute/Storage/Chain path. Clearly identify which commands
       spend provider tokens or native 0G.
-- [ ] Test both provider adapters and the complete job state machine, including
+- [x] Test both provider adapters and the complete job state machine, including
       duplicate submissions, insufficient credit, concurrent reservations,
       provider authentication failure, timeout, invalid output, missing or
       excessive usage, ambiguous completion, disabled instances, secret

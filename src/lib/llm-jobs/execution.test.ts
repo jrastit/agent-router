@@ -85,6 +85,18 @@ describe("durable LLM job execution", () => {
     expect(deps.settle).not.toHaveBeenCalled();
   });
 
+  it("fails closed on insufficient credit before starting inference", async () => {
+    const deps = dependencies([baseJob]);
+    deps.reserve.mockRejectedValue(new Error("insufficient credit"));
+
+    await expect(executeDurableLlmJob(deps, "job:1")).rejects.toThrow(
+      "insufficient credit",
+    );
+    expect(deps.startAttempt).not.toHaveBeenCalled();
+    expect(deps.scaleway.execute).not.toHaveBeenCalled();
+    expect(deps.zg.execute).not.toHaveBeenCalled();
+  });
+
   it("releases credit on provider authentication failure", async () => {
     const execute = vi
       .fn()
@@ -132,6 +144,32 @@ describe("durable LLM job execution", () => {
       expect.anything(),
       "SETTLEMENT_AMBIGUOUS",
     );
+  });
+
+  it.each([
+    "PROVIDER_TIMEOUT",
+    "OUTPUT_INVALID",
+    "USAGE_MISSING",
+    "USAGE_EXCEEDED",
+  ] as const)("reconciles %s without guessing a charge", async (code) => {
+    const deps = dependencies(
+      [
+        { ...baseJob, state: "reserved" },
+        { ...baseJob, state: "executing", attemptId: "attempt:1" },
+      ],
+      vi.fn().mockRejectedValue(new LlmProviderError(code, "redacted")),
+    );
+
+    await expect(executeDurableLlmJob(deps, "job:1")).resolves.toEqual({
+      state: "reconciliation_required",
+      jobId: "job:1",
+    });
+    expect(deps.reconcile).toHaveBeenCalledWith(
+      expect.anything(),
+      "COMPLETION_AMBIGUOUS",
+    );
+    expect(deps.settle).not.toHaveBeenCalled();
+    expect(deps.failAndRelease).not.toHaveBeenCalled();
   });
 
   it("selects the 0G adapter and passes the pinned provider", async () => {

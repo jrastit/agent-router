@@ -19,6 +19,22 @@ describe("atomic LLM credit settlement migration", () => {
     expect(migration).toContain("unused_credit :=");
   });
 
+  it("charges once and returns the exact unused reservation", () => {
+    expect(migration).toContain(
+      "reserved_tinybar = reserved_tinybar - reservation.amount_tinybar",
+    );
+    expect(migration).toContain(
+      "available_tinybar = available_tinybar + unused_credit",
+    );
+    expect(migration).toContain(
+      "spent_tinybar = spent_tinybar + actual_charge",
+    );
+    expect(migration).toContain(
+      "refunded_tinybar = refunded_tinybar + unused_credit",
+    );
+    expect(migration).toContain("where charge.idempotency_key = request_key");
+  });
+
   it("persists delivery and accounting records before delivery state", () => {
     const usage = migration.indexOf("insert into public.llm_job_usage");
     const result = migration.indexOf("insert into public.llm_job_results");

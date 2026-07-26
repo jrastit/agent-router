@@ -58,7 +58,7 @@ export const serverEnvSchema = z
       .string()
       .url()
       .default("https://api.scaleway.ai/v1"),
-    SCALEWAY_GENAI_MODEL: z.string().min(1).default("qwen3.5-27b"),
+    SCALEWAY_GENAI_MODEL: z.string().min(1).default("llama-3.3-70b-instruct"),
     LLM_INSTANCE_ADMIN_TOKEN: optionalSecret,
     PLANNER_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
     G_API_KEY_PRIVATE: optionalSecret,

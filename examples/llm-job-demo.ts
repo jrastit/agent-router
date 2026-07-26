@@ -184,7 +184,7 @@ export function createLiveAdapter(
   }
 
   const model = scaleway
-    ? (environment.SCALEWAY_GENAI_MODEL ?? "qwen3.5-27b")
+    ? (environment.SCALEWAY_GENAI_MODEL ?? "llama-3.3-70b-instruct")
     : (environment.ZG_DEMO_MODEL ?? "llama-3.3-70b-instruct");
   const baseUrl = (
     scaleway

@@ -48,6 +48,8 @@ credit rates in `SCALEWAY_INPUT_PRICE_TINYBAR_PER_MILLION`,
 `ZG_OUTPUT_PRICE_TINYBAR_PER_MILLION`. Each value is a non-negative integer
 tinybar rate per million tokens. Synchronization stores the rates and their
 timestamp with each model; accepted jobs snapshot them before reserving credit.
+The demo defaults use `156250000` for all four rates, making the standard
+512-input/128-output reservation exactly 100,000 tinybar (0.001 HBAR).
 
 ## Complete 0G path
 

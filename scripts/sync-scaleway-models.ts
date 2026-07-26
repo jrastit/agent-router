@@ -1,3 +1,4 @@
+import pg from "pg";
 import { z } from "zod";
 
 import { parseExactTinybarRate } from "../src/lib/llm-instances/credit-pricing";
@@ -20,6 +21,7 @@ const scalewayBase =
   "https://api.scaleway.ai/v1";
 const supabaseUrl = process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const databaseUrl = process.env.SUPABASE_DB_URL;
 const inputPrice = parseExactTinybarRate(
   "SCALEWAY_INPUT_PRICE_TINYBAR_PER_MILLION",
   process.env.SCALEWAY_INPUT_PRICE_TINYBAR_PER_MILLION,
@@ -28,10 +30,16 @@ const outputPrice = parseExactTinybarRate(
   "SCALEWAY_OUTPUT_PRICE_TINYBAR_PER_MILLION",
   process.env.SCALEWAY_OUTPUT_PRICE_TINYBAR_PER_MILLION,
 );
-if (!scalewayKey || !supabaseUrl || !serviceRoleKey) {
+if (!scalewayKey || (!databaseUrl && (!supabaseUrl || !serviceRoleKey))) {
   throw new Error("Scaleway or Supabase server configuration is missing");
 }
-const config = { scalewayKey, scalewayBase, supabaseUrl, serviceRoleKey };
+const config = {
+  scalewayKey,
+  scalewayBase,
+  supabaseUrl,
+  serviceRoleKey,
+  databaseUrl,
+};
 
 const modelSchema = z.object({
   id: z.string().min(1).max(300),
@@ -114,27 +122,112 @@ async function main() {
     };
   });
 
-  const upsertResponse = await fetch(
-    `${config.supabaseUrl.replace(/\/$/, "")}/rest/v1/llm_instances?on_conflict=provider,model_id`,
-    {
-      method: "POST",
-      headers: {
-        apikey: config.serviceRoleKey,
-        authorization: `Bearer ${config.serviceRoleKey}`,
-        "content-type": "application/json",
-        prefer: "resolution=merge-duplicates,return=minimal",
+  if (config.databaseUrl) {
+    await upsertThroughDatabase(config.databaseUrl, rows);
+  } else {
+    const upsertResponse = await fetch(
+      `${config.supabaseUrl!.replace(/\/$/, "")}/rest/v1/llm_instances?on_conflict=provider,model_id`,
+      {
+        method: "POST",
+        headers: {
+          apikey: config.serviceRoleKey!,
+          authorization: `Bearer ${config.serviceRoleKey!}`,
+          "content-type": "application/json",
+          prefer: "resolution=merge-duplicates,return=minimal",
+        },
+        body: JSON.stringify(rows),
+        signal: AbortSignal.timeout(15_000),
       },
-      body: JSON.stringify(rows),
-      signal: AbortSignal.timeout(15_000),
-    },
-  );
-  if (!upsertResponse.ok) {
-    throw new Error(`Supabase model upsert failed (${upsertResponse.status})`);
+    );
+    if (!upsertResponse.ok) {
+      throw new Error(
+        `Supabase model upsert failed (${upsertResponse.status})`,
+      );
+    }
   }
 
   process.stdout.write(
     `${JSON.stringify({ provider: "scaleway", discovered: models.length, upserted: rows.length })}\n`,
   );
+}
+
+async function upsertThroughDatabase(
+  url: string,
+  rows: ReadonlyArray<Record<string, unknown>>,
+) {
+  const databaseUrl = new URL(url);
+  const client = new pg.Client({
+    connectionString: databaseUrl.toString(),
+    connectionTimeoutMillis: 15_000,
+    ...(databaseUrl.hostname === "127.0.0.1" ||
+    databaseUrl.hostname === "localhost"
+      ? { ssl: false }
+      : {}),
+  });
+  await client.connect();
+  try {
+    await client.query("begin");
+    await client.query(
+      `
+      with incoming as (
+        select *
+        from jsonb_to_recordset($1::jsonb) as row(
+          provider text, model_id text, name text, base_url text,
+          capabilities text[], privacy text, enabled boolean,
+          expected_latency_ms integer,
+          input_price_eur_per_million_tokens numeric,
+          output_price_eur_per_million_tokens numeric,
+          input_price_tinybar_per_million bigint,
+          output_price_tinybar_per_million bigint,
+          price_synced_at timestamptz, source_metadata jsonb,
+          synced_at timestamptz, updated_at timestamptz
+        )
+      )
+      insert into public.llm_instances (
+        provider, model_id, name, base_url, capabilities, privacy, enabled,
+        expected_latency_ms, input_price_eur_per_million_tokens,
+        output_price_eur_per_million_tokens,
+        input_price_tinybar_per_million,
+        output_price_tinybar_per_million, price_synced_at, source_metadata,
+        synced_at, updated_at
+      )
+      select
+        provider, model_id, name, base_url, capabilities, privacy, enabled,
+        expected_latency_ms, input_price_eur_per_million_tokens,
+        output_price_eur_per_million_tokens,
+        input_price_tinybar_per_million,
+        output_price_tinybar_per_million, price_synced_at, source_metadata,
+        synced_at, updated_at
+      from incoming
+      on conflict (provider, model_id) do update set
+        name = excluded.name,
+        base_url = excluded.base_url,
+        capabilities = excluded.capabilities,
+        privacy = excluded.privacy,
+        enabled = excluded.enabled,
+        expected_latency_ms = excluded.expected_latency_ms,
+        input_price_eur_per_million_tokens =
+          excluded.input_price_eur_per_million_tokens,
+        output_price_eur_per_million_tokens =
+          excluded.output_price_eur_per_million_tokens,
+        input_price_tinybar_per_million =
+          excluded.input_price_tinybar_per_million,
+        output_price_tinybar_per_million =
+          excluded.output_price_tinybar_per_million,
+        price_synced_at = excluded.price_synced_at,
+        source_metadata = excluded.source_metadata,
+        synced_at = excluded.synced_at,
+        updated_at = excluded.updated_at;
+      `,
+      [JSON.stringify(rows)],
+    );
+    await client.query("commit");
+  } catch (error) {
+    await client.query("rollback");
+    throw new Error("Supabase direct database upsert failed", { cause: error });
+  } finally {
+    await client.end();
+  }
 }
 
 void main();

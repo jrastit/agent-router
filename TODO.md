@@ -401,7 +401,7 @@ user-visible LLM job instances funded from authoritative application credit.
 Provider API keys remain server-only and are never stored in the instance
 catalog, job payload, browser session, result, receipt, or logs.
 
-- [ ] Define durable LLM job, attempt, usage, reservation, charge, refund,
+- [x] Define durable LLM job, attempt, usage, reservation, charge, refund,
       result, and provider-evidence schemas with stable lifecycle and failure
       codes.
 - [ ] Add an authenticated server API that accepts an instance ID, prompt,

@@ -61,8 +61,22 @@ export const zgProviderCatalogSchema = z.object({
     .default([]),
 });
 
-type ZgModel = z.infer<typeof zgModelCatalogSchema>["data"][number];
+export type ZgModel = z.infer<typeof zgModelCatalogSchema>["data"][number];
 type ZgProvider = z.infer<typeof zgProviderCatalogSchema>["data"][number];
+
+const existingEurRowSchema = z.object({
+  id: z.union([z.string(), z.number()]).transform(String),
+  model_id: z.string(),
+  input_price_eur_per_million_tokens: z
+    .union([z.string(), z.number()])
+    .transform(String)
+    .nullable(),
+  output_price_eur_per_million_tokens: z
+    .union([z.string(), z.number()])
+    .transform(String)
+    .nullable(),
+  source_metadata: z.record(z.string(), z.unknown()),
+});
 
 export function zgCapabilities(model: ZgModel): string[] {
   switch (model.type) {
@@ -173,4 +187,90 @@ export function createZgInstanceRow(input: {
     synced_at: input.syncedAt,
     updated_at: input.syncedAt,
   };
+}
+
+export async function updateMissingZgEurPrices(input: {
+  models: readonly ZgModel[];
+  fxSnapshot:
+    { usdPerEur: string; observedOn: string; source: "ECB" } | undefined;
+  supabaseUrl: string;
+  serviceRoleKey: string;
+  fetcher?: typeof fetch;
+}) {
+  const fetcher = input.fetcher ?? fetch;
+  const base = input.supabaseUrl.replace(/\/$/, "");
+  const headers = {
+    apikey: input.serviceRoleKey,
+    authorization: `Bearer ${input.serviceRoleKey}`,
+  };
+  const existingResponse = await fetcher(
+    `${base}/rest/v1/llm_instances?provider=eq.0g&select=id,model_id,input_price_eur_per_million_tokens,output_price_eur_per_million_tokens,source_metadata`,
+    { headers, signal: AbortSignal.timeout(15_000) },
+  );
+  if (!existingResponse.ok) {
+    throw new Error(
+      `Supabase EUR catalog query failed (${existingResponse.status})`,
+    );
+  }
+  const existing = z
+    .array(existingEurRowSchema)
+    .parse(await existingResponse.json());
+  const models = new Map(input.models.map((model) => [model.id, model]));
+  let updated = 0;
+  for (const row of existing) {
+    const model = models.get(row.model_id);
+    if (!model) continue;
+    const patch: Record<string, unknown> = {};
+    if (row.input_price_eur_per_million_tokens === null) {
+      const value = deriveEurPerMillionTokens({
+        eurPerToken: model.pricing_eur?.prompt,
+        usdPerToken: model.pricing_usd?.prompt,
+        usdPerEur: input.fxSnapshot?.usdPerEur,
+      });
+      if (value !== undefined) {
+        patch.input_price_eur_per_million_tokens = value;
+      }
+    }
+    if (row.output_price_eur_per_million_tokens === null) {
+      const value = deriveEurPerMillionTokens({
+        eurPerToken: model.pricing_eur?.completion,
+        usdPerToken: model.pricing_usd?.completion,
+        usdPerEur: input.fxSnapshot?.usdPerEur,
+      });
+      if (value !== undefined) {
+        patch.output_price_eur_per_million_tokens = value;
+      }
+    }
+    if (Object.keys(patch).length === 0) continue;
+    patch.source_metadata = {
+      ...row.source_metadata,
+      pricingUsd: model.pricing_usd ?? null,
+      pricingEur: model.pricing_eur ?? null,
+      pricingFxSnapshot: input.fxSnapshot
+        ? {
+            source: input.fxSnapshot.source,
+            base: "EUR",
+            quote: "USD",
+            usdPerEur: input.fxSnapshot.usdPerEur,
+            observedOn: input.fxSnapshot.observedOn,
+          }
+        : null,
+    };
+    const response = await fetcher(
+      `${base}/rest/v1/llm_instances?id=eq.${encodeURIComponent(row.id)}`,
+      {
+        method: "PATCH",
+        headers: { ...headers, "content-type": "application/json" },
+        body: JSON.stringify(patch),
+        signal: AbortSignal.timeout(15_000),
+      },
+    );
+    if (!response.ok) {
+      throw new Error(
+        `Supabase EUR price update failed for ${row.model_id} (${response.status})`,
+      );
+    }
+    updated += 1;
+  }
+  return updated;
 }

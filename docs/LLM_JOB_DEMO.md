@@ -64,6 +64,16 @@ places. The source, observation date, and USD-per-EUR rate are retained in
 exists, the EUR field remains null and the interactive replay excludes that
 instance rather than estimating a price.
 
+If the target catalog has the EUR columns but intentionally lacks the later
+execution-pricing migration, update only null EUR values on existing 0G rows:
+
+```sh
+npm run sync:0g-eur-prices
+```
+
+This guarded mode never creates models, overwrites an existing EUR value, or
+touches tinybar execution prices.
+
 The interactive replay displays input and output EUR rates separately. Its
 default estimate is 1,000,000 input tokens plus 10,000 output tokens; both
 volumes can be adjusted independently from zero to one million. The budget

@@ -1,7 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   createZgInstanceRow,
+  updateMissingZgEurPrices,
   zgModelCatalogSchema,
   zgProviderCatalogSchema,
 } from "./0g-sync";
@@ -87,5 +88,53 @@ describe("0G catalog synchronization", () => {
         hasPrivateProvider: false,
       },
     });
+  });
+
+  it("fills only missing EUR prices on existing Supabase rows", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        Response.json([
+          {
+            id: 42,
+            model_id: "private-model",
+            input_price_eur_per_million_tokens: null,
+            output_price_eur_per_million_tokens: "9.000000",
+            source_metadata: { retained: true },
+          },
+        ]),
+      )
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+
+    await expect(
+      updateMissingZgEurPrices({
+        models: [model],
+        fxSnapshot: {
+          usdPerEur: "1.1377",
+          observedOn: "2026-07-24",
+          source: "ECB",
+        },
+        supabaseUrl: "https://supabase.example.com",
+        serviceRoleKey: "service-secret",
+        fetcher,
+      }),
+    ).resolves.toBe(1);
+
+    const patch = JSON.parse(
+      String(fetcher.mock.calls[1]?.[1]?.body),
+    ) as Record<string, unknown>;
+    expect(patch).toMatchObject({
+      input_price_eur_per_million_tokens: "0.070317",
+      source_metadata: {
+        retained: true,
+        pricingFxSnapshot: {
+          source: "ECB",
+          observedOn: "2026-07-24",
+          usdPerEur: "1.1377",
+        },
+      },
+    });
+    expect(patch).not.toHaveProperty("output_price_eur_per_million_tokens");
+    expect(JSON.stringify(patch)).not.toContain("service-secret");
   });
 });

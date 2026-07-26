@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import {
   createZgInstanceRow,
+  updateMissingZgEurPrices,
   zgModelCatalogSchema,
   zgProviderCatalogSchema,
 } from "../src/lib/llm-instances/0g-sync";
@@ -10,6 +11,7 @@ import { parseExactTinybarRate } from "../src/lib/llm-instances/credit-pricing";
 import { parseEcbUsdReferenceRate } from "../src/lib/llm-instances/fx-pricing";
 
 const confirmation = "--confirm-production-sync";
+const eurPricesOnly = process.argv.includes("--eur-prices-only");
 if (!process.argv.includes(confirmation)) {
   throw new Error(`Pass ${confirmation} to synchronize the 0G catalog`);
 }
@@ -21,15 +23,24 @@ const baseUrl = (
 const supabaseUrl = process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const databaseUrl = process.env.SUPABASE_DB_URL;
-const inputPrice = parseExactTinybarRate(
-  "ZG_INPUT_PRICE_TINYBAR_PER_MILLION",
-  process.env.ZG_INPUT_PRICE_TINYBAR_PER_MILLION,
-);
-const outputPrice = parseExactTinybarRate(
-  "ZG_OUTPUT_PRICE_TINYBAR_PER_MILLION",
-  process.env.ZG_OUTPUT_PRICE_TINYBAR_PER_MILLION,
-);
-if (!apiKey || (!databaseUrl && (!supabaseUrl || !serviceRoleKey))) {
+const inputPrice = eurPricesOnly
+  ? undefined
+  : parseExactTinybarRate(
+      "ZG_INPUT_PRICE_TINYBAR_PER_MILLION",
+      process.env.ZG_INPUT_PRICE_TINYBAR_PER_MILLION,
+    );
+const outputPrice = eurPricesOnly
+  ? undefined
+  : parseExactTinybarRate(
+      "ZG_OUTPUT_PRICE_TINYBAR_PER_MILLION",
+      process.env.ZG_OUTPUT_PRICE_TINYBAR_PER_MILLION,
+    );
+if (
+  !apiKey ||
+  (eurPricesOnly
+    ? !supabaseUrl || !serviceRoleKey
+    : !databaseUrl && (!supabaseUrl || !serviceRoleKey))
+) {
   throw new Error("0G or Supabase server configuration is missing");
 }
 const config = {
@@ -56,6 +67,24 @@ async function main() {
   const models = zgModelCatalogSchema.parse(await modelResponse.json()).data;
   const syncedAt = new Date().toISOString();
   const fxSnapshot = await fetchEcbFxSnapshot(models);
+  if (eurPricesOnly) {
+    const updated = await updateMissingZgEurPrices({
+      models,
+      fxSnapshot,
+      supabaseUrl: config.supabaseUrl!,
+      serviceRoleKey: config.serviceRoleKey!,
+    });
+    process.stdout.write(
+      `${JSON.stringify({
+        provider: "0g",
+        mode: "eur-prices-only",
+        discovered: models.length,
+        updated,
+        fxSnapshot,
+      })}\n`,
+    );
+    return;
+  }
   const rows = await Promise.all(
     models.map(async (model) => {
       const providerResponse = await fetch(
@@ -81,8 +110,8 @@ async function main() {
           syncedAt,
           fxSnapshot,
         }),
-        input_price_tinybar_per_million: inputPrice,
-        output_price_tinybar_per_million: outputPrice,
+        input_price_tinybar_per_million: inputPrice!,
+        output_price_tinybar_per_million: outputPrice!,
         price_synced_at: syncedAt,
       };
     }),
